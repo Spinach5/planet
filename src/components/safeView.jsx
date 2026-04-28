@@ -26,6 +26,8 @@ export default function SafeAreaView({ children, className = '' }) {
       style={{
         paddingTop: `${top}px`,
         paddingBottom: `${bottom}px`,
+        paddingLeft: '8px',
+        paddingRight: '8px',
         minHeight: '100vh',
         background: `linear-gradient(to bottom, rgba(71,165,253,1.00) 0%, rgba(255,255,255,0) 40%)`,
       }}
