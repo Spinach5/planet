@@ -19,12 +19,17 @@ export default defineAppConfig({
       {
         pagePath:'pages/index/index',
         text:'首页',
-        // iconPath:'/images/home.png',
+        iconPath:'assets/首页.png',
         // selectedIconPath:'/images/home_active.png'
       },
       {
         pagePath:'pages/course/index',
         text:'课程',
+        // iconPath:'/images/course.png', 
+      },
+      {
+        pagePath:'pages/user/index',
+        text:'我的',
         // iconPath:'/images/course.png', 
       }
     ]

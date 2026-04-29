@@ -4,7 +4,7 @@ import prodConfig from './prod'
 
 export default defineConfig(async (merge, { command, mode }) => {
   const baseConfig = {
-    projectName: 'ysx',
+    projectName: 'zqw',
     date: '2026-4-27',
     designWidth: 750,
     deviceRatio: {
