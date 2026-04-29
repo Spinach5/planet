@@ -12,20 +12,27 @@ import { useState } from "react";
 // import SafeAreaView from "../../components/safeView";
 import BasePage from "../../components/basePage";
 
+  
 export default function Index() {
-	const week = ["一", "二", "三", "四", "五", "六", "日"];
-	const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
-	const [week_days, setWeekDays] = useState([]);
-	const [course_time, setCourseTime] = useState([]);
-	const [now_week_courses, setNowWeekCourses] = useState([]);
-	const [is_show_switch_week, setIsShowSwitchWeek] = useState(false);
-	const [is_show_calss_details, setIsShowClassDetails] = useState(false);
-	const [selected_course, setSelectedCourse] = useState({});
-	const [scrollTop, setScrollTop] = useState(0);
-	const [closeClassDetails, setCloseClassDetails] = useState(false);
-	const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
-	const showClassDetails = (item) => {};
-	const switchToWeek = (week_number) => {};
+  const week = ["一", "二", "三", "四", "五", "六", "日"];
+  const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
+  const [week_days, setWeekDays] = useState([]);
+  const [course_time, setCourseTime] = useState([]);
+  const [now_week_courses, setNowWeekCourses] = useState([]);
+  const [is_show_switch_week, setIsShowSwitchWeek] = useState(false);
+  const [is_show_calss_details, setIsShowClassDetails] = useState(false);
+  const [selected_course, setSelectedCourse] = useState({});
+  const [scrollTop, setScrollTop] = useState(0);
+  const [closeClassDetails, setCloseClassDetails] = useState(false);
+  const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
+  const showClassDetails = (item) => {};
+  const switchToWeek = (week_number) => {};
+    if (!cookies) {
+    console.log('登录失败');
+    return null;
+  }
+
+
 
 	return (
 		<BasePage>
