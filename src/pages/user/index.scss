@@ -1,45 +1,45 @@
-@use '../../app.scss' as *;
+@use "../../app.scss" as *;
 .container {
-    padding: 16rpx;
-    // background-color: #f0f0f0;
-    /* min-height: 100vh; */
-    height: 100%;
+	padding: 16rpx;
+	// background-color: #f0f0f0;
+	/* min-height: 100vh; */
+	height: 100%;
 }
 
 /* 用户信息头部 */
 .gradient {
-    padding: 16rpx;
-    // background: linear-gradient(#F6FFFF, #f0f0f0);
-    // background-color: #F6FFFF;
-    // box-shadow: 0px 0px 30px 0px #F6FFFF;
+	padding: 16rpx;
+	// background: linear-gradient(#F6FFFF, #f0f0f0);
+	// background-color: #F6FFFF;
+	// box-shadow: 0px 0px 30px 0px #F6FFFF;
 }
 
 .user {
-    margin-top: 20px;
-    background-color: transparent !important;
-    display: block;
+	margin-top: 20px;
+	background-color: transparent !important;
+	display: block;
 }
 
 .nick-name {
-    font-size: x-large;
-    font-weight: 600;
+	font-size: x-large;
+	font-weight: 600;
 }
 
 .user-name {
-    font-size: large;
+	font-size: large;
 }
 /* 功能区域 */
 .item-icon {
-    font-size: 48rpx;
-    margin-right: 20rpx;
-    width: 60rpx;
-    text-align: center;
+	font-size: 48rpx;
+	margin-right: 20rpx;
+	width: 60rpx;
+	text-align: center;
 }
 
 /* override */
 .card {
-    margin-bottom: 16px;
-    background-color: white;
+	margin-bottom: 16px;
+	background-color: white;
 }
 
 /* .item{
@@ -48,44 +48,44 @@
 
 /* 底部区域 */
 .copyleft {
-    color: rgb(45, 149, 235);
-    display: flex;
-    justify-content: center;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 100rpx;
-    align-items: center;
-    z-index: 10;
+	color: rgb(45, 149, 235);
+	display: flex;
+	justify-content: center;
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	width: 100%;
+	height: 100rpx;
+	align-items: center;
+	z-index: 10;
 }
 
 /* 显示图片 */
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.7);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
 }
 
 .modal-content {
-    position: relative;
-    width: 80%;
+	position: relative;
+	width: 80%;
 }
 
 .modal-image {
-    width: 100%;
-    display: block;
-    border-radius: 16rpx;
+	width: 100%;
+	display: block;
+	border-radius: 16rpx;
 }
 
 .descript {
-    font-size: small;
-    color: gray;
+	font-size: small;
+	color: gray;
 }

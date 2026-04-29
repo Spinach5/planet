@@ -5,8 +5,10 @@
     "react/react-in-jsx-scope": "off",
     "no-unused-vars": "warn",
     "quotes": "off",
-    "jsx-quotes": ["warn", "prefer-double"], // 允许双引号，降级为警告
-    // 或者完全关闭: "jsx-quotes": "off"
-    "import/order": "off" 
+    "jsx-quotes": "off",
+    "import/first": "off",
+	"react/jsx-indent": "off",
+    "react/jsx-indent-props": "off",
+    "indent": "off"
   }
 }
