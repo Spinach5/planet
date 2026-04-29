@@ -5,7 +5,6 @@ class SafeAreaManager {
   constructor() {
     this.safeAreaTop = 44
     this.safeAreaBottom = 34
-    this.statusBarHeight = 44
     this.isReady = false
     this.cacheKey = 'safeArea'        // 缓存 key（由 cacheManager 决定是否加前缀）
     this._syncCache = null
@@ -54,9 +53,13 @@ class SafeAreaManager {
 
     // 2. 获取系统信息
     try {
-      const res = await Taro.getSystemInfo({})
-      const { safeArea, statusBarHeight } = res
       let top, bottom
+      if(process.env.TARO_ENV === 'h5'){
+        top = 0
+        bottom = 0
+      }else{
+        const res = await Taro.getSystemInfo({})
+      const { safeArea, statusBarHeight } = res
       if (safeArea) {
         top = safeArea.top || 44
         const rawbottom = safeArea.bottom
@@ -66,13 +69,12 @@ class SafeAreaManager {
         top = statusBarHeight || 44
         bottom = 0
       }
+      }
+      
 
       const values = {
         top,
         bottom,
-        statusBarHeight: statusBarHeight || 44,
-        left: safeArea?.left || 0,
-        right: safeArea?.right || 0,
       }
 
       this.applyValues(values)
@@ -85,7 +87,7 @@ class SafeAreaManager {
       return this.getValues()
     } catch (error) {
       console.error('获取安全距离失败，使用默认值:', error)
-      const defaultValues = { top: 44, bottom: 34, statusBarHeight: 44, left: 0, right: 0 }
+      const defaultValues = { top: 44, bottom: 34}
       this.applyValues(defaultValues)
       this.setCSSVariables()
       this.isReady = true
@@ -98,9 +100,6 @@ class SafeAreaManager {
   applyValues(values) {
     this.safeAreaTop = values.top
     this.safeAreaBottom = values.bottom
-    this.statusBarHeight = values.statusBarHeight
-    this.safeAreaLeft = values.left || 0
-    this.safeAreaRight = values.right || 0
   }
 
   // 设置 CSS 变量（仅 H5）
@@ -118,9 +117,6 @@ class SafeAreaManager {
     return {
       top: this.safeAreaTop,
       bottom: this.safeAreaBottom,
-      left: this.safeAreaLeft,
-      right: this.safeAreaRight,
-      statusBarHeight: this.statusBarHeight,
       isReady: this.isReady,
     }
   }

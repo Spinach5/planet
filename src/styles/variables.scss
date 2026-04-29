@@ -24,11 +24,6 @@ $radius-md: 12px;
 $radius-lg: 16px;
 $radius-xl: 24px;
 
-// 安全距离（默认值）
-$safe-area-top: 44px;
-$safe-area-bottom: 34px;
-$status-bar-height: 44px;
-
 // 导出变量供 JS 使用
 :export {
   primaryBlue: $primary-blue;

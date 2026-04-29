@@ -11,7 +11,7 @@ export default function Index() {
   ]
 
   return (
-    <SafeAreaView className='page'>
+    <SafeAreaView>
       <Swiper
         indicatorDots
         autoplay
@@ -21,7 +21,7 @@ export default function Index() {
       >
         {bannerList.map((item) => (
           <SwiperItem key={item.id}>
-            <Image src={item.imageUrl} mode='aspectFit' />
+            <Image src={item.imageUrl} mode='aspectFit' className='swiperPic' />
           </SwiperItem>
         ))}
       </Swiper>

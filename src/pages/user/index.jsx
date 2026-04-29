@@ -25,7 +25,7 @@ export default function Index() {
   const closeModal = () => setShowModal(false)
 
   return (
-    <SafeAreaView className='page'>
+    <SafeAreaView>
       <View className='gradient'>
         <View className='bora card item user'>
           <View className='nick-name'>

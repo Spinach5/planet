@@ -8,15 +8,15 @@ export default function SafeAreaView({ children, className = '' }) {
   const { top: cachedTop, bottom: cachedBottom } = getSafeArea()
   console.log('读取到的安全距离:', { cachedTop, cachedBottom })
 
-  const top = cachedTop || 44
-  const bottom = cachedBottom || 0  // 你要保留为 0 还是使用 cachedBottom? 原样设为 0
+  const top = cachedTop
+  const bottom = cachedBottom
 
   return (
     <View
       className={className}
       style={{
         paddingTop: `${top}px`,
-        // paddingBottom: `${bottom}px`,
+        paddingBottom: `${bottom}px`,
         paddingLeft: '8px',
         paddingRight: '8px',
         // minHeight: '100vh',
