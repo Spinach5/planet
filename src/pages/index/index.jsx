@@ -18,11 +18,10 @@ export default function Index() {
         interval={3000}
         duration={500}
         circular
-        className='swiper-box'
       >
         {bannerList.map((item) => (
           <SwiperItem key={item.id}>
-            <Image className='slide-image' src={item.imageUrl} mode='aspectFit' />
+            <Image src={item.imageUrl} mode='aspectFit' />
           </SwiperItem>
         ))}
       </Swiper>

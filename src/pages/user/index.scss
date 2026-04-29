@@ -1,3 +1,4 @@
+@use '../../app.scss' as *;
 .container {
     padding: 16rpx;
     // background-color: #f0f0f0;
@@ -27,7 +28,6 @@
 .user-name {
     font-size: large;
 }
-
 /* 功能区域 */
 .item-icon {
     font-size: 48rpx;
