@@ -8,7 +8,8 @@ import {
 } from "@tarojs/components";
 import defaultPic from "../../assets/tower.jpeg";
 import "./index.scss";
-import SafeAreaView from "../../components/safeView";
+// import SafeAreaView from "../../components/safeView";
+import BasePage from "../../components/basePage";
 
 export default function Index() {
 	const bannerList = [
@@ -18,7 +19,7 @@ export default function Index() {
 	];
 
 	return (
-		<SafeAreaView>
+		<BasePage>
 			<Swiper
 				indicatorDots
 				autoplay
@@ -78,6 +79,6 @@ export default function Index() {
 			<View className="bora card list">
 				<View className="item">最终可能展示公告或活动</View>
 			</View>
-		</SafeAreaView>
+		</BasePage>
 	);
 }

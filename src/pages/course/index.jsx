@@ -9,7 +9,8 @@ import {
 } from "@tarojs/components";
 import "./index.scss";
 import { useState } from "react";
-import SafeAreaView from "../../components/safeView";
+// import SafeAreaView from "../../components/safeView";
+import BasePage from "../../components/basePage";
 
 export default function Index() {
 	const week = ["一", "二", "三", "四", "五", "六", "日"];
@@ -27,7 +28,7 @@ export default function Index() {
 	const switchToWeek = (week_number) => {};
 
 	return (
-		<SafeAreaView>
+		<BasePage>
 			<View className="gradient"></View>
 
 			{/* 日期区域 */}
@@ -163,6 +164,6 @@ export default function Index() {
 					</View>
 				</View>
 			)}
-		</SafeAreaView>
+		</BasePage>
 	);
 }
