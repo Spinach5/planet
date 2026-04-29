@@ -11,6 +11,7 @@ import "./index.scss";
 import { useState } from "react";
 import SafeAreaView from "../../components/safeView";
 
+  
 export default function Index() {
   const week = ["一", "二", "三", "四", "五", "六", "日"];
   const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
@@ -25,11 +26,12 @@ export default function Index() {
   const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
   const showClassDetails = (item) => {};
   const switchToWeek = (week_number) => {};
-export default async function Course() {
-  if (!cookies) {
+    if (!cookies) {
     console.log('登录失败');
-    return;
+    return null;
   }
+
+
 
 	return (
 		<SafeAreaView>
