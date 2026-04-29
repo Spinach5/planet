@@ -4,7 +4,7 @@ export default {
   mini: {},
   h5: {
     // 确保产物为 es5
-    legacy: true,
+    // legacy: true,
     /**
      * WebpackChain 插件配置
      * @docs https://github.com/neutrinojs/webpack-chain

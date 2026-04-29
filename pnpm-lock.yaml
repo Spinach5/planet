@@ -26,6 +26,9 @@ importers:
       '@tarojs/plugin-platform-alipay':
         specifier: 4.2.0
         version: 4.2.0(@tarojs/service@4.2.0)(@tarojs/shared@4.2.0)
+      '@tarojs/plugin-platform-h5':
+        specifier: 4.2.0
+        version: 4.2.0(@tarojs/taro@4.2.0(@tarojs/components@4.2.0(@tarojs/helper@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@tarojs/helper@4.2.0)(@tarojs/shared@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@types/react@18.3.28)(postcss@8.5.12)(react@18.3.1)(rollup@3.30.0)(solid-js@1.9.12)
       '@tarojs/plugin-platform-harmony-hybrid':
         specifier: 4.2.0
         version: 4.2.0(@babel/core@7.29.0)(@tarojs/taro@4.2.0(@tarojs/components@4.2.0(@tarojs/helper@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@tarojs/helper@4.2.0)(@tarojs/shared@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0)(solid-js@1.9.12)
@@ -59,6 +62,9 @@ importers:
       axios:
         specifier: ^1.15.2
         version: 1.15.2
+      cross-env:
+        specifier: ^10.1.0
+        version: 10.1.0
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
@@ -90,9 +96,6 @@ importers:
       '@tarojs/plugin-generator':
         specifier: 4.2.0
         version: 4.2.0(@types/node@25.6.0)
-      '@tarojs/plugin-platform-h5':
-        specifier: 4.2.0
-        version: 4.2.0(@tarojs/taro@4.2.0(@tarojs/components@4.2.0(@tarojs/helper@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@tarojs/helper@4.2.0)(@tarojs/shared@4.2.0)(@types/react@18.3.28)(postcss@8.5.12)(rollup@3.30.0))(@types/react@18.3.28)(postcss@8.5.12)(react@18.3.1)(rollup@3.30.0)(solid-js@1.9.12)
       '@tarojs/vite-runner':
         specifier: 4.2.0
         version: 4.2.0(@tarojs/runtime@4.2.0)(@types/babel__core@7.20.5)(jiti@2.6.1)(postcss@8.5.12)(rollup@3.30.0)(terser@5.46.2)(typescript@6.0.3)(vite@4.5.14(@types/node@25.6.0)(sass@1.99.0)(terser@5.46.2))
@@ -895,6 +898,9 @@ packages:
 
   '@dual-bundle/import-meta-resolve@4.2.1':
     resolution: {integrity: sha512-id+7YRUgoUX6CgV0DtuhirQWodeeA7Lf4i2x71JS/vtA5pRb/hIGWlw+G6MeXvsM+MXrz0VAydTGElX1rAfgPg==}
+
+  '@epic-web/invariant@1.0.0':
+    resolution: {integrity: sha512-lrTPqgvfFQtR/eY/qkIzp98OGdNJu0m5ji3q/nJI8v3SXkRKEnWiOxMmbvcSoAIzv/cGiuvRy57k4suKQSAdwA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -2546,6 +2552,11 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  cross-env@10.1.0:
+    resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==}
+    engines: {node: '>=20'}
+    hasBin: true
 
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
@@ -6059,6 +6070,8 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.2.1': {}
 
+  '@epic-web/invariant@1.0.0': {}
+
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
 
@@ -7787,6 +7800,11 @@ snapshots:
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 6.0.3
+
+  cross-env@10.1.0:
+    dependencies:
+      '@epic-web/invariant': 1.0.0
+      cross-spawn: 7.0.6
 
   cross-spawn@7.0.6:
     dependencies:

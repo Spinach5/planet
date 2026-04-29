@@ -1,5 +1,7 @@
 {
-  "extends": ["taro/react"],
+  "extends": [
+    "taro/react"
+  ],
   "rules": {
     "react/jsx-uses-react": "off",
     "react/react-in-jsx-scope": "off",
@@ -7,7 +9,7 @@
     "quotes": "off",
     "jsx-quotes": "off",
     "import/first": "off",
-	"react/jsx-indent": "off",
+    "react/jsx-indent": "off",
     "react/jsx-indent-props": "off",
     "indent": "off"
   }
