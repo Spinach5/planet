@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
 	View,
 	Swiper,
@@ -7,36 +8,63 @@ import {
 	Navigator,
 	ScrollView,
 } from "@tarojs/components";
-import "./index.scss";
-import { useState } from "react";
 import SafeAreaView from "../../components/safeView";
+import "./index.scss";
 
 
 export default function Index() {
-  const week = ["一", "二", "三", "四", "五", "六", "日"];
-  const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
-  const [week_days, setWeekDays] = useState([]);
-  const [course_time, setCourseTime] = useState([]);
-  const [now_week_courses, setNowWeekCourses] = useState([]);
-  const [is_show_switch_week, setIsShowSwitchWeek] = useState(false);
-  const [is_show_calss_details, setIsShowClassDetails] = useState(false);
-  const [selected_course, setSelectedCourse] = useState({});
-  const [scrollTop, setScrollTop] = useState(0);
-  const [closeClassDetails, setCloseClassDetails] = useState(false);
-  const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
-  const showClassDetails = (item) => {};
-  const switchToWeek = (week_number) => {};
-    if (!cookies) {
-    console.log('登录失败');
-    return null;
-  }
+	const week = ["一", "二", "三", "四", "五", "六", "日"];
+	const [now_week_number, setNowWeekNumber] = useState(1);
+	const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
+	const [week_days, setWeekDays] = useState([]);
+	const [course_time, setCourseTime] = useState([
+            ['08:20', '09:05'],
+            ['09:10', '09:55'],
+            ['10:15', '11:00'],
+            ['11:05', '11:50'],
+            ['14:00', '14:45'],
+            ['14:50', '15:35'],
+            ['15:55', '16:40'],
+            ['16:45', '17:30'],
+            ['18:30', '19:15'],
+            ['19:20', '20:05'],
+            ['20:10', '20:55'],
+            ['', '21:20']]);
+	const [now_week_courses, setNowWeekCourses] = useState([]);
+	const [is_show_switch_week, setIsShowSwitchWeek] = useState(false);
+	const [is_show_calss_details, setIsShowClassDetails] = useState(false);
+	const [selected_course, setSelectedCourse] = useState({});
+	const [scrollTop, setScrollTop] = useState(0);
+	const [closeClassDetails, setCloseClassDetails] = useState(false);
+	const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
+	const showClassDetails = (item) => { };
+	const switchToWeek = (week_number) => { };
+	// if (!cookies) {
+	// 	console.log('登录失败');
+	// 	return null;
+	// }
 
 
 
 	return (
-		<SafeAreaView>
-			<View className="gradient"></View>
-
+		<SafeAreaView className="page">
+			{/* 工具栏 */}
+			<View className="tools">
+				<View className="btn">
+					<Image src="../../assets/more.svg" />
+				</View>
+				<View className="btn" style={{paddingLeft: "4px",}} >
+					<Text>25-26学年春季</Text>
+					<Image src="../../assets/down.svg" />
+				</View>
+				<View className="btn">
+					<Text>第{now_week_number}周</Text>
+					<Image src="../../assets/down.svg" style={{paddingLeft: "4px",}} />
+				</View>
+				<View className="btn">
+					<Image src="../../assets/grid.svg" />
+				</View>
+			</View>
 			{/* 日期区域 */}
 			<View className="date">
 				<View className="month">
