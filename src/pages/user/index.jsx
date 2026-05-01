@@ -29,7 +29,9 @@ export default function Index() {
 
 	return (
 		<SafeAreaView>
-			<HeadStatus>我的</HeadStatus>
+			<HeadStatus
+			  text='我的'
+			></HeadStatus>
 			<View className='bora card item user'>
 				<View className='nick-name'>
 					{nickname ? nickname : '昵称'}
