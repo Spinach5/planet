@@ -13,7 +13,7 @@ export default function SaveAreaView({
         <View
             className={className}
             style={{
-                minHeight: isH5 ? 'calc(100dvh -55px)' : '100%',
+                height: isH5 ? 'calc(100dvh -55px)' : '100%',
                 // paddingTop: 'env(safe-area-inset-top)',
                 paddingTop: `${paddingtop}px`,
                 paddingLeft: "8px",
