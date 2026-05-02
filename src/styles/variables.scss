@@ -3,6 +3,7 @@ $primary-blue: #47a5fd;
 $white: #ffffff;
 $gray-bg: #f5f5f5;
 $gray-border: #e5e5e5;
+$black: #000000;
 
 // 间距变量
 $spacing-xs: 4px;
@@ -27,4 +28,7 @@ $radius-xl: 24px;
 // 导出变量供 JS 使用
 :export {
 	primaryBlue: $primary-blue;
+	white: $white;
+	black: $black;
+	radius_m:$radius-md;
 }
