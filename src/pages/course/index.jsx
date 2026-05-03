@@ -10,7 +10,7 @@ import {
 } from "@tarojs/components";
 import SafeAreaView from "../../components/safeView";
 import "./index.scss";
-
+import Btn from "../../components/Btn";
 
 export default function Index() {
 	const week = ["一", "二", "三", "四", "五", "六", "日"];
@@ -49,6 +49,9 @@ export default function Index() {
 	return (
 		<SafeAreaView className="page">
 			{/* 工具栏 */}
+			<Btn>
+				<Image src="../../assets/more.svg" />
+			</Btn>
 			<View className="tools">
 				<View className="btn">
 					<Image src="../../assets/more.svg" />
@@ -108,7 +111,7 @@ export default function Index() {
 							</View>
 						))}
 						<View style={{ fontSize: "small", height: "120px" }}>
-							其他课程
+							备注信息
 						</View>
 					</View>
 

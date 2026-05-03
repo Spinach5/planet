@@ -52,8 +52,8 @@ const handleClick = async () => {
   }
 }
   return (
-    <View className={`my-item ${className}`} onClick={handleClick}>
-      <View className="icon-wrapper">
+    <View className={`my-item ${className}`} >
+      <View className="icon-wrapper" onClick={handleClick}>
         <Image src={icon} className="grid-icon" />
       </View>
       <Text className="grid-text">{text}</Text>

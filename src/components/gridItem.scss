@@ -3,55 +3,55 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-
   border-radius: 24rpx;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
-  width: calc(25% - 8px); /* 减去间距，保证刚好4个 */
-/* 点击效果 */
+  width: calc(25% - 8px);
+
   &:active {
-	transform: scale(0.95);
-	background-color: rgba(0, 0, 0, 0.05);
-}
+    transform: scale(0.95);
+    background-color: rgba(0, 0, 0, 0.05);
+  }
 }
 
 .icon-wrapper {
-	width: 100rpx;
-	height: 100rpx;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border-radius: 32rpx;
-	margin-bottom: 12rpx;
-	transition: all 0.3s ease;
-	box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
-}
+  width: 100rpx;
+  height: 100rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32rpx;
+  margin-bottom: 12rpx;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
+  cursor: pointer;
 
-.grid-icon {
-	width: 56rpx;
-	height: 56rpx;
-	display: block;
-}
+  // 只在这里保留悬浮
+  &:hover {
+	transform: translateY(-8rpx);
+	box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.15);
+  }
 
-/* 文字样式美化 */
-.grid-text {
-	font-size: 24rpx;
-	font-family:
-		-apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
-		"Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", "宋体";
-	font-weight: bold;
-	color: #333333;
-	margin-top: 8rpx;
-	letter-spacing: 0.5rpx;
-	transition: color 0.3s ease;
+  &:active {
+    transform: scale(0.95);
+  }
 }
-
-/* 悬停效果（部分浏览器支持） */
-.my-item:hover .grid-text {
+.icon-wrapper:hover .grid-text {
 	color: #667eea;
 }
 
-.my-item:hover .icon-wrapper {
-	transform: translateY(-8rpx);
-	box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.15);
+.grid-icon {
+  width: 56rpx;
+  height: 56rpx;
+  display: block;
+}
+
+.grid-text {
+  font-size: 24rpx;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", "宋体";
+  font-weight: bold;
+  color: #333333;
+  margin-top: 8rpx;
+  letter-spacing: 0.5rpx;
+  transition: color 0.3s ease;
 }

@@ -1,0 +1,20 @@
+@use "../styles/variables" as *;
+.btn  {
+		background-color: white;
+		width: fit-content;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 4px;
+		border-radius: 6px;
+
+		text {
+			line-height: 20px;
+			font-size: large;
+		}
+
+		image {
+			height: 25px;
+			width: 25px;
+		}
+	}
