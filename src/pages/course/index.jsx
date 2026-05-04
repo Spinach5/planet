@@ -11,6 +11,7 @@ import {
 import SafeAreaView from "../../components/safeView";
 import "./index.scss";
 import Btn from "../../components/Btn";
+import CourseHeader from "../../components/courseHeader";
 
 export default function Index() {
 	const week = ["一", "二", "三", "四", "五", "六", "日"];
@@ -18,18 +19,19 @@ export default function Index() {
 	const [now_month, setNowMonth] = useState(new Date().getMonth() + 1);
 	const [week_days, setWeekDays] = useState([]);
 	const [course_time, setCourseTime] = useState([
-            ['08:20', '09:05'],
-            ['09:10', '09:55'],
-            ['10:15', '11:00'],
-            ['11:05', '11:50'],
-            ['14:00', '14:45'],
-            ['14:50', '15:35'],
-            ['15:55', '16:40'],
-            ['16:45', '17:30'],
-            ['18:30', '19:15'],
-            ['19:20', '20:05'],
-            ['20:10', '20:55'],
-            ['', '21:20']]);
+		["08:20", "09:05"],
+		["09:10", "09:55"],
+		["10:15", "11:00"],
+		["11:05", "11:50"],
+		["14:00", "14:45"],
+		["14:50", "15:35"],
+		["15:55", "16:40"],
+		["16:45", "17:30"],
+		["18:30", "19:15"],
+		["19:20", "20:05"],
+		["20:10", "20:55"],
+		["", "21:20"],
+	]);
 	const [now_week_courses, setNowWeekCourses] = useState([]);
 	const [is_show_switch_week, setIsShowSwitchWeek] = useState(false);
 	const [is_show_calss_details, setIsShowClassDetails] = useState(false);
@@ -37,37 +39,27 @@ export default function Index() {
 	const [scrollTop, setScrollTop] = useState(0);
 	const [closeClassDetails, setCloseClassDetails] = useState(false);
 	const [closeSwitchWeek, setCloseSwitchWeek] = useState(false);
-	const showClassDetails = (item) => { };
-	const switchToWeek = (week_number) => { };
+	const showClassDetails = (item) => {};
+	const switchToWeek = (week_number) => {};
 	// if (!cookies) {
 	// 	console.log('登录失败');
 	// 	return null;
 	// }
 
-
-
 	return (
 		<SafeAreaView className="page">
 			{/* 工具栏 */}
-			<Btn>
-				<Image src="../../assets/more.svg" />
-			</Btn>
-			<View className="tools">
-				<View className="btn">
+			<CourseHeader>
+				<Btn>
 					<Image src="../../assets/more.svg" />
-				</View>
-				<View className="btn" style={{paddingLeft: "4px",}} >
-					<Text>25-26学年春季</Text>
-					<Image src="../../assets/down.svg" />
-				</View>
-				<View className="btn">
+				</Btn>
+				<Btn>
 					<Text>第{now_week_number}周</Text>
-					<Image src="../../assets/down.svg" style={{paddingLeft: "4px",}} />
-				</View>
-				<View className="btn">
-					<Image src="../../assets/grid.svg" />
-				</View>
-			</View>
+					<Image
+						src="../../assets/down.svg"
+					/>
+				</Btn>
+			</CourseHeader>
 			{/* 日期区域 */}
 			<View className="date">
 				<View className="month">
