@@ -45,7 +45,7 @@ async function requestCore(url, method, data, headers, baseURL, cookieManager, r
     data: requestData,
     header: headers,
     redirect: 'manual',
-    dataType: 'text',
+    // dataType: 'text',解析成文本
   })
 
   // 保存 Set-Cookie

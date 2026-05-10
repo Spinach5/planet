@@ -8,11 +8,12 @@ export async function getCurrentWeek() {
 			Origin: "https://jwxt.hbut.edu.cn",
 		},
 		dataType: "text",
-		withCredentials: process.env.TARO_ENV === "h5",
+		withCredentials: true,
 	};
 
 	const response = await hbutRequest.post("/admin/api/getXlzc", loginConfig);
 	console.log(response.data);
+	console.log(response.data.ret);
 	if(response.data.ret === 0){
 		return response.data.data.xlzc;
 	}
