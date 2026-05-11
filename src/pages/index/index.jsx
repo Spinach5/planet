@@ -4,8 +4,26 @@ import SafeAreaView from "../../components/safeView";
 import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";
 import GridContainer from "../../components/gridContainer";
-
+import { getSchedule } from "../../service/hubt/schedule";
+import { useLoad ,useLaunch, useDidShow, useDidHide} from "@tarojs/taro";
 export default function Index() {
+
+
+  // 页面加载时执行
+  useLoad(() => {
+    console.log("页面已加载");
+  });
+
+  // 页面显示时执行（每次切换到前台都会执行）
+  useDidShow(() => {
+    console.log("页面已显示");
+  });
+
+  // 页面隐藏时执行（切换到后台）
+  useDidHide(() => {
+	getSchedule("2026-5-11")
+    console.log("页面已隐藏");
+  });
 	return (
 		<SafeAreaView className="">
 			<HeadStatus text="首页" />
