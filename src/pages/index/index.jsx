@@ -22,7 +22,6 @@ export default function Index() {
 
   // 页面隐藏时执行（切换到后台）
   useDidHide(() => {
-	getSchedule("2026-5-11")
     console.log("页面已隐藏");
   });
 	return (

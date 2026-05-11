@@ -20,7 +20,6 @@ export async function getExtroInfo() {
 		loginConfig,
 	);
 	if(response.data.ret === 0){
-		console.log("获取实践信息成功")
 		return response.data.data.sjk;
 	}
 	else{

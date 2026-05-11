@@ -1,6 +1,5 @@
 import { useLaunch } from "@tarojs/taro";
 import "./app.scss";
-import '@nutui/nutui-react-taro/dist/styles/theme-default.scss'
 import cacheManager from "./utils/cache";
 
 function App({ children }) {

@@ -6,7 +6,7 @@ export async function getSchedule(time) {
 			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
 			Referer: "https://jwxt.hbut.edu.cn",
 			Origin: "https://jwxt.hbut.edu.cn",
-		},	
+		},
 		withCredentials: true,
 	};
 
@@ -15,7 +15,6 @@ export async function getSchedule(time) {
         console.log(response.data.ret)
 	if(response.data.ret === 0){
         console.log(response.data.data.bzList)
-
 		return response.data.data.bzList;
 	}
 	else{
