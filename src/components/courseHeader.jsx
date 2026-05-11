@@ -20,7 +20,7 @@ export default function CourseHeader({ className = "" }) {
 				marginBottom: "16px",
 				height: "40px",
 				display: "flex",
-				gap: "8px",
+				gap: "18px",
 			}}
 		>
 			<Btn>

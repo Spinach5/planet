@@ -4,8 +4,9 @@ import SafeAreaView from "../../components/safeView";
 import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";
 import GridContainer from "../../components/gridContainer";
-import { getSchedule } from "../../service/hubt/schedule";
+import { getSchedule } from "../../service/hubt/Schedule";
 import { useLoad ,useLaunch, useDidShow, useDidHide} from "@tarojs/taro";
+
 export default function Index() {
 
 
