@@ -13,6 +13,7 @@ export default function Index() {
 			{/* 工具栏 */}
 			<CourseHeader />
 			<WeekHeader />
+			
 		</SafeAreaView>
 	);
 }

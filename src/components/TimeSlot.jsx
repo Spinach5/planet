@@ -1,5 +1,5 @@
 import { View } from "@tarojs/components";
-import "./TimeSlot.scss"; // 可选样式文件，也可直接使用内联样式
+import "./TimeSlot.scss";
 
 /**
  * 课程时间段组件

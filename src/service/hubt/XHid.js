@@ -8,20 +8,8 @@ class XHidManager {
 		this.isReady = false;
 		this.cacheKey = "xhid"; // 缓存 key（由 cacheManager 决定是否加前缀）
 		this._syncCache = null;
-		this.loadFromCache();
 	}
 
-	loadFromCache() {
-		const cached = this.getFromCache();
-		if (cached && typeof cached === "string" && cached.length > 0) {
-			this.applyValues(cached);
-			this._syncCache = cached;
-			this.isReady = true;
-			console.log("从缓存加载 xhid:", cached);
-			return true;
-		}
-		return false;
-	}
 	// 保存到缓存（使用 CacheManager，永不过期）
 	saveToCache(xhid) {
 		if (!xhid) return;
