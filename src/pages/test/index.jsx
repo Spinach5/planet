@@ -1,12 +1,14 @@
 import "./index.scss";
 import SafeAreaView from "../../components/safeView";
+import Taro from "@tarojs/taro";
 import { Button } from "@tarojs/components";
-import { login } from "../../utils/hbut/login";
+import { login } from "../../service/hubt/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
 import { getXhid } from "../../service/hubt/GetXhid";
-import { getSchedule } from "../../service/hubt/Schedule";
+import { getSchedule } from "../../service/hubt/TodaySchedule";
 import { getAllWeek } from "../../service/hubt/GetAllWeek";
+import { fetchXHid } from "../../service/hubt/XHid";
 
 export default function Index() {
 	return (
@@ -35,7 +37,7 @@ export default function Index() {
 			<Button
 				type="danger"
 				style={{ margin: "0px" }}
-				onClick={async () => console.log(await getXhid())}
+				onClick={async () => console.log(await fetchXHid())}
 			>
 				获取xhid
 			</Button>
@@ -54,6 +56,20 @@ export default function Index() {
 				onClick={async () => console.log(await getAllWeek())}
 			>
 				所有周次
+			</Button>
+			<Button
+				type="success"
+				style={{ margin: "0px" }}
+				onClick={async () => {Taro.setStorageSync("shit","shit")}}
+			>
+				测试set缓存
+			</Button>
+			<Button
+				type="success"
+				style={{ margin: "0px" }}
+				onClick={async () => {Taro.getStorageSync("shit")}}
+			>
+				测试get缓存
 			</Button>
 		</SafeAreaView>
 	);
