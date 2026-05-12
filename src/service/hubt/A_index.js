@@ -3,5 +3,5 @@ export { getCurrentWeek } from "./CurrentWeek";
 export { getExtroInfo } from "./ExtroInfo";
 export { getAllWeek } from "./GetAllWeek";
 export { getStuInfo } from "./StuInfo";
-export { getSchedule } from "./TodaySchedule";
+export { getDailySchedule } from "./DailySchedule";
 export { login } from "./login";

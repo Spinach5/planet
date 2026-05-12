@@ -1,6 +1,6 @@
 import { hbutRequest } from "../../utils/request";
 
-export async function getPersonal_Details(str) {
+export async function getDailySchedule(time) {
 	const loginConfig = {
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -11,11 +11,12 @@ export async function getPersonal_Details(str) {
 	};
 
 	const response = await hbutRequest.get(
-		`/admin/xsd/xskp/xskp?xhid=${str}`,
+		`/admin/getDayBz?rq=${time}`,
         loginConfig);
+        console.log(response.data.ret)
 	if(response.data.ret === 0){
-        console.log(response.data.data)
-		return response.data.data;
+        console.log(response.data.data.bzList)
+		return response.data.data.bzList;
 	}
 	else{
 		return [];

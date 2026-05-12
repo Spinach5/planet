@@ -6,9 +6,10 @@ import { login } from "../../service/hubt/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
 import { getXhid } from "../../service/hubt/GetXhid";
-import { getDaily_Schedule } from "../../service/hubt/TodayDaily_Schedule";
+import { getDailySchedule } from "../../service/hubt/DailySchedule";
 import { getAllWeek } from "../../service/hubt/GetAllWeek";
 import { fetchXHid } from "../../service/hubt/XHid";
+import TimeSlot from "../../components/TimeSlot";
 
 export default function Index() {
 	return (
@@ -45,7 +46,7 @@ export default function Index() {
 				type="warning"
 				style={{ margin: "0px" }}
 				onClick={async () =>
-					console.log(await getSchedule("2026-5-11"))
+					console.log(await getDailySchedule("2026-5-11"))
 				}
 			>
 				今日课表
@@ -60,17 +61,22 @@ export default function Index() {
 			<Button
 				type="success"
 				style={{ margin: "0px" }}
-				onClick={async () => {Taro.setStorageSync("shit","shit")}}
+				onClick={async () => {
+					Taro.setStorageSync("shit", "shit");
+				}}
 			>
 				测试set缓存
 			</Button>
 			<Button
 				type="success"
 				style={{ margin: "0px" }}
-				onClick={async () => {Taro.getStorageSync("shit")}}
+				onClick={async () => {
+					Taro.getStorageSync("shit");
+				}}
 			>
 				测试get缓存
 			</Button>
+			<TimeSlot startTime="08:00" endTime="08:45" order="1" />
 		</SafeAreaView>
 	);
 }

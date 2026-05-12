@@ -18,7 +18,7 @@ export async function getAllWeek() {
 		return response.data.data.length-1;
 	}
 	else{
-		console.log("获取排课周次失败");
+		console.log("获取排课周次失败,尝试重新登录");
 		return 0;
 	}
 }

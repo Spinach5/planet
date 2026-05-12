@@ -18,7 +18,9 @@ export async function getCurrentWeek() {
 		return response.data.data.xlzc;
 	}
 	else{
-		return -1;
+		console.log("获取当前周数失败")
 		console.log(response.data);
+		return -1;
+
 	}
 }

@@ -5,7 +5,7 @@ import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";
 import GridContainer from "../../components/gridContainer";
 import { useLoad ,useLaunch, useDidShow, useDidHide} from "@tarojs/taro";
-import { getPersonal_Details } from "../../service/hubt/Personal_Details";
+import { getStuInfo } from "../../service/hubt/StuInfo";
 
 
 export default function Index() {
