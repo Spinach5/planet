@@ -2,8 +2,9 @@
 //获取时间作息数组
 import { hbutRequest } from "../../utils/request";
 import { getSortedClassTimes } from "../../utils/hbut/timeHelper";
+import { getCurrentSemester } from "./CurrentSemester";
 
-export async function getTimeTable(semester) {
+export async function getTimeTable() {
 	const loginConfig = {
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -13,6 +14,7 @@ export async function getTimeTable(semester) {
 		// dataType: "text",
 		withCredentials: true,
 	};
+	const semester=await getCurrentSemester();
 	const response = await hbutRequest.get(
 		"admin/api/getZclistByXnxq?xnxq=" + semester,
 		loginConfig,

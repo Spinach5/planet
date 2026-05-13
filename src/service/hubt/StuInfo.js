@@ -1,6 +1,6 @@
 import { hbutRequest } from "../../utils/request";
-
-export async function getStuInfo(xhid) {
+import { getXhid } from "./GetXhid";
+export async function getStuInfo() {
 	const loginConfig = {
 		headers: {
 			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
@@ -10,6 +10,7 @@ export async function getStuInfo(xhid) {
 		// dataType: "text",
 		withCredentials: true,
 	};
+	const xhid=getXhid();
 	const response = await hbutRequest.get(
 		`/admin/xsd/xskp/xskp?xhid=${xhid}`,
 		loginConfig,
