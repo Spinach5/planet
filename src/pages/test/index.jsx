@@ -7,12 +7,10 @@ import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
 import { getDailySchedule } from "../../service/hubt/DailySchedule";
 import { getAllWeek } from "../../service/hubt/GetAllWeek";
-import { fetchXHid } from "../../service/hubt/XHid";
-import TimeSlot from "../../components/TimeSlot";
+import { getXhid } from "../../service/hubt/GetXhid";
 import { getCurrentSemester } from "../../service/hubt/CurrentSemester";
 import { getExamInfo } from "../../service/hubt/ExamInfo";
 import { getScores } from "../../service/hubt/Scores";
-import print from "../../utils/hbut/getscore";
 import { getTimeTable } from "../../service/hubt/GetTimeTable";
 
 export default function Index() {
@@ -21,30 +19,23 @@ export default function Index() {
 			<Button
 				type="info"
 				style={{ margin: "0px" }}
-				onClick={ () => print()}
-			>
-				登录
-			</Button>
-			<Button
-				type="info"
-				style={{ margin: "0px" }}
 				onClick={async () => console.log(await getScores())}
 			>
-				登录
+				获取当前分数
 			</Button>
 			<Button
 				type="primary"
 				style={{ margin: "0px" }}
 				onClick={async () => console.log(await getExamInfo())}
 			>
-				登录
+				获取考试信息
 			</Button>
 			<Button
 				type="primary"
 				style={{ margin: "0px" }}
 				onClick={async () => console.log(await getCurrentSemester())}
 			>
-				登录
+				获取当前学期
 			</Button>
 			<Button
 				type="primary"
@@ -65,12 +56,12 @@ export default function Index() {
 				style={{ margin: "0px" }}
 				onClick={async () => console.log(await getExtroInfo())}
 			>
-				所有周数清单
+				所有考试信息
 			</Button>
 			<Button
 				type="danger"
 				style={{ margin: "0px" }}
-				onClick={async () => console.log(await fetchXHid())}
+				onClick={async () => console.log(await getXhid())}
 			>
 				获取xhid
 			</Button>
