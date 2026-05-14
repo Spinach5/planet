@@ -4,7 +4,8 @@ export default defineAppConfig({
 		'pages/index/index',
 		"pages/course/index",
 		"pages/user/index",
-		"pages/test/index"
+		"pages/test/index",
+		"pages/login/index"
 	],
 
 	window: {
@@ -44,6 +45,7 @@ export default defineAppConfig({
 				iconPath: "./assets/我的.png",
 				selectedIconPath: "./assets/我的1.png",
 			},
+	
 		]
 	}
 

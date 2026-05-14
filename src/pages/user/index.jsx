@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { View, Image, Text } from '@tarojs/components';
+import Taro from '@tarojs/taro';
 import HeadStatus from '../../components/headStatus'
 import SafeAreaView from '../../components/safeView';
 import './index.scss';
@@ -19,7 +20,14 @@ export default function Index() {
 	// 模拟事件处理函数，实际需替换为真实逻辑
 	const switch_is_show_raw_uname = () =>
 		setIsShowRawUname(!is_show_raw_uname);
-	const handleLogin = () => { };
+	
+	// 完善登录跳转函数
+	const handleLogin = () => {
+		Taro.navigateTo({
+			url: '/pages/login/index'
+		});
+	};
+	
 	const manage_account = () => { };
 	const showLocalImage = () => { };
 	const get_course_data = () => { };
@@ -33,9 +41,11 @@ export default function Index() {
 			  text='我的'
 			></HeadStatus>
 			<View className='bora card item user'>
+
 				<View className='nick-name'>
 					{nickname ? nickname : '昵称'}
 				</View>
+
 				<View
 					className='user-name'
 					onClick={switch_is_show_raw_uname}
@@ -46,6 +56,7 @@ export default function Index() {
 							: username
 						: '账号'}
 				</View>
+
 				<View>
 					<Text className='descript'>
 						上次登陆xxt时间{xxt_last_login_time}
@@ -53,12 +64,14 @@ export default function Index() {
 						上次拉取xxt课表时间{xxt_last_get_data_time}
 					</Text>
 				</View>
+
 			</View>
+
 
 			<View className='container'>
 				{!is_loggedin_xxt && (
-					<View className='bora login-btn' onClick={handleLogin}>
-						<Text>登录</Text>
+					<View className='bora login-btn highlight-btn' onClick={handleLogin}>
+						<Text>立即登录</Text>
 					</View>
 				)}
 
@@ -72,6 +85,7 @@ export default function Index() {
 					<View className='item' onClick={showLocalImage}>
 						<Text>向我们反馈</Text>
 					</View>
+
 					<View className='item' onClick={showLocalImage}>
 						<Text>加入我们</Text>
 					</View>
@@ -83,12 +97,14 @@ export default function Index() {
 							<Text>从xxt获取课表</Text>
 						</View>
 					</View>
+
 					<View className='item' onClick={handleLogout}>
 						<View>
 							<Text style={{ color: 'red' }}>
 								清除所有小程序缓存
 							</Text>
 						</View>
+
 						<View>
 							<Text className='descript'>
 								同时将会清除登录状态
