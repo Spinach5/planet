@@ -61,8 +61,7 @@ NODE_ENV=production taro build --type weapp --watch # Bash
 - 需要设置关闭上传代码时样式自动补全，开启可能报错
 - 需要设置关闭代码压缩上传，开启可能报错
 
----
-### 使用到的技术
+## 使用到的技术
 [Taro](https://docs.taro.zone/docs/)
 
 [React](https://zh-hans.react.dev/learn)
