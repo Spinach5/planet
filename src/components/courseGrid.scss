@@ -4,15 +4,15 @@
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
-	height: 95%;
-	width: 95%;
+	height: 98%;
+	width: 98%;
 	margin: auto;
 	z-index: 2;
 	cursor: pointer;
 }
 .course-name {
 	font-weight: bold;
-	font-size: 12px;
+	font-size: 20px;
 	line-height: 1.4;
 	display: -webkit-box;
 	-webkit-box-orient: vertical;
@@ -23,7 +23,7 @@
 	margin-bottom: auto;
 }
 .course-room {
-	font-size: 12px;
+	font-size: 20px;
 	margin-top: auto;
 	display: -webkit-box;
 	-webkit-box-orient: vertical;

@@ -97,14 +97,7 @@ export default function CourseTable({ currentWeek }) {
 
 	return (
 		<View className="course-table">
-			<View
-				className="grid-container"
-				style={{
-					display: "grid",
-					gridTemplateColumns: "12.5% repeat(7, 1fr)",
-					gridAutoRows: "minmax(80px, auto)",
-				}}
-			>
+			<View className="grid-container">
 				<TimeColumn timeTable={timeTable} />
 				<CourseGrid gridCourses={gridCourses} />
 			</View>

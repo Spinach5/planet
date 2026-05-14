@@ -91,6 +91,7 @@ export default function CourseGrid({ gridCourses }) {
 							backgroundColor: "#fff",
 							borderRadius: "16px",
 							overflow: "hidden",
+							padding:"10px"
 						}}
 						onClick={(e) => e.stopPropagation()}
 					>
@@ -112,7 +113,7 @@ export default function CourseGrid({ gridCourses }) {
 							scrollY
 							style={{
 								maxHeight: "60vh",
-								padding: "16px",
+								padding: "5px",
 							}}
 						>
 							<View
@@ -170,8 +171,8 @@ function DetailRow({ label, value }) {
   const displayValue = value && value !== 'undefined' ? value : '未知';
   return (
     <View style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
-      <Text style={{ fontWeight: "bold", fontSize: "16px", color: "#333", flexShrink: 0, width: "100px" }}>{label}：</Text>
-      <Text style={{ fontSize: "16px", color: "#555", flex: 1, textAlign: "left", wordBreak: "break-word" }}>{displayValue}</Text>
+      <Text style={{ fontWeight: "bold", fontSize: "16px", color: "#333", flexShrink: 0 }}>{label}：</Text>
+      <Text style={{ fontSize: "16px", color: "#555", flex: 1, textAlign: "left", wordBreak: "break-word", whiteSpace: "normal",}}>{displayValue}</Text>
     </View>
   );
 }
