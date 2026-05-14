@@ -48,7 +48,7 @@ export async function getAllSchedule(semester) {
 		}
 
 		// 检查业务返回码
-		if (response.data?.ret !== 0) {
+		if (response.data.ret !== 0) {
 			console.log("[getCurrentWeek] 接口返回异常:", response.data);
 			throw new Error("获取课表失败：接口返回 ret 不为 0");
 		}
