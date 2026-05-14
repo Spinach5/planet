@@ -67,7 +67,7 @@ const avgRank = avgRankMatch ? {
 } : null;
 
 // 输出结果
-const print = () => {
+const printf = () => {
   console.log({
     name,
     studentId,
@@ -82,4 +82,4 @@ const print = () => {
   });
 };
 
-export default print;
+export default printf;

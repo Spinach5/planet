@@ -14,6 +14,7 @@ import { getScores } from "../../service/hubt/Scores";
 import { getTimeTable } from "../../service/hubt/GetTimeTable";
 import { getAllSchedule } from "../../service/hubt/AllSchedule";
 import { getStuInfo } from "../../service/hubt/StuInfo";
+import  printf  from "../../utils/hbut/getscore";
 
 export default function Index() {
 	return (
@@ -42,7 +43,7 @@ export default function Index() {
 			<Button
 				type="info"
 				style={{ margin: "0px" }}
-				onClick={ () => print()}
+				onClick={ () => printf()}
 			>
 				打印个人信息
 			</Button>
