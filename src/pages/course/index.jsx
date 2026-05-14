@@ -6,7 +6,7 @@ import CourseHeader from "../../components/courseHeader";
 import WeekHeader from "../../components/courseWeek";
 import CourseTable from "../../components/courseTable";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
-import "./index.scss";
+import "./index.css";
 
 export default function Index() {
 	const [currentWeek, setCurrentWeek] = useState(null);

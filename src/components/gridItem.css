@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .my-item {
   display: flex;
   flex-direction: column;
@@ -6,11 +7,10 @@
   border-radius: 24rpx;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   background: transparent;
-
-  &:active {
-    transform: scale(0.95);
-    background-color: rgba(0, 0, 0, 0.05);
-  }
+}
+.my-item:active {
+  transform: scale(0.95);
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 .icon-wrapper {
@@ -24,19 +24,17 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.08);
   cursor: pointer;
-
-  // 只在这里保留悬浮
-  &:hover {
-	transform: translateY(-8rpx);
-	box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.15);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
 }
+.icon-wrapper:hover {
+  transform: translateY(-8rpx);
+  box-shadow: 0 12rpx 24rpx rgba(0, 0, 0, 0.15);
+}
+.icon-wrapper:active {
+  transform: scale(0.95);
+}
+
 .icon-wrapper:hover .grid-text {
-	color: #667eea;
+  color: #667eea;
 }
 
 .grid-icon {

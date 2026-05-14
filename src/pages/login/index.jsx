@@ -7,7 +7,7 @@ import {
   Button,
 } from "@tarojs/components"
 import Taro from '@tarojs/taro'
-import "./index.scss"
+import "./index.css"
 import SafeAreaView from "../../components/safeView"
 import img1 from '../../assets/tdjj.jpg'
 
@@ -16,7 +16,7 @@ export default function Index() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  
+
   // 表单验证错误信息
   const [errors, setErrors] = useState({
     account: '',
@@ -80,7 +80,7 @@ export default function Index() {
         type: 'light'
       }).catch(() => {})
     }
-    
+
     // 波纹效果动画
     const btn = document.querySelector('.home-btn')
     if (btn) {
@@ -89,7 +89,7 @@ export default function Index() {
         btn.classList.remove('ripple-effect')
       }, 300)
     }
-    
+
     setTimeout(() => {
       Taro.switchTab({
         url: '/pages/user/index'
@@ -105,12 +105,12 @@ export default function Index() {
   const handleLogin = async () => {
     const accountError = validateAccount(account)
     const passwordError = validatePassword(password)
-    
+
     setErrors({
       account: accountError,
       password: passwordError
     })
-    
+
     if (accountError || passwordError) {
       Taro.showToast({
         title: accountError || passwordError,
@@ -119,27 +119,27 @@ export default function Index() {
       })
       return
     }
-    
+
     if (loading) return
-    
+
     setLoading(true)
-    
+
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500))
-      
+
       console.log('登录成功', { account, password })
       Taro.showToast({
         title: '登录成功',
         icon: 'success',
         duration: 1500
       })
-      
+
       setTimeout(() => {
         Taro.switchTab({
           url: '/pages/index/index'
         })
       }, 1500)
-      
+
     } catch (error) {
       Taro.showToast({
         title: '登录失败，请重试',
@@ -187,8 +187,8 @@ export default function Index() {
         {/* Logo区域 - 使用您导入的图片 */}
         <View className="logo-section">
           <View className="logo-wrapper">
-            <Image 
-              className="logo-image" 
+            <Image
+              className="logo-image"
                src={img1}
               mode="aspectFill"
             />

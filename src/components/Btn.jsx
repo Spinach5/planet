@@ -1,5 +1,5 @@
 import { View } from "@tarojs/components"
-import './Btn.scss'
+import './Btn.css'
 
 export default function Btn({
   children,

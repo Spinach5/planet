@@ -1,6 +1,6 @@
 // TimeSlot.jsx
 import { View } from "@tarojs/components";
-import './courseTimeSlot.scss'
+import './courseTimeSlot.css'
 
 export default function TimeSlot({ startTime, endTime, order}) {
   return (

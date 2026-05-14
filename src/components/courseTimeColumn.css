@@ -1,16 +1,16 @@
-// TimeContainer.scss
+@charset "UTF-8";
 .time-container {
   /* 隐藏滚动条（Webkit 浏览器 / 小程序） */
-  &::-webkit-scrollbar {
-    display: none;
-    width: 0;
-    height: 0;
-    background: transparent;
-  }
-
+}
+.time-container::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+  background: transparent;
+}
+.time-container {
   /* 兼容 Firefox */
   scrollbar-width: none;
-
   /* 兼容 IE/Edge */
   -ms-overflow-style: none;
 }

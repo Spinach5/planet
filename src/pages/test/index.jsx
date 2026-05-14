@@ -1,7 +1,7 @@
-import "./index.scss";
+import "./index.css";
 import SafeAreaView from "../../components/safeView";
 import Taro from "@tarojs/taro";
-import { Button } from "@tarojs/components";
+import { Button, Icon } from "@tarojs/components";
 import { login } from "../../service/hubt/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
@@ -158,6 +158,18 @@ export default function Index() {
 			>
 				清除H5cookies
 			</Button>
+			<Icon size="60" type="success" />
+			<Icon size="60" type="info" />
+			<Icon size="60" type="warn" color="#ccc" />
+			<Icon size="60" type="warn" />
+			<Icon size="60" type="waiting" />
+			<Icon size="20" type="success_no_circle" />
+			<Icon size="20" type="warn" />
+			<Icon size="20" type="success" />
+			<Icon size="20" type="download" />
+			<Icon size="20" type="clear" color="red" />
+			<Icon size="20" type="search" />
+			<Icon size="20" type="cancel" />
 		</SafeAreaView>
 	);
 }

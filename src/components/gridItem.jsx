@@ -1,6 +1,6 @@
 import { View, Text, Image } from "@tarojs/components"
 import Taro from '@tarojs/taro'
-import './gridItem.scss'
+import './gridItem.css'
 
 export default function GridItem({
   url,

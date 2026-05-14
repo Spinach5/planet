@@ -43,9 +43,9 @@
 .week-day-box.today {
   background-color: #fff;
   border-radius: 8px;
-  .day-number,
-  .day-week {
-    color: #007aff;
-    font-weight: bold;
-  }
+}
+.week-day-box.today .day-number,
+.week-day-box.today .day-week {
+  color: #007aff;
+  font-weight: bold;
 }

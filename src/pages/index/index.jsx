@@ -1,5 +1,5 @@
 import { View } from "@tarojs/components";
-import "./index.scss";
+import "./index.css";
 import SafeAreaView from "../../components/safeView";
 import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";

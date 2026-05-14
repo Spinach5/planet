@@ -1,5 +1,5 @@
 import { View, Text, ScrollView} from "@tarojs/components";
-import "./courseGrid.scss";
+import "./courseGrid.css";
 import { useState } from "react";
 /**
  * 课表卡片背景,将颜色变淡（提高亮度、降低饱和度）

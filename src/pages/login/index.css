@@ -1,3 +1,4 @@
+@charset "UTF-8";
 .login-container {
   position: relative;
   min-height: 100vh;
@@ -14,50 +15,41 @@
   cursor: pointer;
   overflow: hidden;
   border-radius: 40px;
-  
-  &-inner {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 40px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 2;
-  }
-  
-  &-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
-    border-radius: 40px;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 1;
-  }
-  
-  &:active {
-    .home-btn-inner {
-      transform: scale(0.96);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    }
-    
-    .home-btn-bg {
-      opacity: 1;
-    }
-  }
-  
-  &.ripple-effect {
-    .home-btn-inner {
-      animation: btnRipple 0.4s ease-out;
-    }
-  }
+}
+.home-btn-inner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 40px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+.home-btn-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.1));
+  border-radius: 40px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: 1;
+}
+.home-btn:active .home-btn-inner {
+  transform: scale(0.96);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+.home-btn:active .home-btn-bg {
+  opacity: 1;
+}
+.home-btn.ripple-effect .home-btn-inner {
+  animation: btnRipple 0.4s ease-out;
 }
 
 @keyframes btnRipple {
@@ -72,7 +64,6 @@
     transform: scale(1);
   }
 }
-
 .home-icon-wrapper {
   display: flex;
   align-items: center;
@@ -116,27 +107,24 @@
   position: absolute;
   border-radius: 50%;
   background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%);
-  
-  &-1 {
-    width: 300px;
-    height: 300px;
-    top: -150px;
-    right: -80px;
-  }
-  
-  &-2 {
-    width: 200px;
-    height: 200px;
-    bottom: 20%;
-    left: -100px;
-  }
-  
-  &-3 {
-    width: 150px;
-    height: 150px;
-    bottom: -50px;
-    right: 20px;
-  }
+}
+.circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -150px;
+  right: -80px;
+}
+.circle-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 20%;
+  left: -100px;
+}
+.circle-3 {
+  width: 150px;
+  height: 150px;
+  bottom: -50px;
+  right: 20px;
 }
 
 /* Logo区域 - 支持自定义图片 */
@@ -163,18 +151,17 @@
   animation: float 3s ease-in-out infinite;
   overflow: hidden;
   position: relative;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
-    border-radius: 24px;
-    pointer-events: none;
-  }
+}
+.logo-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: 24px;
+  pointer-events: none;
 }
 
 .logo-image {
@@ -196,7 +183,6 @@
     transform: translateY(-8px);
   }
 }
-
 .app-name {
   font-size: 28px;
   font-weight: 600;
@@ -232,22 +218,19 @@
   margin-bottom: 4px;
   transition: all 0.3s ease;
   border: 1px solid transparent;
-  
-  &:focus-within {
-    background: #ffffff;
-    border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-  }
-  
-  &.error {
-    border-color: #ef4444;
-    background: #fff5f5;
-    
-    &:focus-within {
-      border-color: #ef4444;
-      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
-    }
-  }
+}
+.input-group:focus-within {
+  background: #ffffff;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+.input-group.error {
+  border-color: #ef4444;
+  background: #fff5f5;
+}
+.input-group.error:focus-within {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
 
 .error-tip {
@@ -259,11 +242,16 @@
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  75% { transform: translateX(4px); }
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
 }
-
 .input-icon {
   font-size: 20px;
   margin-right: 12px;
@@ -291,20 +279,18 @@
   margin-left: 8px;
   cursor: pointer;
   transition: transform 0.2s;
-  
-  &:active {
-    transform: scale(0.9);
-  }
+}
+.password-toggle:active {
+  transform: scale(0.9);
 }
 
 .toggle-icon {
   font-size: 20px;
   opacity: 0.6;
   transition: opacity 0.2s;
-  
-  &:active {
-    opacity: 1;
-  }
+}
+.toggle-icon:active {
+  opacity: 1;
 }
 
 /* 选项 */
@@ -320,29 +306,26 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  
-  .checkbox {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #d1d5db;
-    border-radius: 5px;
-    background: white;
-    transition: all 0.2s;
-  }
-  
-  text {
-    font-size: 13px;
-    color: #6b7280;
-  }
+}
+.remember .checkbox {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d1d5db;
+  border-radius: 5px;
+  background: white;
+  transition: all 0.2s;
+}
+.remember text {
+  font-size: 13px;
+  color: #6b7280;
 }
 
 .forgot {
   font-size: 13px;
   color: #6366f1;
-  
-  &:active {
-    opacity: 0.7;
-  }
+}
+.forgot:active {
+  opacity: 0.7;
 }
 
 /* 登录按钮 */
@@ -361,23 +344,19 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  
-  &::after {
-    border: none;
-  }
-  
-  &:active {
-    transform: scale(0.98);
-    box-shadow: 0 5px 10px -3px rgba(99, 102, 241, 0.4);
-  }
-  
-  &.loading {
-    opacity: 0.7;
-    
-    &:active {
-      transform: none;
-    }
-  }
+}
+.login-btn::after {
+  border: none;
+}
+.login-btn:active {
+  transform: scale(0.98);
+  box-shadow: 0 5px 10px -3px rgba(99, 102, 241, 0.4);
+}
+.login-btn.loading {
+  opacity: 0.7;
+}
+.login-btn.loading:active {
+  transform: none;
 }
 
 .loading-content {
@@ -401,7 +380,6 @@
     transform: rotate(360deg);
   }
 }
-
 .btn-active {
   opacity: 0.8;
 }
@@ -411,16 +389,14 @@
   text-align: center;
   font-size: 14px;
   color: #6b7280;
-  
-  .register-link {
-    color: #6366f1;
-    font-weight: 500;
-    margin-left: 4px;
-    
-    &:active {
-      text-decoration: underline;
-    }
-  }
+}
+.register-guide .register-link {
+  color: #6366f1;
+  font-weight: 500;
+  margin-left: 4px;
+}
+.register-guide .register-link:active {
+  text-decoration: underline;
 }
 
 /* 第三方登录 */
@@ -437,17 +413,15 @@
   justify-content: center;
   gap: 12px;
   margin-bottom: 24px;
-  
-  .line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
-  }
-  
-  text {
-    font-size: 13px;
-    color: #9ca3af;
-  }
+}
+.divider .line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e5e7eb, transparent);
+}
+.divider text {
+  font-size: 13px;
+  color: #9ca3af;
 }
 
 .icons {
@@ -467,9 +441,8 @@
   font-size: 24px;
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.05);
   transition: all 0.2s;
-  
-  &:active {
-    transform: scale(0.95);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  }
+}
+.icon-item:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }

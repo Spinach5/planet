@@ -3,7 +3,7 @@ import { View, Image, Text } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import HeadStatus from '../../components/headStatus'
 import SafeAreaView from '../../components/safeView';
-import './index.scss';
+import './index.css';
 
 
 export default function Index() {
@@ -20,14 +20,14 @@ export default function Index() {
 	// 模拟事件处理函数，实际需替换为真实逻辑
 	const switch_is_show_raw_uname = () =>
 		setIsShowRawUname(!is_show_raw_uname);
-	
+
 	// 完善登录跳转函数
 	const handleLogin = () => {
 		Taro.navigateTo({
 			url: '/pages/login/index'
 		});
 	};
-	
+
 	const manage_account = () => { };
 	const showLocalImage = () => { };
 	const get_course_data = () => { };

@@ -1,5 +1,5 @@
 import { useLaunch } from "@tarojs/taro";
-import "./app.scss";
+import "./app.css";
 
 function App({ children }) {
 	useLaunch(async () => {

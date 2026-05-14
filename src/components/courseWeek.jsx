@@ -1,6 +1,6 @@
 import { View, Text } from "@tarojs/components";
 import { useEffect, useState } from "react";
-import "./courseWeek.scss";
+import "./courseWeek.css";
 import { getCurrentWeek } from "../service/hubt/CurrentWeek";
 
 /**

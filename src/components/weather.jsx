@@ -1,5 +1,5 @@
 import { View,Text} from "@tarojs/components";
-import { white,radius_m,black} from "../styles/variables.scss";
+import { white,radius_m,black} from "../styles/variables.css";
 
 export default function WeatherTile({
   children,

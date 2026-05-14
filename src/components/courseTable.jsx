@@ -4,7 +4,7 @@ import { getAllSchedule } from "../service/hubt/AllSchedule";
 import { getTimeTable } from "../service/hubt/GetTimeTable";
 import TimeColumn from "./courseTImeColumn.jsx";
 import CourseGrid from "./courseGrid";
-import "./courseTable.scss";
+import "./courseTable.css";
 
 // 工具函数：字符串哈希
 function getHashCode(str) {
