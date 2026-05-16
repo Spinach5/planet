@@ -80,6 +80,36 @@
   margin-bottom: 32px;
 }
 
+.input-wrapper{
+  flex:1;
+  position:relative
+}
+
+.input-field {
+  flex: 1;
+  height: 88px;
+  border: 2px solid transparent;
+  border-radius: 20px;
+  padding: 0 10px;
+  font-size: 28px;
+  color: #1a2c3e;
+  transition: all 0.3s;
+  background: #f5f7fa;
+}
+
+.input-field.input-error {
+  border-color: #ff4d4f;
+  background: #fff2f0;
+}
+
+.error-tip {
+  position: absolute;
+  bottom: -40px;
+  left: 10px;
+  font-size: 22px;
+  color: #ff4d4f;
+}
+
 .input-label {
   font-size: 28px;
   color: #1a2c3e;
@@ -89,15 +119,25 @@
   flex-shrink: 0;
   text-align: right;  /* 文本居右 */
 }
-.input-field {
+
+.password-wrapper {
   flex: 1;
-  height: 88px;
-  border: none;
-  border-radius: 20px;
-  padding: 0 10px;
-  font-size: 28px;
-  color: #1a2c3e;
-  transition: all 0.3s;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .input-field {
+  flex: 1;
+  padding-right: 80px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 20px;
+  font-size: 40px;
+  color: #8a99b0;
+  z-index: 10;
 }
 
 .input-field:focus {

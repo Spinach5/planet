@@ -11,20 +11,76 @@ export default function Index() {
 	const [studentId, setStudentId] = useState("");
 	const [password, setPassword] = useState("");
 	const [agreed, setAgreed] = useState(false);
+	const [showPassword, setShowPassword] = useState(false); // 密码可见性状态
+	const [studentIdError, setStudentIdError] = useState(false); // 学号输入错误状态
 
 	// 大学列表（只展示湖北工业大学）
 	const universityList = ["湖北工业大学"];
 
 	const handleLogin = () => {
-		if (!studentId || !password) {
-			console.log("请填写学号和密码");
-			return;
+  // 学号验证
+  if (!studentId) {
+    Taro.showToast({
+      title: '请输入学号',
+      icon: 'none'
+    });
+    setStudentIdError(true);
+    return;
+  }
+  
+  // 学号长度验证
+  if (studentId.length !== 10) {
+    Taro.showToast({
+      title: '学号必须为10位数字',
+      icon: 'none'
+    });
+    setStudentIdError(true);
+    return;
+  }
+  
+  setStudentIdError(false);
+  
+  // 密码验证
+  if (!password) {
+    Taro.showToast({
+      title: '请输入密码',
+      icon: 'none'
+    });
+    return;
+  }
+  
+  if (!agreed) {
+    Taro.showToast({
+      title: '请阅读并同意用户协议和隐私政策',
+      icon: 'none'
+    });
+    return;
+  }
+  
+  console.log("登录中...", { university, studentId, password });
+};
+
+	// 学号输入处理（只允许数字）
+	const handleStudentIdInput = (e) => {
+		let value = e.detail.value;
+		// 只保留数字
+		value = value.replace(/\D/g, "");
+		if (value.length <= 12) {
+			setStudentId(value);
 		}
-		if (!agreed) {
-			console.log("请阅读并同意用户协议和隐私政策");
-			return;
-		}
-		console.log("登录中...", { university, studentId, password });
+		// if (value.length > 0 && value.length !== 10) {
+		// 	setStudentIdError(true);
+		// } else {
+		// 	setStudentIdError(false);
+		// }
+	};
+
+	// 密码输入处理（不允许空格）
+	const handlePasswordInput = (e) => {
+		let value = e.detail.value;
+		// 移除所有空格
+		value = value.replace(/\s/g, "");
+		setPassword(value);
 	};
 
 	return (
@@ -62,25 +118,44 @@ export default function Index() {
 				<View className="form">
 					<View className="input-item">
 						<Text className="input-label">学号</Text>
-						<Input
-							className="input-field"
-							placeholder="请输入学号"
-							placeholderClass="placeholder"
-							value={studentId}
-							onInput={(e) => setStudentId(e.detail.value)}
-						/>
+						<view className="input-wrapper">
+							<Input
+								className={`"input-field" ${studentIdError ? "input-error" : ""}`}
+								placeholder="请输入学号"
+								placeholderClass="placeholder"
+								value={studentId}
+								onInput={handleStudentIdInput}
+								onBlur={()=>{
+									//失去焦点时验证
+									if(studentId&&studentId.length!==10){
+										setStudentIdError(true);
+									}else{
+										setStudentIdError(false);
+									}
+								}}
+							/>
+							{studentIdError && <Text className="input-error-text">学号长度不正确</Text>}
+						</view>
 					</View>
 
 					<View className="input-item">
 						<Text className="input-label">密码</Text>
-						<Input
-							className="input-field"
-							placeholder="请输入密码"
-							placeholderClass="placeholder"
-							password
-							value={password}
-							onInput={(e) => setPassword(e.detail.value)}
-						/>
+						<View className="password-wrapper">
+							<Input
+								className="input-field"
+								placeholder="请输入密码"
+								placeholderClass="placeholder"
+								password={!showPassword}
+								value={password}
+								onInput={handlePasswordInput}
+							/>
+							<Text
+								className="password-toggle"
+								onClick={() => setShowPassword(!showPassword)}
+							>
+								{showPassword ? "👁️" : "👁️‍🗨️"}
+							</Text>
+						</View>
 					</View>
 
 					<Button className="login-btn" onClick={handleLogin}>
