@@ -68,6 +68,7 @@ export async function auth(stuID, password) {
 
     // 4. 默认情况：返回 HTML 但不确定是否成功，保守处理
     console.log('登录状态，返回了 HTML')
+    
     return {
       success: true,  // 根据实际情况调整，或进一步检查
       message: '登录请求已完成，请验证',

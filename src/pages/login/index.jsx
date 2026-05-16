@@ -4,7 +4,9 @@ import "./index.css";
 import HeadStatus from "../../components/headStatus";
 import SafeAreaView from "../../components/safeView";
 import img from "../../assets/微信.png";
+import { login } from "../../service/hubt/login";
 import Taro from "@tarojs/taro";
+import { getAllSchedule } from "../../service/hubt/AllSchedule";
 
 export default function Index() {
 	const [university, setUniversity] = useState("湖北工业大学");
@@ -56,8 +58,15 @@ export default function Index() {
     });
     return;
   }
-  
+  login(studentId, password)
   console.log("登录中...", { university, studentId, password });
+  Taro.showToast({
+    title: '登录成功',
+    icon: 'success'
+  });
+  Taro.switchTab({
+    url: '/pages/index/index'
+  });
 };
 
 	// 学号输入处理（只允许数字）

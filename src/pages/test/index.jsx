@@ -17,6 +17,7 @@ import { getStuInfo } from "../../service/hubt/StuInfo";
 import { cleanH5Cookies } from "../../utils/hbut/cleanH5Cookies";
 import printf from "../../utils/hbut/getscore";
 
+
 export default function Index() {
 	return (
 		<SafeAreaView className="">
@@ -72,7 +73,7 @@ export default function Index() {
 			<Button
 				type="primary"
 				style={{ margin: "0px" }}
-				onClick={() => login("2410321409", "Spinach114514!")}
+				onClick={() => login()}
 			>
 				登录
 			</Button>
