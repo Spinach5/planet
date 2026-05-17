@@ -3,7 +3,6 @@ import { View, Text, Input, Button, Picker, Image } from "@tarojs/components";
 import "./index.css";
 import HeadStatus from "../../../components/headStatus";
 import SafeAreaView from "../../../components/safeView";
-import img from "../../../assets/微信.png";
 import Taro from "@tarojs/taro";
 import { checkStuID } from "../../../utils/checkStuID";
 import { login } from "../../../service/hubt/login";
@@ -65,15 +64,14 @@ export default function Index() {
 		value = value.replace(/\s/g, "");
 		setPassword(value);
 	};
-
+{/* <View class="fa fa-arrow-left" style="font-size:48px; color:#F00"></View> */}
 	return (
 		<SafeAreaView>
 			<View className="login-container">
 				<View
-					className="back-btn"
+					className="fa fa-arrow-left back-btn"
 					onClick={() => Taro.switchTab({ url: "/pages/user/index" })}
 				>
-					<Text className="back-icon">←</Text>
 				</View>
 				<HeadStatus text="登录" />
 

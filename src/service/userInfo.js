@@ -1,7 +1,7 @@
 // src/utils/userManager.js
 import Taro from "@tarojs/taro";
 import cacheManager from "./cache";
-import { getSchoolService } from "./schoolService";
+import { cleanH5Cookies } from "../utils/cleanH5Cookies";
 
 class UserManager {
 	constructor() {
@@ -71,7 +71,6 @@ class UserManager {
 			university: this.university,
 			realName: this.realName,
 			stuId: this.stuId,
-			password: this.password,
 			year: this.year,
 			majority: this.majority,
 			field: this.field,
@@ -114,12 +113,6 @@ class UserManager {
 		console.log("无有效用户缓存");
 		return false;
 	}
-	login(stuID, password) {
-		if (this.isLoggedIn) {
-			console.log("用户已登录");
-			return;
-		}
-	}
 
 	// 注销，清空所有状态
 	logout() {
@@ -134,7 +127,11 @@ class UserManager {
 
 		// 清除缓存
 		cacheManager.remove(this.cacheKey);
-
+		cacheManager.clear();
+		Taro.clearStorage();
+		if (process.env.TARO_ENV === "h5") {
+			cleanH5Cookies();
+		}
 		console.log("用户已注销，所有信息已清空");
 	}
 

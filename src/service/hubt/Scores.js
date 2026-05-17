@@ -6,10 +6,10 @@ import { getXhid } from './GetXhid';  // 需要获取 xhid
 
 const CACHE_KEY = "ScoresData";  // 定义缓存key
 
-export async function getScores() {
+export async function getScores(forceRefresh = false) {
   // 1. 优先从缓存获取
   const cached = cacheManager.get(CACHE_KEY);
-  if (cached) {
+  if (cached && !forceRefresh) {
     console.log("[getScores] 从缓存获取成绩数据");
     return cached;
   }
@@ -27,7 +27,6 @@ export async function getScores() {
     // 获取 xhid（参考 URL 中的 xhid 参数）
     const xhid = await getXhid();
 
-    // 注意：原 URL 中还有 fasz=1 参数，一并加上
     const response = await hbutRequest.get(
       `/admin/xsd/xskp/xyqk?xhid=${xhid}`,
       loginConfig
@@ -66,11 +65,19 @@ export async function getScores() {
       throw new Error("获取成绩数据失败：响应数据格式异常");
     }
 
+	const extractData ={
+		"gpa": scoresData.gpa,
+		"averageScore": scoresData.pjcj,
+		"notPass":scoresData.bjgms,
+		"gpaRank":scoresData.gpazypm,
+		"gottenCredits":scoresData.hdzxf,
+		"chosenClass":scoresData.yxkms
+	}
     // 3. 存入缓存（永不过期）
-    cacheManager.set(CACHE_KEY, scoresData);
+    cacheManager.set(CACHE_KEY, extractData);
     console.log("[getScores] 已缓存成绩数据");
 
-    return scoresData;
+    return extractData;
 
   } catch (error) {
     // 如果错误已经是 Error 对象，直接抛出；否则包装一下

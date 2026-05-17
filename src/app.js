@@ -1,5 +1,6 @@
 import { useLaunch } from "@tarojs/taro";
 import "./app.css";
+import "./static/css/font-awesome.css"
 
 function App({ children }) {
 	useLaunch(async () => {

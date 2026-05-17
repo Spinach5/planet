@@ -1,45 +1,72 @@
-//https://jwxt.hbut.edu.cn/admin/cjgl/xscjbbdy/getXscjpm?xh=2410321409&sznj=2024&xnxq=2025-2026-2
-//get 返回的是html
-//学号+所在年级
-//绩点部分
-{/* <table class="table table-bordered table-condensed dataTables-example dataTable no-footer stu-table">
-            <tbody>
-                <tr>
-                    <td title="曾秦伟">姓名：曾秦伟</td>
-                    <td title="2410321409">学号：2410321409</td>
-                    <td title="2024">年级：2024</td>
-                </tr>
-                <tr>
-                    <td title="计算机科学与人工智能学院">学院：计算机科学与人工智能学院</td>
-                    <td title="软件工程">专业：软件工程</td>
-                    <td title="24软件4">班级：24软件4</td>
-                </tr>
-                <tr>
-                    <td title="    1.1158">平均学分绩点：    1.1158</td>
-                    <td title="59.67">算术平均分：59.67</td>
-                    <td title=""></td>
-                </tr>
-            </tbody>
-        </table> */}
-//排名部分
-{/* <tbody>
-                <!-- <tr style="height:18px;">
-                    <td colspan="4" class="report1_4"></td>
-                </tr> -->
+import { hbutRequest } from "../../utils/request";
+import cacheManager from "../../utils/cache";
+import { extractRanks } from "../../utils/hbut/acadamicHelper";
 
-                <tr>
-                    <td>平均学分绩点</td>
+const CACHE_KEY = "CreditsData";  // 定义缓存key
 
-                    <td title="144/213">144/213</td>
-                    <td title="29/49">29/49</td>
-                    <td title="6/9">6/9</td>
-                </tr>
-                <tr>
-                    <td>算术平均分</td>
+export async function getCredits() {
+  // 1. 优先从缓存获取
+  const cached = cacheManager.get(CACHE_KEY);
+  if (cached) {
+	console.log("[getCredits] 从缓存获取成绩数据");
+	return cached;
+  }
 
-                    <td title="152/213">152/213</td>
-                    <td title="30/49">30/49</td>
-                    <td title="4/9">4/9</td>
-                </tr>
-            </tbody>
-        </table> */}
+  const loginConfig = {
+	headers: {
+	  "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+	  Referer: "https://jwxt.hbut.edu.cn",
+	  Origin: "https://jwxt.hbut.edu.cn",
+	},
+	withCredentials: true,
+	dataType: 'text',      // 期望返回 HTML
+  };
+
+  try {
+	// 获取 xhid（参考 URL 中的 xhid 参数）
+
+	const response = await hbutRequest.get(
+	  `admin/cjgl/xscjbbdy/getXscjpm?xh=2410321409&sznj=2024&xnxq=2025-2026-2`,
+	  loginConfig
+	);
+
+	// 检查 HTTP 状态码
+	if (response.status !== 200) {
+	  console.log("[getCredits] 网络请求失败, status:", response.status);
+	  throw new Error("获取成绩数据失败：网络请求失败");
+	}
+
+	// 检查登录失效
+	if (response.status === 300) {
+	  console.log("[getCredits] 登录失效，请重新登录");
+	  throw new Error("获取成绩数据失败：登录失效，请重新登录");
+	}
+
+	if (typeof response.data !== 'string') {
+	  console.log("[getCredits] 响应数据格式异常");
+	  throw new Error("获取成绩数据失败：响应数据格式异常");
+	}
+
+	const scoresData = extractRanks(response.data);
+
+	// 验证数据有效性
+	if (!scoresData) {
+	  console.log("[getCredits] 响应数据中无 data 字段");
+	  throw new Error("获取成绩数据失败：响应数据中无成绩数据");
+	}
+
+
+	// 3. 存入缓存（永不过期）
+	cacheManager.set(CACHE_KEY, scoresData);
+	console.log("[getCredits] 已缓存成绩数据");
+
+	return scoresData;
+
+  } catch (error) {
+	// 如果错误已经是 Error 对象，直接抛出；否则包装一下
+	if (error instanceof Error) {
+	  throw error;
+	}
+	throw new Error("获取成绩数据失败：" + error);
+  }
+}

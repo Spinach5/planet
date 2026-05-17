@@ -1,7 +1,7 @@
 import "./index.css";
 import SafeAreaView from "../../components/safeView";
 import Taro from "@tarojs/taro";
-import { Button, Icon } from "@tarojs/components";
+import { Button, Icon ,View} from "@tarojs/components";
 import { login } from "../../service/hubt/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
@@ -14,9 +14,7 @@ import { getExamInfo } from "../../service/hubt/ExamInfo";
 import { getScores } from "../../service/hubt/Scores";
 import { getTimeTable } from "../../service/hubt/GetTimeTable";
 import { getStuInfo } from "../../service/hubt/StuInfo";
-import { cleanH5Cookies } from "../../utils/hbut/cleanH5Cookies";
-import printf from "../../utils/hbut/getscore";
-
+import { cleanH5Cookies } from "../../utils/cleanH5Cookies";
 
 export default function Index() {
 	return (
@@ -41,13 +39,6 @@ export default function Index() {
 				onClick={async () => console.log(await getTimeTable())}
 			>
 				获取课表时间
-			</Button>
-			<Button
-				type="info"
-				style={{ margin: "0px" }}
-				onClick={() => printf()}
-			>
-				打印个人信息
 			</Button>
 			<Button
 				type="info"
@@ -159,18 +150,7 @@ export default function Index() {
 			>
 				清除H5cookies
 			</Button>
-			{/* <Icon size="60" type="success" />
-			<Icon size="60" type="info" />
-			<Icon size="60" type="warn" color="#ccc" />
-			<Icon size="60" type="warn" />
-			<Icon size="60" type="waiting" />
-			<Icon size="20" type="success_no_circle" />
-			<Icon size="20" type="warn" />
-			<Icon size="20" type="success" />
-			<Icon size="20" type="download" />
-			<Icon size="20" type="clear" color="red" />
-			<Icon size="20" type="search" />
-			<Icon size="20" type="cancel" /> */}
+			<View class="fa fa-arrow-left" style="font-size:48px; color:#F00"></View>
 		</SafeAreaView>
 	);
 }

@@ -1,14 +1,6 @@
-/* .login-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-  padding: 60px 40px 40px;
-  display: flex;
-  flex-direction: column;
-} */
-/* 左上角退出按钮 */
 .back-btn {
   top: 20px;
-  left: 20px;
+  left: 0px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -17,9 +9,6 @@
   padding: 12px 20px;
   border-radius: 40px;
   box-shadow: none;
-}
-
-.back-icon {
   font-size: 50px;
   color: white;
   font-weight: bolder;
