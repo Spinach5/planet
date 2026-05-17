@@ -1,6 +1,6 @@
 // src/utils/userManager.js
 import Taro from "@tarojs/taro";
-import cacheManager from "./cache";
+import cacheManager from "../utils/cache";
 import { cleanH5Cookies } from "../utils/cleanH5Cookies";
 
 class UserManager {

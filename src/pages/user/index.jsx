@@ -13,7 +13,6 @@ export default function Index() {
   const [username, setUsername] = useState('');
   const [is_show_raw_uname, setIsShowRawUname] = useState(false);
   const [is_loggedin_xxt, setIsLoggedinXxt] = useState(false);
-  const [showModal, setShowModal] = useState(false);
 
   // 获取登录状态的函数
   const loadUserInfo = () => {
@@ -135,17 +134,6 @@ export default function Index() {
         </View>
       )}
       
-      <View className='copyleft'>
-        <Text>copyleft</Text>
-      </View>
-
-      {showModal && (
-        <View className='modal-overlay' onClick={() => setShowModal(false)}>
-          <View className='modal-content' onClick={(e) => e.stopPropagation()}>
-            <Image src='../../image/qrcode_1777289986212.jpg' mode='widthFix' className='modal-image'></Image>
-          </View>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
