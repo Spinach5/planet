@@ -10,5 +10,5 @@ import "./index.css";
 import SafeAreaView from "../../../components/safeView";
 
 export default function Index() {
-	return <SafeAreaView className="page"></SafeAreaView>;
+	return <SafeAreaView ></SafeAreaView>;
 }

@@ -4,27 +4,26 @@ import SafeAreaView from "../../components/safeView";
 import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";
 import GridContainer from "../../components/gridContainer";
-import { useLoad ,useLaunch, useDidShow, useDidHide} from "@tarojs/taro";
+import { useLoad, useLaunch, useDidShow, useDidHide, useRouter} from "@tarojs/taro";
 import { getStuInfo } from "../../service/hubt/StuInfo";
 
-
 export default function Index() {
-  // 页面加载时执行
-  useLoad(() => {
+	const router = useRouter();
+	const currentPath = router.path.split('?')[0];
+	// 页面加载时执行
+	useLoad(() => {});
 
-  });
+	// 页面显示时执行（每次切换到前台都会执行）
+	useDidShow(() => {
+		console.log("页面已显示");
+	});
 
-  // 页面显示时执行（每次切换到前台都会执行）
-  useDidShow(() => {
-    console.log("页面已显示");
-  });
-
-  // 页面隐藏时执行（切换到后台）
-  useDidHide(() => {
-    console.log("页面已隐藏");
-  });
+	// 页面隐藏时执行（切换到后台）
+	useDidHide(() => {
+		console.log("页面已隐藏");
+	});
 	return (
-		<SafeAreaView className="">
+		<SafeAreaView currentPath={currentPath} >
 			<HeadStatus text="首页" />
 			{/* 轮播图组件 */}
 			<IndexSwiper />

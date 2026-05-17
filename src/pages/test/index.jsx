@@ -1,7 +1,7 @@
 import "./index.css";
 import SafeAreaView from "../../components/safeView";
-import Taro from "@tarojs/taro";
-import { Button, Icon ,View} from "@tarojs/components";
+import Taro, { useRouter } from "@tarojs/taro";
+import { Button, Icon, View, Text } from "@tarojs/components";
 import { login } from "../../service/hubt/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
@@ -17,8 +17,10 @@ import { getStuInfo } from "../../service/hubt/StuInfo";
 import { cleanH5Cookies } from "../../utils/cleanH5Cookies";
 
 export default function Index() {
+	const router = useRouter();
+	const currentPath = router.path.split('?')[0];
 	return (
-		<SafeAreaView className="">
+		<SafeAreaView currentPath={currentPath}>
 			<Button
 				type="info"
 				style={{ margin: "0px" }}
@@ -150,7 +152,10 @@ export default function Index() {
 			>
 				清除H5cookies
 			</Button>
-			<View class="fa fa-arrow-left" style="font-size:48px; color:#F00"></View>
+			<Text
+				class="fa fa-arrow-left"
+				style="font-size:48px; color:#F00"
+			></Text>
 		</SafeAreaView>
 	);
 }
