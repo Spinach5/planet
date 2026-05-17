@@ -11,6 +11,9 @@ const TAB_LIST = [
 ]
 
 export default function TabBar({ currentPath }) {
+	if(!currentPath){//判断是否有传入currentPath
+		return null
+	}
   // 根据外部传入的 currentPath 计算高亮索引
   const selectedIndex = TAB_LIST.findIndex(item => item.pagePath === currentPath)
 

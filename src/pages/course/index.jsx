@@ -13,8 +13,6 @@ import { getAllSchedule } from "../../service/hubt/AllSchedule";
 import { getTimeTable } from "../../service/hubt/GetTimeTable";
 import { getColorFromName } from "../../utils/getHashCode";
 import "./index.css";
-import { isLoggedIn } from "../../service/userInfo";
-import { useDidShow } from "@tarojs/taro";
 
 export default function Index() {
 	const router = useRouter();
