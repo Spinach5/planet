@@ -71,3 +71,12 @@
   justify-content: center;
   z-index: 1003;
 }
+
+.gobacktoday {
+  background-color: #11b7f4;
+  position: fixed;
+  right: 0;
+  top: 60%;
+  z-index: 1;
+  border-radius: 6px 0 0 6px;
+}

@@ -30,7 +30,8 @@
     "dev:rn": "npm run build:rn -- --watch",
     "dev:qq": "npm run build:qq -- --watch",
     "dev:jd": "npm run build:jd -- --watch",
-    "dev:harmony-hybrid": "npm run build:harmony-hybrid -- --watch"
+    "dev:harmony-hybrid": "npm run build:harmony-hybrid -- --watch",
+    "dev:zx": "taro build --type h5 --watch"
   },
   "browserslist": {
     "development": [
@@ -64,6 +65,7 @@
     "axios": "^1.16.1",
     "axios-taro-adapter": "^0.0.3",
     "jsencrypt": "^3.5.4",
+    "npx": "^10.2.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "taro-axios-adapter": "^0.0.3",

@@ -74,6 +74,7 @@ export default function Index() {
 	const [semesterList, setSemesterList] = useState([]);
 	const [currentSemester, setCurrentSemester] = useState(null);
 	const [currentWeek, setCurrentWeek] = useState(null);
+  const [actualWeek, setActualWeek] = useState(null);
 	const [weekList, setWeekList] = useState([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [timeTable, setTimeTable] = useState([]);
