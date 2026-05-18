@@ -62,11 +62,20 @@ export async function getStuInfo() {
 	  throw new Error("获取成绩数据失败：响应数据格式异常");
 	}
 
+	const cleanInfo = {
+		university:"hbut",
+		realName:stuInfo.xm,
+		stuId:stuInfo.xh,
+		grade:stuInfo.sznj,
+		majority:stuInfo.zymc,
+		class:stuInfo.bjmc,
+		college:stuInfo.skyx,
+	}
 	// 3. 存入缓存（永不过期）
-	cacheManager.set(CACHE_KEY, stuInfo);
+	cacheManager.set(CACHE_KEY, cleanInfo);
 	console.log("[getStuInfo] 已缓存成绩数据");
 
-	return stuInfo;
+	return cleanInfo;
 
   } catch (error) {
 	// 如果错误已经是 Error 对象，直接抛出；否则包装一下

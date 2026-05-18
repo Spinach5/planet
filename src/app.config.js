@@ -24,26 +24,18 @@ export default defineAppConfig({
 			{
 				pagePath: "pages/index/index",
 				text: "首页",
-				iconPath: "",
-				selectedIconPath: "",
 			},
 			{
 				pagePath: "pages/course/index",
 				text: "课程",
-				iconPath: "",
-				selectedIconPath: "",
 			},
 			{
 				pagePath: "pages/test/index",
 				text: "测试",
-				iconPath: "",
-				selectedIconPath: "",
 			},
 			{
 				pagePath: "pages/user/index",
 				text: "我的",
-				iconPath: "",
-				selectedIconPath: "",
 			},
 
 		]

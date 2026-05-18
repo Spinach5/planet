@@ -1,139 +1,110 @@
-import { useState, useEffect } from 'react';
-import { View, Image, Text } from '@tarojs/components';
-import Taro ,{useRouter}from '@tarojs/taro';
-import HeadStatus from '../../components/headStatus'
-import SafeAreaView from '../../components/safeView';
-import './index.css';
-import {logout} from '../../service/userInfo';
-
+import { useState, useEffect } from "react";
+import { View, Text } from "@tarojs/components";
+import Taro, { useDidShow, useRouter } from "@tarojs/taro";
+import HeadStatus from "../../components/headStatus";
+import SafeAreaView from "../../components/safeView";
+import userManager from "../../service/userInfo";
+import "./index.css";
 
 export default function Index() {
-	const router = useRouter();
-	const currentPath = router.path.split('?')[0];
-	// 补充缺失的状态定义，实际项目中请根据业务逻辑完善初始值和 setter
-	const [nickname, setNickname] = useState("");
-	const [raw_username, setRawUsername] = useState("");
-	const [username, setUsername] = useState("");
-	const [is_show_raw_uname, setIsShowRawUname] = useState(false);
-	const [xxt_last_login_time, setXxtLastLoginTime] = useState("");
-	const [xxt_last_get_data_time, setXxtLastGetDataTime] = useState("");
-	const [is_loggedin_xxt, setIsLoggedinXxt] = useState(false);
-	const [showModal, setShowModal] = useState(false);
+  const router = useRouter();
+  const currentPath = router.path.split("?")[0];
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // 获取登录状态的函数
+  // 加载用户信息（登录状态从 userManager 获取）
   const loadUserInfo = () => {
-    console.log('加载用户信息');
-    console.log('是否登录:', is_loggedin_xxt);
-
-    if (is_loggedin_xxt) {
-      setIsLoggedinXxt(true);
-      const userInfo = Taro.getStorageSync('userInfo');
-      if (userInfo) {
-        setNickname(userInfo.nickname || '');
-        setRawUsername(userInfo.raw_username || '');
-        setUsername(userInfo.username || '');
-      }
-    } else {
-      setIsLoggedinXxt(false);
-      setNickname('');
-      setRawUsername('');
-      setUsername('');
+    try {
+      const info = userManager.getUserInfoSync();
+	  console.log(info)
+      setUserInfo(info); // info 为 null 表示未登录
+    } catch (error) {
+      console.error("获取用户信息失败", error);
+      setUserInfo(null);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // 每次页面显示时都重新加载
+  // 页面首次加载和每次显示时重新获取用户信息
   useEffect(() => {
     loadUserInfo();
   }, []);
 
-  // 监听路由参数变化
-  useEffect(() => {
-    const handleRouteChange = () => {
-      loadUserInfo();
-    };
-
-    // 监听页面显示
-    Taro.eventCenter.on('__taroRouterChange', handleRouteChange);
-
-    return () => {
-      Taro.eventCenter.off('__taroRouterChange', handleRouteChange);
-    };
-  }, []);
-
-  const switch_is_show_raw_uname = () => setIsShowRawUname(!is_show_raw_uname);
+  useDidShow(() => {
+    // 从其他页面返回时刷新登录状态
+    loadUserInfo();
+  });
 
   const handleLogin = () => {
     Taro.navigateTo({
-      url: '/modules/pages/login/index'
+      url: "/modules/pages/login/index",
     });
   };
 
   const handleLogout = () => {
     Taro.showModal({
-      title: '提示',
-      content: '确定要退出登录吗？',
+      title: "提示",
+      content: "确定要退出登录吗？",
       success: (res) => {
         if (res.confirm) {
-          Taro.removeStorageSync('is_loggedin_xxt');
-          Taro.removeStorageSync('userInfo');
-          setIsLoggedinXxt(false);
-          setNickname('');
-          setRawUsername('');
-          setUsername('');
-		  logout();
+          userManager.logout();
+          setUserInfo(null); // 清空本地状态
           Taro.showToast({
-            title: '已退出登录',
-            icon: 'success'
+            title: "已退出登录",
+            icon: "success",
           });
-
         }
-      }
+      },
     });
   };
 
-	return (
-		<SafeAreaView currentPath={currentPath}>
-			<HeadStatus text="我的"></HeadStatus>
-			<View className="bora card item user">
-				<View className="nick-name">
-					{nickname ? nickname : "昵称"}
-				</View>
+  if (loading) {
+    return (
+      <SafeAreaView currentPath={currentPath}>
+        <View className="loading-wrapper">加载中...</View>
+      </SafeAreaView>
+    );
+  }
 
-        <View className='user-name' onClick={switch_is_show_raw_uname}>
-          {is_loggedin_xxt ? (
-            raw_username && is_show_raw_uname ? raw_username : (username || '账号')
-          ) : (
-            '未登录'
-          )}
-        </View>
+  const isLoggedIn = userManager.checkLogin();
+  const username = userInfo?.realName || "昵称";
+  const stuId = userInfo?.stuId || "未登录";
+
+  return (
+    <SafeAreaView currentPath={currentPath}>
+      <HeadStatus text="我的" />
+      <View className="bora card item user">
+        <View className="nick-name">{username}</View>
+        <View className="user-name">{stuId}</View>
       </View>
 
-      <View className='container'>
-        <View className='bora card list'>
-          <View className='item' onClick={() => {}}>
+      <View className="container">
+        <View className="bora card list">
+          <View className="item" onClick={() => {}}>
             <Text>设置</Text>
           </View>
-          <View className='item' onClick={() => {}}>
+          <View className="item" onClick={() => {}}>
             <Text>常见问题</Text>
           </View>
-          <View className='item' onClick={() => {}}>
+          <View className="item" onClick={() => {}}>
             <Text>关于我们</Text>
           </View>
-          <View className='item' onClick={() => {}}>
+          <View className="item" onClick={() => {}}>
             <Text>反馈与建议</Text>
           </View>
-          <View className='item' onClick={() => {}}>
+          <View className="item" onClick={() => {}}>
             <Text>分享小程序</Text>
           </View>
         </View>
       </View>
 
-      {!is_loggedin_xxt ? (
-        <View className='bora login-btn highlight-btn' onClick={handleLogin}>
+      {!isLoggedIn ? (
+        <View className="bora login-btn highlight-btn" onClick={handleLogin}>
           <Text>立即登录</Text>
         </View>
       ) : (
-        <View className='bora logout-btn' onClick={handleLogout}>
+        <View className="bora logout-btn" onClick={handleLogout}>
           <Text>退出登录</Text>
         </View>
       )}

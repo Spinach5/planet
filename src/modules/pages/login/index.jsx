@@ -6,6 +6,7 @@ import SafeAreaView from "../../../components/safeView";
 import Taro from "@tarojs/taro";
 import { checkStuID } from "../../../utils/checkStuID";
 import { login } from "../../../service/hubt/login";
+import userManager from "../../../service/userInfo";
 
 export default function Index() {
 	const [university, setUniversity] = useState("湖北工业大学");
@@ -45,17 +46,12 @@ export default function Index() {
 			Taro.showLoading({ title: "登录中..." });
 
 			// 调用登录接口
+			console.log("login", studentId, password);
 			const res = await login(studentId, password);
-
-			// 保存登录状态和用户信息
-			Taro.setStorageSync("is_loggedin_xxt", true);
-			Taro.setStorageSync("userInfo", {
-				raw_username: studentId,
-				username: studentId,
-				nickname: `用户${studentId.slice(-4)}`,
-			});
-
 			Taro.hideLoading();
+			if (!res) {
+				return;
+			}
 			Taro.showToast({
 				title: "登录成功",
 				icon: "success",
@@ -90,15 +86,16 @@ export default function Index() {
 		value = value.replace(/\s/g, "");
 		setPassword(value);
 	};
-{/* <View class="fa fa-arrow-left" style="font-size:48px; color:#F00"></View> */}
+	{
+		/* <View class="fa fa-arrow-left" style="font-size:48px; color:#F00"></View> */
+	}
 	return (
 		<SafeAreaView>
 			<View className="login-container">
 				<View
 					className="fa fa-arrow-left back-btn"
 					onClick={() => Taro.switchTab({ url: "/pages/user/index" })}
-				>
-				</View>
+				></View>
 				<HeadStatus text="登录" />
 
 				<View className="header">

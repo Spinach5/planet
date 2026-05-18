@@ -10,9 +10,10 @@ class UserManager {
 		this.realName = "帅哥"; // 真实姓名
 		this.stuId = ""; // 学号
 		this.password = ""; // 密码
-		this.year = 0; // 入学年份
+		this.grade = 0; // 入学年份
 		this.majority = ""; // 专业
-		this.field = ""; // 学院
+		this.class = ""; // 班级
+		this.college = ""; // 学院
 
 		this.isLoggedIn = false; // 登录状态
 		this.cacheKey = "userInfo"; // 缓存 key
@@ -26,9 +27,10 @@ class UserManager {
 			realName: this.realName,
 			stuId: this.stuId,
 			password: this.password,
-			year: this.year,
+			grade: this.grade,
 			majority: this.majority,
-			field: this.field,
+			class: this.class,
+			college: this.college,
 			isLoggedIn: this.isLoggedIn,
 		};
 		cacheManager.set(this.cacheKey, userData, null);
@@ -59,9 +61,10 @@ class UserManager {
 		this.realName = values.realName || "帅哥";
 		this.stuId = values.stuId || "";
 		this.password = values.password || "";
-		this.year = values.year || 0;
+		this.grade = values.grade || 0;
 		this.majority = values.majority || "";
-		this.field = values.field || "";
+		this.class = values.class || "";
+		this.college = values.college || "";
 		this.isLoggedIn = values.isLoggedIn || false;
 	}
 
@@ -71,9 +74,10 @@ class UserManager {
 			university: this.university,
 			realName: this.realName,
 			stuId: this.stuId,
-			year: this.year,
+			grade: this.grade,
 			majority: this.majority,
-			field: this.field,
+			college: this.college,
+			class: this.class,
 			isLoggedIn: this.isLoggedIn,
 		};
 	}
@@ -119,10 +123,12 @@ class UserManager {
 		this.university = "hbut";
 		this.realName = "帅哥";
 		this.stuId = "";
-		this.year = 0;
+		this.grade = 0;
 		this.majority = "";
-		this.field = "";
+		this.college = "";
 		this.isLoggedIn = false;
+		this.password = "";
+		this.class = "";
 		this._syncCache = null;
 
 		// 清除缓存
@@ -145,9 +151,9 @@ class UserManager {
 		return this.university;
 	}
 
-	// 获取学号
-	getStuId() {
-		return this.stuId;
+	// 获取学号和密码
+	getAccount() {
+		return { stuId: this.stuId, password: this.password };
 	}
 }
 
@@ -161,5 +167,4 @@ export default userManager;
 export const getUserInfo = () => userManager.getUserInfoSync();
 export const setUserField = (key, value) => userManager.setField(key, value);
 export const setUserFields = (fields) => userManager.setFields(fields);
-export const logout = () => userManager.logout();
 export const isLoggedIn = () => userManager.checkLogin();

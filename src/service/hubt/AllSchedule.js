@@ -3,13 +3,13 @@ import cacheManager from "../../utils/cache";
 import { hbutRequest } from "../../utils/request";
 import { getXhid } from "./GetXhid";
 import { extractCourseData } from "../../utils/hbut/courseHelper";
-import { getCurrentSemester } from "./CurrentSemester";
 
 const CACHE_KEY = "All_COURSE_"; // 定义缓存key
 
-export async function getAllSchedule(forceRefresh = false) {
+export async function getAllSchedule(forceRefresh = false,semester) {
 	// 1. 优先从缓存获取（和第一段一致）
-	const cached = cacheManager.get(CACHE_KEY );
+	console.log(`[getCurrentWeek] semester:${semester}`);
+	const cached = cacheManager.get(CACHE_KEY+semester);
 	if (cached && !forceRefresh) {
 		console.log("[getCurrentWeek] 从缓存获取课表");
 		return cached;
@@ -27,7 +27,6 @@ export async function getAllSchedule(forceRefresh = false) {
 
 	try {
 		const xhid = await getXhid();
-		const semester = await getCurrentSemester();
 		const response = await hbutRequest.get(
 			`admin/pkgl/xskb/sdpkkbList?xnxq=${semester}&xhid=${xhid}`,
 			loginConfig,
@@ -58,7 +57,7 @@ export async function getAllSchedule(forceRefresh = false) {
 		console.log(courseData);
 		// 3. 存入缓存（永不过期，和第一段一致）
 		cacheManager.set(CACHE_KEY + semester, courseData);
-		console.log("[getCurrentWeek] 已缓存课表数据");
+		console.log(`[getCurrentWeek] 已缓存${semester}课表数据`);
 
 		return courseData;
 	} catch (error) {
