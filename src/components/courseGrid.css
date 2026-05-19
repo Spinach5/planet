@@ -1,6 +1,6 @@
 .course-grid-container {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   width: 100%;
   grid-auto-rows: 150px;
 }

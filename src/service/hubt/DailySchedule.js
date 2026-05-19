@@ -1,6 +1,7 @@
 // 获取每日作息
 import { hbutRequest } from "../../utils/request";
 import cacheManager from "../../utils/cache";
+import { AutoRetry } from "./autoRetry";
 
 // 注意：因为每天的时间参数不同，缓存key需要包含日期参数
 const getCacheKey = (time) => `DailySchedule_${time}`;
@@ -13,8 +14,8 @@ export async function getDailySchedule(time) {
     console.log(`[getDailySchedule] 从缓存获取作息数据，时间: ${time}`);
     return cached;
   }
-
-  const loginConfig = {
+  const fetchDailySchedule = async ()=>{
+	  const loginConfig = {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
       Referer: "https://jwxt.hbut.edu.cn",
@@ -23,12 +24,15 @@ export async function getDailySchedule(time) {
     withCredentials: true,
   };
 
-  try {
     const response = await hbutRequest.get(
       `/admin/getDayBz?rq=${time}`,
       loginConfig
     );
+	return response;
+  }
 
+  try{
+	const response = await AutoRetry(fetchDailySchedule, {maxRetry:1})
     // 检查 HTTP 状态码
     if (response.status !== 200) {
       console.log("[getDailySchedule] 网络请求失败, status:", response.status);

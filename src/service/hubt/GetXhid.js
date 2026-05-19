@@ -1,6 +1,7 @@
 // src/service/hubt/getXhid.js
 import cacheManager from "../../utils/cache";
 import { hbutRequest } from "../../utils/request";
+import { AutoRetry } from "./autoRetry";
 
 const CACHE_KEY = "xhid";
 
@@ -12,18 +13,23 @@ export async function getXhid() {
 	}
 
 	// 2. 缓存未命中，发起请求
-	const loginConfig = {
-		headers: {
-			"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-			Referer: "https://jwxt.hbut.edu.cn",
-			Origin: "https://jwxt.hbut.edu.cn",
-		},
-		withCredentials: true,
+	const fetchXhid = async () => {
+		const loginConfig = {
+			headers: {
+				"Content-Type":
+					"application/x-www-form-urlencoded; charset=UTF-8",
+				Referer: "https://jwxt.hbut.edu.cn",
+				Origin: "https://jwxt.hbut.edu.cn",
+			},
+			withCredentials: true,
+		};
+		const response = await hbutRequest.get(
+			"/admin/xsd/xyjc/getXsjbxx",
+			loginConfig,
+		);
+		return response;
 	};
-	const response = await hbutRequest.get(
-		"/admin/xsd/xyjc/getXsjbxx",
-		loginConfig,
-	);
+	const response = await AutoRetry(fetchXhid, { maxRetry: 1 });
 	if (response.status !== 200) {
 		console.log("[getXhid] 网络请求失败");
 		throw new Error("获取 xhid 失败：网络请求失败");
