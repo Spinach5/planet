@@ -74,7 +74,7 @@ export default function Index() {
 	const [semesterList, setSemesterList] = useState([]);
 	const [currentSemester, setCurrentSemester] = useState(null);
 	const [currentWeek, setCurrentWeek] = useState(null);
-  const [actualWeek, setActualWeek] = useState(null);
+	const [actualWeek, setActualWeek] = useState(null);
 	const [weekList, setWeekList] = useState([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [timeTable, setTimeTable] = useState([]);
@@ -458,6 +458,7 @@ export default function Index() {
 			</View>
 		);
 	}
+	const swiperHeight = timeTable.length * 150; // 单位 px
 	return (
 		<SafeAreaView currentPath={currentPath}>
 			<CourseHeader
@@ -469,12 +470,20 @@ export default function Index() {
 				onAddCourse={() => setAddModalVisible(true)}
 			/>
 			<WeekHeader currentWeek={currentWeek} />
-			<ScrollView scrollY className="outer-scroll">
+			<ScrollView
+				scrollY
+				className="outer-scroll"
+				showScrollbar={false}
+				enhanced
+				bounces={false}
+			>
 				<View className="schedule-row">
-					<View className="time-col-fixed">
-						<TimeColumn timeTable={timeTable} />
-					</View>
-					<View className="swiper-col">
+					<TimeColumn timeTable={timeTable} />
+
+					<View
+						className="swiper-col"
+						style={{ height: `${swiperHeight}rpx` }}
+					>
 						<Swiper
 							current={currentIndex}
 							onChange={onSwiperChange}

@@ -8,3 +8,6 @@ page {
   height: 0;
   color: transparent;
 }
+:root {
+  --row-height: 150px;   /* 全局行高 */
+}
