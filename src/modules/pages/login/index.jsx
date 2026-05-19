@@ -5,7 +5,7 @@ import HeadStatus from "../../../components/headStatus";
 import SafeAreaView from "../../../components/safeView";
 import Taro from "@tarojs/taro";
 import { checkStuID } from "../../../utils/checkStuID";
-import { login } from "../../../service/hubt/login";
+import { login } from "../../../service/login";
 import userManager from "../../../service/userInfo";
 
 export default function Index() {
@@ -16,7 +16,7 @@ export default function Index() {
 	const [showPassword, setShowPassword] = useState(false);
 	const [studentIdError, setStudentIdError] = useState(false);
 
-	const universityList = ["湖北工业大学", "其他大学"];
+	const universityList = ["湖北工业大学"];
 
 	const handleLogin = async () => {
 		// 学号验证
@@ -47,7 +47,7 @@ export default function Index() {
 
 			// 调用登录接口
 			console.log("login", studentId, password);
-			const res = await login(studentId, password);
+			const res = await login(studentId, password,university);
 			Taro.hideLoading();
 			if (!res) {
 				return;

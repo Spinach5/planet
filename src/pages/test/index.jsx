@@ -2,7 +2,7 @@ import "./index.css";
 import SafeAreaView from "../../components/safeView";
 import Taro, { useRouter } from "@tarojs/taro";
 import { Button, Icon, View, Text } from "@tarojs/components";
-import { login } from "../../service/hubt/login";
+import { login } from "../../service/login";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getExtroInfo } from "../../service/hubt/ExtroInfo";
 import { getDailySchedule } from "../../service/hubt/DailySchedule";
