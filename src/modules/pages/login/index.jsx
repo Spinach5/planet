@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { View, Text, Input, Button, Picker, Image } from "@tarojs/components";
+import { View, Text, Input, Button, Picker } from "@tarojs/components";
 import "./index.css";
 import HeadStatus from "../../../components/headStatus";
 import SafeAreaView from "../../../components/safeView";
 import Taro from "@tarojs/taro";
 import { checkStuID } from "../../../utils/checkStuID";
 import { login } from "../../../service/login";
-import userManager from "../../../service/userInfo";
+import { AtIcon } from "taro-ui";
 
 export default function Index() {
 	const [university, setUniversity] = useState("湖北工业大学");
@@ -47,7 +47,7 @@ export default function Index() {
 
 			// 调用登录接口
 			console.log("login", studentId, password);
-			const res = await login(studentId, password,university);
+			const res = await login(studentId, password, university);
 			Taro.hideLoading();
 			if (!res) {
 				return;
@@ -89,10 +89,11 @@ export default function Index() {
 	return (
 		<SafeAreaView>
 			<View className="login-container">
-				<View
-					className="fa fa-arrow-left back-btn"
+				<AtIcon
+					value="arrow-left"
+					color="#ffffff"
 					onClick={() => Taro.switchTab({ url: "/pages/user/index" })}
-				></View>
+				/>
 				<HeadStatus text="登录" />
 
 				<View className="header">
@@ -154,7 +155,11 @@ export default function Index() {
 								className="password-toggle"
 								onClick={() => setShowPassword(!showPassword)}
 							>
-								{showPassword ? <View className="fa fa-eye" style={{color:"#1a2c3e"}} /> : <View className="fa fa-eye-slash" style={{color:"#1a2c3e"}}/>}
+								{showPassword ? (
+									<AtIcon value="volume-plus" color="#1a2c3e" />
+								) : (
+									<AtIcon value="volume-off" color="#1a2c3e" />
+								)}
 							</Text>
 						</View>
 					</View>

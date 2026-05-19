@@ -4,18 +4,6 @@ import "./courseWeek.css";
 import { getCurrentWeek } from "../service/hubt/CurrentWeek";
 
 /**
- * 根据基准周一日期和目标周数偏移计算目标周一的日期
- * @param {Date} baseMonday 基准周一（今天的周一）
- * @param {number} diffWeeks 目标周数 - 实际周数
- * @returns {Date}
- */
-const getTargetMonday = (baseMonday, diffWeeks) => {
-	const target = new Date(baseMonday);
-	target.setDate(baseMonday.getDate() + diffWeeks * 7);
-	return target;
-};
-
-/**
  * 根据周一的日期，生成一周的日期数组
  * @param {Date} mondayDate 周一日期
  * @returns {Array<{ date: number, month: number, weekStr: string, fullDate: Date }>}
@@ -36,7 +24,7 @@ const getWeekDatesFromMonday = (mondayDate) => {
 	return weekDays;
 };
 
-export default function WeekHeader({ currentWeek, className = "" }) {
+export default function WeekHeader({ currentWeek}) {
 	const [currentMonth, setCurrentMonth] = useState(0);
 	const [weekDates, setWeekDates] = useState([]);
 	const [todayDate, setTodayDate] = useState(null);

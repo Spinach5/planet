@@ -3,6 +3,7 @@ import { View, Text, ScrollView } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import Btn from "./Btn";
 import { getAllWeek } from "../service/hubt/GetAllWeek";
+import { AtIcon } from "taro-ui";
 
 export default function CourseHeader({
 	currentSemester,
@@ -19,7 +20,7 @@ export default function CourseHeader({
 
 	useEffect(() => {
 		getAllWeek(currentSemester).then((list) => setWeekList(list || []));
-	}, []);
+	}, [currentSemester]);
 
 	const handleSelectWeek = (week) => {
 		setShowPicker(false);
@@ -30,9 +31,9 @@ export default function CourseHeader({
 	const closeFunctionMenu = () => setShowFunctionMenu(false);
 
 	const functionList = [
-		{ func: "刷新课表", icon: "fa fa-refresh" },
-		{ func: "选择学期", icon: "fa fa-calendar" },
-		{ func: "添加课程", icon: "fa fa-plus" },
+		{ func: "刷新课表", icon: "repeat-play" },
+		{ func: "选择学期", icon: "tag" },
+		{ func: "添加课程", icon: "add" },
 	];
 
 	const handleFunctionClick = (funcName) => {
@@ -56,11 +57,11 @@ export default function CourseHeader({
 				}}
 			>
 				<Btn onClick={() => setShowFunctionMenu(true)}>
-					<View className="fa fa-list-ul" />
+					<AtIcon value="bullet-list" size={20} />
 				</Btn>
 				<Btn onClick={() => setShowPicker(true)}>
 					<Text>第{currentWeek ?? "?"}周</Text>
-					<View className="fa fa-angle-down" />
+					<AtIcon value="chevron-down" size={20} />
 				</Btn>
 			</View>
 
@@ -107,6 +108,11 @@ export default function CourseHeader({
 								}}
 								onClick={() => handleFunctionClick(item.func)}
 							>
+								<AtIcon
+									value={item.icon}
+									size={20}
+									style={{ width: "24px" }}
+								/>
 								<View
 									className={item.icon}
 									style={{ fontSize: "20px", width: "24px" }}

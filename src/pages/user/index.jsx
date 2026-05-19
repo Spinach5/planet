@@ -3,6 +3,7 @@ import { View, Text } from "@tarojs/components";
 import Taro, { useDidShow, useRouter } from "@tarojs/taro";
 import HeadStatus from "../../components/headStatus";
 import SafeAreaView from "../../components/safeView";
+import UserCard from "../../components/userCard";
 import userManager from "../../service/userInfo";
 import "./index.css";
 
@@ -70,13 +71,21 @@ export default function Index() {
   const isLoggedIn = userManager.checkLogin();
   const username = userInfo?.realName || "昵称";
   const stuId = userInfo?.stuId || "未登录";
+  const university = userInfo?.university || "?";
+  const college = userInfo?.college || "?";
+  const Uclass = userInfo?.class || "?";
 
   return (
     <SafeAreaView currentPath={currentPath}>
       <HeadStatus text="我的" />
       <View className="bora card item user">
         <View className="nick-name">{username}</View>
-        <View className="user-name">{stuId}</View>
+        <View className="user-name">学号:{stuId}</View>
+		<View className="detailCard">
+		<UserCard text={university} />
+		<UserCard text={college} />
+		<UserCard text={Uclass} />
+		</View>
       </View>
 
       <View className="container">

@@ -16,14 +16,14 @@ const IconClass = {
 
 // 功能入口配置数据
 const gridItems = [
-	{ url: "", icon: IconClass.studentIcon, text: "学生会" },
-	{ url: "/modules/pages/club/index", icon: IconClass.clubIcon, text: "社团" },
-	{ url: "", icon: IconClass.foodIcon, text: "美食" },
-	{ url: "", icon: IconClass.adminIcon, text: "行政事务" },
-	{ url: "", icon: IconClass.bookIcon, text: "书籍资料" },
-	{ url: "", icon: IconClass.dailyIcon, text: "日常用品" },
-	{ url: "", icon: IconClass.mapIcon, text: "地图" },
-	{ url: "", icon: IconClass.secondHandIcon, text: "二手书" },
+	{ url: "", icon: "close-circle", text: "学生会" },
+	{ url: "/modules/pages/club/index", icon: "close-circle", text: "社团" },
+	{ url: "", icon: "close-circle", text: "美食" },
+	{ url: "", icon: "close-circle", text: "行政事务" },
+	{ url: "", icon: "close-circle", text: "书籍资料" },
+	{ url: "", icon: "close-circle", text: "日常用品" },
+	{ url: "", icon: "close-circle", text: "地图" },
+	{ url: "", icon: "close-circle", text: "二手书" },
 ];
 
 export default function GridContainer({ className = "" }) {

@@ -57,7 +57,7 @@ class UserManager {
 
 	// 应用数值到实例属性
 	applyValues(values) {
-		this.university = values.university || "hbut";
+		this.university = values.university || "";
 		this.realName = values.realName || "帅哥";
 		this.stuId = values.stuId || "";
 		this.password = values.password || "";
@@ -120,7 +120,7 @@ class UserManager {
 
 	// 注销，清空所有状态
 	logout() {
-		this.university = "hbut";
+		this.university = "";
 		this.realName = "帅哥";
 		this.stuId = "";
 		this.grade = 0;

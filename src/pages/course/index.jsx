@@ -8,7 +8,6 @@ import {
 	Text,
 	Picker,
 	Input,
-	Button,
 } from "@tarojs/components";
 import Taro, { useRouter, useDidShow } from "@tarojs/taro";
 import SafeAreaView from "../../components/safeView";
@@ -16,6 +15,7 @@ import CourseHeader from "../../components/courseHeader";
 import WeekHeader from "../../components/courseWeek";
 import TimeColumn from "../../components/courseTimeColumn";
 import CourseGrid from "../../components/courseGrid";
+import Loading from "../../components/Loading";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getAllWeek } from "../../service/hubt/GetAllWeek";
 import { getAllSchedule } from "../../service/hubt/AllSchedule";
@@ -254,7 +254,8 @@ export default function Index() {
 				setCurrentIndex(idx);
 			}
 		}
-	}, [weekList, currentWeek]);
+	}, [weekList, currentWeek, currentIndex]);
+
 	// 预处理所有周的课程网格数据
 	useEffect(() => {
 		if (
@@ -324,11 +325,11 @@ export default function Index() {
 	// TODO 在其他学期触发时切回本学期
 	const handleBackToCurrentWeek = useCallback(() => {
 		if (actualWeek && weekList.length > 0) {
-		const idx = weekList.indexOf(actualWeek);
-		if (idx !== -1) {
-			setCurrentIndex(idx);
-			setCurrentWeek(actualWeek);
-		}
+			const idx = weekList.indexOf(actualWeek);
+			if (idx !== -1) {
+				setCurrentIndex(idx);
+				setCurrentWeek(actualWeek);
+			}
 		}
 	}, [actualWeek, weekList]);
 
@@ -418,9 +419,7 @@ export default function Index() {
 	if (isLoggedIn === null) {
 		return (
 			<SafeAreaView currentPath={currentPath}>
-				<View className="loading-container">
-					<View className="loading-text">加载中...</View>
-				</View>
+				<Loading />
 			</SafeAreaView>
 		);
 	}
@@ -458,17 +457,15 @@ export default function Index() {
 	if (isLoading) {
 		return (
 			<SafeAreaView currentPath={currentPath}>
-				<View className="loading-container">
-					<View className="loading-text">加载中...</View>
-				</View>
+				<Loading />
 			</SafeAreaView>
 		);
 	}
 	if (!weeksDataReady) {
 		return (
-			<View className="loading-container">
-				<View className="loading-text">加载课程数据中...</View>
-			</View>
+			<SafeAreaView currentPath={currentPath}>
+				<Loading text="加载课表数据中..." />
+			</SafeAreaView>
 		);
 	}
 	const swiperHeight = timeTable.length * 150; // 单位 px
@@ -519,7 +516,11 @@ export default function Index() {
 				</View>
 			</ScrollView>
 			{/* 返回本周的按钮 */}
-			{actualWeek && currentWeek !== actualWeek && (<View className="gobacktoday" onClick={handleBackToCurrentWeek}>返回本周</View>)}
+			{actualWeek && currentWeek !== actualWeek && (
+				<View className="gobacktoday" onClick={handleBackToCurrentWeek}>
+					返回本周
+				</View>
+			)}
 			{/* 课程详情弹窗 */}
 			{modalVisible && currentCourse && (
 				<View className="course-info" onClick={closeModal}>

@@ -69,6 +69,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "taro-axios-adapter": "^0.0.3",
+    "taro-ui": "^3.3.1",
     "wx-jsencrypt": "^3.0.0-rc.1.4"
   },
   "devDependencies": {

@@ -44,6 +44,7 @@ export default defineConfig(async (merge, { command, mode }) => {
 		h5: {
 			publicPath: "/",
 			staticDirectory: "static",
+			esnextModules: ['taro-ui'],
 			// 添加代理配置
 			devServer: {
 				port: 10086,
