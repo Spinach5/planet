@@ -158,6 +158,9 @@ export default function Index() {
 				style="font-size:48px; color:#F00"
 			></Text>
 			<SearchBar placeholder="er"></SearchBar>
+			<View>
+				<View class="fa  fa-spin fa fa-hand-peace-o" />
+			</View>
 		</SafeAreaView>
 	);
 }

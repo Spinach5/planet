@@ -67,7 +67,6 @@ export async function getStuInfo() {
 		}
 
 		const cleanInfo = {
-			university: "hbut",
 			realName: stuInfo.xm,
 			stuId: stuInfo.xh,
 			grade: stuInfo.sznj,

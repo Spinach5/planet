@@ -16,6 +16,7 @@ import CourseHeader from "../../components/courseHeader";
 import WeekHeader from "../../components/courseWeek";
 import TimeColumn from "../../components/courseTimeColumn";
 import CourseGrid from "../../components/courseGrid";
+import Loading from "../../components/Loading";
 import { getCurrentWeek } from "../../service/hubt/CurrentWeek";
 import { getAllWeek } from "../../service/hubt/GetAllWeek";
 import { getAllSchedule } from "../../service/hubt/AllSchedule";
@@ -418,9 +419,7 @@ export default function Index() {
 	if (isLoggedIn === null) {
 		return (
 			<SafeAreaView currentPath={currentPath}>
-				<View className="loading-container">
-					<View className="loading-text">加载中...</View>
-				</View>
+				<Loading />
 			</SafeAreaView>
 		);
 	}
@@ -458,17 +457,15 @@ export default function Index() {
 	if (isLoading) {
 		return (
 			<SafeAreaView currentPath={currentPath}>
-				<View className="loading-container">
-					<View className="loading-text">加载中...</View>
-				</View>
+				<Loading />
 			</SafeAreaView>
 		);
 	}
 	if (!weeksDataReady) {
 		return (
-			<View className="loading-container">
-				<View className="loading-text">加载课程数据中...</View>
-			</View>
+			<SafeAreaView currentPath={currentPath}>
+				<Loading text="加载课表数据中..." />
+			</SafeAreaView>
 		);
 	}
 	const swiperHeight = timeTable.length * 150; // 单位 px
