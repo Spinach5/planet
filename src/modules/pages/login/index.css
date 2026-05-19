@@ -73,12 +73,13 @@
 
 .input-wrapper{
   flex:1;
-  position:relative
+  position:relative;
+  gap:0;
 }
 
 .input-field {
   flex: 1;
-  height: 88px;
+  /* height: 88px; */
   border: 2px solid transparent;
   border-radius: 20px;
   padding: 0 10px;
@@ -86,11 +87,20 @@
   color: #1a2c3e;
   transition: all 0.3s;
   background: #f5f7fa;
+  display: flex;
+  align-items: center;
+  justify-items: center;
 }
 
 .input-field.input-error {
   border-color: #ff4d4f;
   background: #fff2f0;
+}
+
+.input-error-text {
+  font-size: medium;
+  display: flex;
+  color: red;
 }
 
 .error-tip {
@@ -154,10 +164,6 @@
   margin-top: 20px;
   margin-bottom: 32px;
   box-shadow: 0 4px 12px rgba(45, 140, 255, 0.3);
-}
-
-.login-btn::after {
-  border: none;
 }
 
 .agreement {

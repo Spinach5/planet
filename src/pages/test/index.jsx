@@ -154,7 +154,7 @@ export default function Index() {
 				清除H5cookies
 			</Button>
 			<Text
-				class="fa fa-arrow-left"
+				class="arrow-left"
 				style="font-size:48px; color:#F00"
 			></Text>
 			<SearchBar placeholder="er"></SearchBar>
