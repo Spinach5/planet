@@ -114,6 +114,7 @@ export default function Index() {
 	const resetCourseData = useCallback(() => {
 		setCurrentSemester(null);
 		setCurrentWeek(null);
+		setActualWeek(null);
 		setWeekList([]);
 		setCurrentIndex(0);
 		setTimeTable([]);
@@ -216,6 +217,7 @@ export default function Index() {
 				}
 				setWeekList(weeksNum);
 				setCurrentWeek(validWeek);
+				setActualWeek(validWeek);
 				const idx = weeksNum.indexOf(validWeek);
 				setCurrentIndex(idx >= 0 ? idx : 0);
 			})
@@ -318,6 +320,17 @@ export default function Index() {
 		},
 		[weekList, currentIndex],
 	);
+
+	// TODO 在其他学期触发时切回本学期
+	const handleBackToCurrentWeek = useCallback(() => {
+		if (actualWeek && weekList.length > 0) {
+		const idx = weekList.indexOf(actualWeek);
+		if (idx !== -1) {
+			setCurrentIndex(idx);
+			setCurrentWeek(actualWeek);
+		}
+		}
+	}, [actualWeek, weekList]);
 
 	const onSwiperChange = useCallback(
 		(e) => {
@@ -505,7 +518,8 @@ export default function Index() {
 					</View>
 				</View>
 			</ScrollView>
-
+			{/* 返回本周的按钮 */}
+			{actualWeek && currentWeek !== actualWeek && (<View className="gobacktoday" onClick={handleBackToCurrentWeek}>返回本周</View>)}
 			{/* 课程详情弹窗 */}
 			{modalVisible && currentCourse && (
 				<View className="course-info" onClick={closeModal}>
