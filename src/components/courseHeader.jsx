@@ -3,7 +3,7 @@ import { View, Text, Picker } from "@tarojs/components";
 import { useState, useEffect } from "react";
 import Btn from "./Btn";
 import { AtIcon } from "taro-ui";
-import CourseSelectorModal from "./CourseSelectorModal";
+import WeekSelectorModal from "./WeekSelectorModal";
 import AddCourseModal from "./AddCourseModal";
 import SemesterPicker from "./SemesterSelector";
 import "./courseHeader.css";
@@ -21,7 +21,6 @@ export default function CourseHeader({
 	const [showFunctionMenu, setShowFunctionMenu] = useState(false);
 	const [showAddModal, setShowAddModal] = useState(false);
 
-	console.log("semesterList", semesterList);
 	// 获取学期列表（用于选择学期）
 	useEffect(() => {
 		if (!currentSemester) return;
@@ -48,16 +47,7 @@ export default function CourseHeader({
 
 	return (
 		<>
-			<View
-				style={{
-					padding: "4px",
-					marginBottom: "16px",
-					height: "40px",
-					display: "flex",
-					gap: "18px",
-					alignItems: "center",
-				}}
-			>
+			<View className="header-content">
 				<Btn onClick={() => setShowFunctionMenu(true)}>
 					<AtIcon value="bullet-list" size={20} />
 				</Btn>
@@ -108,7 +98,7 @@ export default function CourseHeader({
 			)}
 
 			{/* 周数选择弹窗 */}
-			<CourseSelectorModal
+			<WeekSelectorModal
 				visible={showWeekPicker}
 				semester={currentSemester}
 				onSelect={handleSelectWeek}

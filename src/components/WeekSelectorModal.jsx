@@ -3,9 +3,9 @@ import { useState, useEffect } from "react";
 import { getCurrentWeek } from "../service/hubt/CurrentWeek";
 import { getAllWeek } from "../service/hubt/GetAllWeek";
 import { getSemeseterList } from "../service/hubt/CurrentSemester";
-import "./CourseSelectorModal.css";
+import "./WeekSelectorModal.css";
 
-export default function CourseSelectorModal({
+export default function WeekSelectorModal({
   visible,
   semester,
   onSelect,
@@ -41,7 +41,6 @@ export default function CourseSelectorModal({
           showScrollbar={false}
           style={{ maxHeight: "400px" }}
         >
-          <View style={{ padding: "16px" }}>
             <View className="week-grid">
               {weekList.map((week) => {
                 const isSelected =
@@ -57,7 +56,6 @@ export default function CourseSelectorModal({
                 );
               })}
             </View>
-          </View>
         </ScrollView>
       </View>
     </View>

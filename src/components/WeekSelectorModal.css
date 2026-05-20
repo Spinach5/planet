@@ -1,0 +1,30 @@
+.week-grid {
+	padding: 40px;
+	display: grid;
+	grid-template-columns: repeat(6, 60px); /* 固定每列 60px */
+	gap: 8px;
+	justify-content: center; /* 水平居中 */
+}
+
+.week-item {
+	width: 60px; /* 与列宽一致 */
+	height: 60px; /* 固定高度，正方形 */
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 8px;
+	background-color: #47a5fd;
+	color: #fff;
+	font-size: 18px;
+	font-weight: bold;
+	box-sizing: border-box;
+	cursor: pointer;
+	transition: all 0.2s;
+	user-select: none;
+}
+
+.week-item.selected {
+	background-color: #fff;
+	border: 2px solid #47a5fd;
+	color: #47a5fd;
+}

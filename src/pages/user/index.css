@@ -29,11 +29,6 @@
   color: #666;
   padding-bottom: 15px;
 }
-.user.descript {
-  font-size: 24px;
-  color: #999;
-  line-height: 1.6;
-}
 
 .container {
   padding: 0 30px;
@@ -80,41 +75,13 @@
 	background-color: #cc0000;
 }
 
-.copyleft {
-  text-align: center;
-  padding: 40px 0;
-  color: #999;
-  font-size: 24px;
-}
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
 
-.modal-content {
-  width: 80%;
-  background: #fff;
-  border-radius: 20px;
-  overflow: hidden;
-}
-.modal-content .modal-image {
-  width: 100%;
-  display: block;
-}
 .detailCard{
 	display: flex;
 	flex-direction: row;
 	gap: 10px;
-	height: 40px;
-	margin-bottom: 10px;
+	height: 80px;
+	margin-bottom: 40px;
 }
 

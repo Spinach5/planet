@@ -4,7 +4,6 @@ import SafeAreaView from "../../components/safeView";
 import HeadStatus from "../../components/headStatus";
 import IndexSwiper from "../../components/IndexSwiper";
 import GridContainer from "../../components/gridContainer";
-import { AtIcon } from "taro-ui";
 import { useLoad,  useDidShow, useDidHide, useRouter} from "@tarojs/taro";
 
 export default function Index() {
@@ -15,12 +14,10 @@ export default function Index() {
 
 	// 页面显示时执行（每次切换到前台都会执行）
 	useDidShow(() => {
-		console.log("页面已显示");
 	});
 
 	// 页面隐藏时执行（切换到后台）
 	useDidHide(() => {
-		console.log("页面已隐藏");
 	});
 	return (
 		<SafeAreaView currentPath={currentPath} >

@@ -5,14 +5,13 @@ export default function UserCard({ text }) {
     <View
       style={{
         backgroundColor: "#47a5fd",
-		fontSize: "10px",
-        borderRadius: "10px",
+		fontSize: "8px",
+        borderRadius: "16px",
         color: "white",
         display: "inline-flex",
         justifyContent: "center",
         alignItems: "center",
-        padding: "12px 20px",
-		height: "100%",
+        padding: "0px 20px",
       }}
     >
       {text}

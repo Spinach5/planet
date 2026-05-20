@@ -17,7 +17,6 @@ export default function Index() {
   const loadUserInfo = () => {
     try {
       const info = userManager.getUserInfoSync();
-	  console.log(info)
       setUserInfo(info); // info 为 null 表示未登录
     } catch (error) {
       console.error("获取用户信息失败", error);
