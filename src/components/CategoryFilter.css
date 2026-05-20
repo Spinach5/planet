@@ -7,11 +7,11 @@
 
 .category-tab {
   flex-shrink: 0;
-  padding: 8px 20px;
+  padding: 5px 20px;
   border: 1px solid #e5e7eb;
   border-radius: 20px;
   background: #fff;
-  font-size: medium;
+  font-size: large;
   color: #6b7280;
   cursor: pointer;
   transition: all 0.2s;

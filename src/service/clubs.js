@@ -1,0 +1,42 @@
+// 获取所有社团
+import cacheManager from "../utils/cache";
+import { opendiffRequest } from "../utils/request"
+
+const CACHE_KEY_CLUBS = "All_CLUBS";
+const CACHE_KEY_CLUBCATEGORY = "ALL_CLUBCATEGORY"
+
+export async function getAllClub(forceRefresh = false) {
+    const cached_clubs = cacheManager.get(CACHE_KEY_CLUBS);
+    const cached_clubcategory = cacheManager.get(CACHE_KEY_CLUBCATEGORY);
+    if (cached_clubs && cached_clubcategory && !forceRefresh) {
+        console.log("[getAllClub] 从缓存获取社团");
+        return { club: cached_clubs, clubcategory: cached_clubcategory };
+    }
+
+    // 实际请求函数
+    const fetchClubs = async () => {
+        const club_res = await opendiffRequest.get('/opendiff/clubs')
+        const club_category_res = await opendiffRequest.get('/opendiff/clubcategory')
+        return { club: club_res.data, clubcategory: club_category_res.data };
+    };
+
+    try {
+        // TODO 自动重试
+        const response = await fetchClubs()
+        // const response = await AutoRetry(fetchClubs, { maxRetry: 1 });
+        // if (response.status !== 200) {
+        //     console.warn(`网络请求失败，状态码: ${response.status}`);
+        // }
+        // if (response.data.ret !== 0) {
+        //     console.warn(`接口返回异常: ret=${response.data.ret}`);
+        // }
+
+        cacheManager.set(CACHE_KEY_CLUBS, response.club);
+        cacheManager.set(CACHE_KEY_CLUBCATEGORY, response.clubcategory);
+        console.log(`[getAllClub] 已缓存社团数据`);
+        return response;
+    } catch (error) {
+        console.error("[getAllClub] 获取失败:", error);
+        throw error;
+    }
+}

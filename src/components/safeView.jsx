@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import Taro from "@tarojs/taro";
 import TabBar from "./TabBar";
 
-export default function SaveAreaView({ children, currentPath }) {
+export default function SaveAreaView({ children, currentPath, className }) {
 	const [tabBarHeight, setTabBarHeight] = useState(50); // 默认高度 50px，避免闪烁
 	const safeArea = getSafeArea(); // { top, bottom }
 
@@ -43,6 +43,7 @@ export default function SaveAreaView({ children, currentPath }) {
 					background: `linear-gradient(to bottom, rgb(71,165,253) 0%, rgb(255,255,255) 40%)`,
 					boxSizing: "border-box",
 				}}
+				className={`${className}`}
 			>
 				{children}
 			</View>
