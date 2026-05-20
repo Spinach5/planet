@@ -49,6 +49,36 @@ export default defineConfig(async (merge, { command, mode }) => {
 			devServer: {
 				port: 10086,
 				proxy: {
+					"/opendiff": {
+						target: "https://api.zxionf.top",
+						changeOrigin: true,
+						rewrite: (path) => path.replace(/^\/opendiff/, ""),
+						configure: (proxy, options) => {
+							proxy.on("proxyRes", (proxyRes, req, res) => {
+								console.log("proxyRes触发");
+								if (proxyRes.headers.location) {
+									let location = proxyRes.headers.location;
+									if (location.startsWith("/")) {
+										proxyRes.headers.location =
+											"/opendiff" + location;
+									} else if (
+										location.indexOf("api.zxionf.top")
+									) {
+										const relative = location.replace(
+											/https?:\/\/[^/]+/,
+											"",
+										);
+										proxyRes.headers.location =
+											"/opendiff" + relative;
+									}
+									console.log(
+										"修改后的 location:",
+										proxyRes.headers.location,
+									);
+								}
+							});
+						},
+					},
 					"/hbut": {
 						target: "https://jwxt.hbut.edu.cn",
 						changeOrigin: true,

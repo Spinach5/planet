@@ -61,6 +61,7 @@ const createRequest = (baseURL, cookiesPrefix = "") => {
 
 // 为不同后端创建实例（自动隔离 Cookie）
 export const hbutRequest = createRequest(API_BASE.hbut, "hbut");
+export const opendiffRequest = createRequest(API_BASE.opendiff, "opendiff")
 
 // 默认实例（无 URL，用于相对路径请求）
 export default createRequest("");
