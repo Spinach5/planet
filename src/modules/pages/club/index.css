@@ -1,42 +1,41 @@
 .header {
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+	height: fit-content;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
 }
 
 .input-field {
-  height: auto;
-  border: 2px solid transparent;
-  border-radius: 20px;
-  padding: 0 10px;
-  font-size: 28px;
-  color: #1a2c3e;
-  transition: all 0.3s;
-  background: #f5f7fa;
+	height: auto;
+	border: 2px solid transparent;
+	border-radius: 20px;
+	padding: 0 10px;
+	font-size: 28px;
+	color: #1a2c3e;
+	transition: all 0.3s;
+	background: #f5f7fa;
 }
 
 .club-card {
-  background-color: #eff3fe;
-  border-radius: 10px;
+	background-color: #eff3fe;
+	border-radius: 10px;
 }
 
 .content-row {
-  display: flex;
-  align-items: flex-start;
+	display: flex;
+	align-items: flex-start;
+}
+.label {
+	font-size: 26rpx;
+	font-weight: bold;
+	color: #666;
+	width: 180rpx;
+	flex-shrink: 0;
+}
 
-  .label {
-    font-size: 26rpx;
-    font-weight: bold;
-    color: #666;
-    width: 180rpx;
-    flex-shrink: 0;
-  }
-
-  .value {
-    flex: 1;
-    font-size: 26rpx;
-    color: #333;
-    line-height: 1.4;
-  }
+.value {
+	flex: 1;
+	font-size: 26rpx;
+	color: #333;
+	line-height: 1.4;
 }

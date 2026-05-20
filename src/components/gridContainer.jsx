@@ -1,5 +1,6 @@
 import { View } from "@tarojs/components";
 import GridItem from "./gridItem";
+import { Muyu } from "../assets/muyu";
 
 const IconClass = {
 	studentIcon:"fa fa-users",

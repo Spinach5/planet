@@ -1,26 +1,46 @@
 .muyu-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  position: relative;
-  margin-top: 50px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	position: relative;
+	margin-top: 50px;
 }
 
 .muyu-img {
-  width: 240px;
-  height: 240px;
+	width: 240px;
+	height: 240px;
 }
 
 .muyu-stick {
-  width: 180px;
-  height: 180px;
-  transform: rotate(20deg);
-  transition: transform 0.1s ease;
-  margin-bottom: 10px;
+	width: 200px;
+	height: 200px;
+	transform: rotate(20deg);
+	transition: transform 0.1s ease;
 }
 
 .muyu-container:active .muyu-stick {
-  transform: rotate(90deg);
+	transform: rotate(90deg);
+}
+.choose-audio {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+	margin-top: 20px;
+}
+.choose-audio {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border-radius: 40px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
 }
