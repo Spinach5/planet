@@ -46,7 +46,7 @@ export default function Index() {
 				</View>
 				<View className="content-row">
 					<View className="label">联系方式：</View>
-					<View className="value">{"暂未取得联系方式null"}</View>
+					<View className="value">暂未取得联系方式</View>
 				</View>
 			</View>
 		);
