@@ -1,8 +1,6 @@
 import { View, ScrollView } from "@tarojs/components";
 import { useState, useEffect } from "react";
-import { getCurrentWeek } from "../service/hbut/CurrentWeek";
-import { getAllWeek } from "../service/hbut/GetAllWeek";
-import { getSemesterList } from "../service/hbut/CurrentSemester";
+import { getCurrentWeek, getAllWeek, getSemesterList } from "../service";
 import "./WeekSelectorModal.css";
 
 export default function WeekSelectorModal({

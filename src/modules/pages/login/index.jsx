@@ -5,7 +5,7 @@ import HeadStatus from "../../../components/HeadStatus";
 import SafeAreaView from "../../../components/SafeAreaView";
 import Taro from "@tarojs/taro";
 import { checkStuID } from "../../../utils/checkStuID";
-import { login } from "../../../service/login";
+import { login } from "../../../service";
 import runtimeLogger from "../../../utils/runtimeLogger";
 import { AtIcon } from "taro-ui";
 

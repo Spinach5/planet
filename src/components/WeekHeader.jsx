@@ -1,7 +1,7 @@
 import { View, Text } from "@tarojs/components";
 import { useEffect, useState } from "react";
 import "./WeekHeader.css";
-import { getCurrentWeek } from "../service/hbut/CurrentWeek";
+import { getCurrentWeek } from "../service";
 
 /**
  * 根据周一的日期，生成一周的日期数组
