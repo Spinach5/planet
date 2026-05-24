@@ -40,21 +40,34 @@ async function requestCore(url, method, data, headers, baseURL, cookieManager, r
     }
   }
 
-  const response = await fetch(fullUrl, {
-    method,
-    headers,
-    body: method !== 'GET' && method !== 'HEAD' ? requestData : undefined,
-    redirect: 'manual',
-  })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), 15000)
+  let response
+  try {
+    response = await fetch(fullUrl, {
+      method,
+      headers,
+      body: method !== 'GET' && method !== 'HEAD' ? requestData : undefined,
+      redirect: 'manual',
+      signal: controller.signal,
+    })
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   // 保存 Set-Cookie
-  const setCookieHeader = response.headers.get('set-cookie')
-  if (setCookieHeader) {
-    const cookieHeaders = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader]
-    cookieHeaders.forEach(header => {
-      cookieManager.parseAndMerge(header)
-    })
+  let cookieHeaders
+  if (typeof response.headers.getSetCookie === 'function') {
+    cookieHeaders = response.headers.getSetCookie()
+  } else if (typeof response.headers.getAll === 'function') {
+    cookieHeaders = response.headers.getAll('set-cookie')
+  } else {
+    const raw = response.headers.get('set-cookie')
+    cookieHeaders = raw ? [raw] : []
   }
+  cookieHeaders.forEach(header => {
+    cookieManager.parseAndMerge(header)
+  })
 
   // 手动处理重定向
   if (response.status >= 300 && response.status < 400 && response.status !== 304) {
