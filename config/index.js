@@ -22,7 +22,7 @@ export default defineConfig(async (merge, { command, mode }) => {
 			options: {},
 		},
 		framework: "react",
-		compiler: "vite",
+		compiler: process.env.TARO_ENV === 'rn' ? 'webpack5' : 'vite',
 		mini: {
 			optimizeMainPackage: {
 				enable: true,
@@ -161,7 +161,7 @@ export default defineConfig(async (merge, { command, mode }) => {
 			},
 		},
 		rn: {
-			appName: "taroDemo",
+			appName: "taro_mini",
 			postcss: {
 				cssModules: {
 					enable: false,
