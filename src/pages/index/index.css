@@ -1,5 +1,3 @@
-@charset "UTF-8";
-
 .item {
   padding: 8px;
 }
@@ -12,23 +10,7 @@
   background-color: #fff9c4;
 }
 
-/* 响应式调整 */
-@media (max-width: 375px) {
-  .grid {
-    gap: 16rpx;
-  }
-  .item {
-    padding: 20rpx 12rpx;
-  }
-  .icon {
-    font-size: 56rpx;
-  }
-  .item text {
-    font-size: 22rpx;
-  }
-}
 .card {
   background-color: white;
   padding: 8px;
 }
-

@@ -1,0 +1,5 @@
+/* RN-compatible styles */
+.university-name { font-size: 32px; font-weight: 600; color: #1a2c3e; }
+.subtitle { font-size: 28px; color: #6c7a8e; }
+.form { background-color: white; border-radius: 32px; padding: 40px 32px; }
+.login-btn { background-color: #2d8cff; border-radius: 10px; font-size: 32px; font-weight: 500; color: white; }

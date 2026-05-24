@@ -14,7 +14,7 @@
   width: 100px;
   height: 100px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #47a5fd, #2d8cf0);
+  background: #47a5fd;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -108,7 +108,7 @@
 
 /* 登录 / 退出按钮 */
 .user-login-btn {
-  background: linear-gradient(135deg, #47a5fd, #2d8cf0);
+  background: #47a5fd;
   color: #fff;
   font-size: 32px;
   font-weight: 600;

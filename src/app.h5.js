@@ -1,5 +1,6 @@
 import { useLaunch } from "@tarojs/taro";
 import "./app.css";
+import "taro-ui/lib/style/index.scss";
 import runtimeLogger from "./utils/runtimeLogger";
 
 function App({ children }) {

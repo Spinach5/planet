@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const { getMetroConfig } = require\\('@tarojs/rn-supporter'\\); console.log\\(typeof getMetroConfig\\);\")",
+      "Bash(node -e \"const { getMetroConfig } = require\\('@tarojs/rn-supporter'\\); getMetroConfig\\(\\).then\\(c => console.log\\(JSON.stringify\\(c, null, 2\\)\\)\\).catch\\(e => console.error\\(e.message\\)\\);\")",
+      "Bash(rm -rf /tmp/metro-cache && cat /home/zqw/Downloads/win_share/ysx/src/app.js)",
+      "Bash(ln -sf /home/zqw/Downloads/win_share/ysx/node_modules/stylelint/lib/utils/declarationValueIndex.js /home/zqw/Downloads/win_share/ysx/node_modules/stylelint/lib/utils/declarationValueIndex.cjs)",
+      "Bash(cat)",
+      "Bash(cp /tmp/index_fix.css /home/zqw/Downloads/win_share/ysx/src/pages/index/index.css)",
+      "Bash(sed -i 's/background: linear-gradient\\(135deg, #47a5fd, #2d8cf0\\);/background: #47a5fd;/g' /home/zqw/Downloads/win_share/ysx/src/pages/user/index.css)",
+      "Bash(sed -i 's/background: linear-gradient\\(135deg, #2d8cff, #1a6dd4\\);/background: #2d8cff;/g' /home/zqw/Downloads/win_share/ysx/src/modules/pages/login/index.css)"
+    ],
+    "additionalDirectories": [
+      "/tmp/metro-cache"
+    ]
+  }
+}
