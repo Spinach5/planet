@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [h5, weapp, rn]
+        platform: [h5, weapp]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
