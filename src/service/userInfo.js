@@ -7,14 +7,14 @@ import { hbutCookies, opendiffCookies, giteeCookies } from "../utils/request";
 class UserManager {
 	constructor() {
 		// 用户信息字段
-		this.university = "hbut"; // 大学
+		this.university = "酒吧舞大学"; // 大学
 		this.realName = "帅哥"; // 真实姓名
 		this.stuId = ""; // 学号
 		this.password = ""; // 密码
 		this.grade = "0"; // 入学年份
 		this.majority = ""; // 专业
-		this.class = ""; // 班级
-		this.college = ""; // 学院
+		this.class = "第7班"; // 班级
+		this.college = "霍格沃兹学院"; // 学院
 
 		this.isLoggedIn = false; // 登录状态
 		this.cacheKey = "userInfo"; // 缓存 key

@@ -21,8 +21,16 @@ const menuItems = [
     icon: "download",
     onClick: () => Taro.navigateTo({ url: "/modules/pages/repo/index" }),
   },
-  { text: "反馈与建议", icon: "message", onClick: () => {} },
-  { text: "分享小程序", icon: "share", onClick: () => {} },
+  {
+    text: "加入我们",
+    icon: "phone",
+    onClick: () => Taro.navigateTo({ url: "/modules/pages/join/index" }),
+  },
+  {
+    text: "反馈与建议",
+    icon: "message",
+    onClick: () => Taro.navigateTo({ url: "/modules/pages/feedback/index" }),
+  },
 ];
 
 export default function Index() {

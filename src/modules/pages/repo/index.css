@@ -169,3 +169,61 @@
   border-radius: 4px;
   transition: width 0.6s ease;
 }
+
+/* 开源项目 */
+.repos-section {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-top: 16px;
+}
+
+.repos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.repo-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.repo-item-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #f0f5ff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.repo-item-icon-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2563eb;
+}
+
+.repo-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.repo-item-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.repo-item-url {
+  font-size: 12px;
+  color: #2563eb;
+  word-break: break-all;
+  text-decoration: underline;
+}

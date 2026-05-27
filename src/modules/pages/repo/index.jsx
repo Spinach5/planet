@@ -3,6 +3,7 @@ import "./index.css";
 import HeadStatus from "../../../components/HeadStatus";
 import SafeAreaView from "../../../components/SafeAreaView";
 import { getContributor } from "../../../service/getContributor";
+import { getRepos } from "../../../service/getRepos";
 import { getHashCode } from "../../../utils/getHashCode";
 import Taro, { usePullDownRefresh } from "@tarojs/taro";
 import { View, Text } from "@tarojs/components";
@@ -50,6 +51,8 @@ export default function Index() {
   const [contributors, setContributors] = useState([]);
   const [contributorsCount, setContributorsCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [repos, setRepos] = useState([]);
+  const [reposLoading, setReposLoading] = useState(true);
 
   const fetchContributors = useCallback(async (force = false) => {
     setLoading(true);
@@ -67,12 +70,25 @@ export default function Index() {
     }
   }, []);
 
+  const fetchRepos = useCallback(async (force = false) => {
+    setReposLoading(true);
+    try {
+      const data = await getRepos(force);
+      setRepos(data || []);
+    } catch (err) {
+      console.warn("获取仓库列表失败:", err);
+    } finally {
+      setReposLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     fetchContributors();
-  }, [fetchContributors]);
+    fetchRepos();
+  }, [fetchContributors, fetchRepos]);
 
   usePullDownRefresh(() => {
-    fetchContributors(true).finally(() => {
+    Promise.all([fetchContributors(true), fetchRepos(true)]).finally(() => {
       Taro.stopPullDownRefresh();
     });
   });
@@ -124,6 +140,41 @@ export default function Index() {
                   maxCommits={maxCommits}
                   index={index}
                 />
+              ))}
+            </View>
+          )}
+        </View>
+
+        <View className="repos-section">
+          <Text className="section-title">开源项目</Text>
+          {reposLoading ? (
+            <View className="loading-wrap">
+              <Text className="loading-text">加载中...</Text>
+            </View>
+          ) : repos.length === 0 ? (
+            <View className="empty-wrap">
+              <Text className="empty-text">暂无仓库数据</Text>
+            </View>
+          ) : (
+            <View className="repos-list">
+              {repos.map((repo) => (
+                <View key={repo.name} className="repo-item">
+                  <View className="repo-item-icon">
+                    <Text className="repo-item-icon-text">R</Text>
+                  </View>
+                  <View className="repo-item-info">
+                    <Text className="repo-item-name">{repo.name}</Text>
+                    <Text
+                      className="repo-item-url"
+                      onClick={() => {
+                        Taro.setClipboardData({ data: repo.url });
+                        Taro.showToast({ title: "已复制", icon: "none" });
+                      }}
+                    >
+                      {repo.url}
+                    </Text>
+                  </View>
+                </View>
               ))}
             </View>
           )}

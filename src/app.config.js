@@ -47,6 +47,8 @@ export default defineAppConfig({
 				"pages/runtimeLog/index",
 				"pages/repo/index",
 				"pages/settings/index",
+				"pages/join/index",
+				"pages/feedback/index",
 			],
 		},
 	],

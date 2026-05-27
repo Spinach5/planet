@@ -1,0 +1,170 @@
+.feedback-content {
+  padding: 16px;
+  min-height: 100vh;
+}
+
+.feedback-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.feedback-label {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1a1a;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.feedback-label-hint {
+  font-size: 13px;
+  font-weight: 400;
+  color: #e74c3c;
+  margin-left: 4px;
+}
+
+/* Token 输入 */
+.token-input-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.token-input {
+  flex: 1;
+  height: 42px;
+  padding: 0 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+}
+
+.token-save-btn {
+  width: 64px;
+  height: 42px;
+  background: #2563eb;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.token-save-btn-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+/* Token 已保存 */
+.token-saved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  border: 1px solid #bbf7d0;
+  margin-bottom: 10px;
+}
+
+.token-saved-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.token-saved-text {
+  font-size: 14px;
+  color: #16a34a;
+}
+
+.token-change-btn {
+  padding: 4px 14px;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+}
+
+.token-change-btn-text {
+  font-size: 13px;
+  color: #2563eb;
+}
+
+.token-tip {
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.5;
+  display: block;
+}
+
+/* 反馈内容 */
+.feedback-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  line-height: 1.6;
+  box-sizing: border-box;
+}
+
+.feedback-char-count {
+  text-align: right;
+  font-size: 12px;
+  color: #bbb;
+  margin-top: 8px;
+}
+
+.feedback-contact-input {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px;
+  background: #f7f8fa;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+}
+
+.feedback-tips-card {
+  padding: 14px 20px;
+  background: #fafbff;
+}
+
+.feedback-tips-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feedback-tips-text {
+  font-size: 13px;
+  color: #999;
+  line-height: 1.5;
+}
+
+.feedback-submit {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.feedback-submit-disabled {
+  opacity: 0.6;
+}
+
+.feedback-submit-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+}
