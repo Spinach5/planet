@@ -1,0 +1,91 @@
+name: Taro Multi-Platform Build
+
+on:
+  push:
+    tags:
+      - 'v*'               # 推送 tag 时触发（如 v1.0.0）
+  workflow_dispatch:       # 支持手动触发
+    inputs:
+      version:
+        description: '版本号（可选，如 v1.0.0）'
+        required: false
+        default: ''
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: [h5, weapp, swan, alipay, tt, qq, jd]   # 需要构建的平台
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci                     # 更快更严格的安装
+
+      - name: Set version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.ref_type }}" == "tag" ]]; then
+            VERSION="${{ github.ref_name }}"
+          elif [[ "${{ github.event.inputs.version }}" != "" ]]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="manual-$(date +'%Y%m%d-%H%M%S')"
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Version set to ${VERSION}"
+
+      - name: Build for ${{ matrix.platform }}
+        run: npm run build:${{ matrix.platform }}
+
+      - name: Compress build output
+        run: |
+          cd dist/${{ matrix.platform }}
+          zip -r "../../${{ matrix.platform }}-${{ env.VERSION }}.zip" .
+          cd -
+        # 假设 Taro 默认输出目录为 dist/平台名
+        # 可根据实际配置调整路径（如 h5 输出到 dist/h5，weapp 输出到 dist/weapp）
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-build
+          path: ${{ matrix.platform }}-${{ env.VERSION }}.zip
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## Taro 多端构建 ${{ github.ref_name }}
+            包含以下平台：
+            - H5
+            - 微信小程序
+            - 百度小程序
+            - 支付宝小程序
+            - 抖音小程序
+            - QQ小程序
+            - 京东小程序
+          draft: false
+          prerelease: false
+          files: artifacts/**/*.zip
