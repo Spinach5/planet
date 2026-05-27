@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: [h5, weapp, swan, alipay, tt, qq, jd]
+        platform: [h5, weapp, rn, alipay, qq]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
