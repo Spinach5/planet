@@ -81,7 +81,10 @@ export default function Index() {
 
 	// 刷新课表
 	const refreshCourseData = useCallback(async (forceRefresh = false) => {
-		if (!isLoggedIn || !currentSemester) return;
+		if (!isLoggedIn || !currentSemester) {
+			Taro.showToast({ title: "请先登录", icon: "none" });
+			return;
+		}
 		setLoading(true);
 		try {
 			const [scheduleData, timeData] = await Promise.all([
@@ -90,6 +93,9 @@ export default function Index() {
 			]);
 			setCourses(scheduleData || []);
 			setTimeTable(timeData || []);
+			if (forceRefresh) {
+				Taro.showToast({ title: "刷新成功", icon: "success", duration: 1000 });
+			}
 		} catch (err) {
 			runtimeLogger.error("Course", "刷新课表失败", err);
 			Taro.showToast({ title: "刷新失败", icon: "none" });
@@ -402,7 +408,7 @@ export default function Index() {
 				currentSemester={currentSemester}
 				currentWeek={currentWeek}
 				onWeekChange={handleWeekChange}
-				onRefresh={refreshCourseData}
+				onRefresh={() => refreshCourseData(true)}
 				onAddCourseConfirm={handleAddCourseConfirm}
 				semesterList={semesterList} // 新增
 				onSemesterChange={handleSemesterChange} // 新增

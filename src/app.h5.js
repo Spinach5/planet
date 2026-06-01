@@ -2,6 +2,7 @@ import { useLaunch } from "@tarojs/taro";
 import "./app.css";
 import "taro-ui/lib/style/index.scss";
 import runtimeLogger from "./utils/runtimeLogger";
+import 'taro-icons/scss/MaterialCommunityIcons.scss';
 
 function App({ children }) {
 	useLaunch(async () => {

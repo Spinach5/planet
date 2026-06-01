@@ -2,6 +2,7 @@ import { View, Text } from "@tarojs/components";
 import Taro from "@tarojs/taro";
 import "./GridItem.css";
 import { AtIcon } from "taro-ui";
+import { MaterialCommunityIcons } from "taro-icons";
 import runtimeLogger from "../utils/runtimeLogger";
 
 export default function GridItem({
@@ -15,11 +16,6 @@ export default function GridItem({
 }) {
 
 const handleClick = async () => {
-  // if (onClick) {
-  //   onClick()
-  //   return
-  // }
-
   if (!navigate) return
   if (!url) {
     console.warn('url is required for navigate')
@@ -57,10 +53,11 @@ const handleClick = async () => {
 	return (
 		<View className={`my-item ${className}`}>
 			<View className="icon-wrapper" onClick={handleClick}>
-				<AtIcon
-					value={`${icon}`}
+				<MaterialCommunityIcons
+					name={`${icon}`}
 					className="grid-icon"
 					color="#47a5fd"
+					size={50}
 				/>
 			</View>
 			<Text className="grid-text">{text}</Text>

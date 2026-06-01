@@ -22,7 +22,19 @@ export default defineConfig(async (merge, { command, mode }) => {
 			options: {},
 		},
 		framework: "react",
-		compiler: process.env.TARO_ENV === "rn" ? "webpack5" : "vite",
+		compiler: process.env.TARO_ENV === "rn" ? "webpack5" : {
+			type: "vite",
+			vitePlugins: [{
+				name: "fix-taro-icons-jsx",
+				config: () => ({
+					optimizeDeps: {
+						esbuildOptions: {
+							loader: { ".js": "jsx" },
+						},
+					},
+				}),
+			}],
+		},
 		mini: {
 			optimizeMainPackage: {
 				enable: true,

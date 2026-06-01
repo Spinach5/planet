@@ -11,3 +11,4 @@ export { getSemesterList }   from './CurrentSemester';
 export { getScores }         from './Scores';
 export { getStuInfo }        from './StuInfo';
 export { getTimeTable }      from './GetTimeTable';
+export { getAllClub }        from './clubs';

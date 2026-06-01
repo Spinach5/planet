@@ -9,10 +9,15 @@ const CACHE_KEY = "All_COURSE_";
 
 export async function getAllSchedule(forceRefresh = false, semester) {
   console.log(`[getAllSchedule] semester:${semester}`);
-  const cached = cacheManager.get(CACHE_KEY + semester);
-  if (cached && !forceRefresh) {
-    console.log("[getAllSchedule] 从缓存获取课表");
-    return cached;
+  if (forceRefresh) {
+    cacheManager.remove(CACHE_KEY + semester);
+    console.log(`[getAllSchedule] 已清除${semester}课表缓存`);
+  } else {
+    const cached = cacheManager.get(CACHE_KEY + semester);
+    if (cached) {
+      console.log("[getAllSchedule] 从缓存获取课表");
+      return cached;
+    }
   }
 
   // 实际请求函数

@@ -95,6 +95,7 @@
     "rollup": "^4.60.4",
     "stylelint-taro-rn": "^4.2.0",
     "taro-axios-adapter": "^0.0.3",
+    "taro-icons": "^0.4.0",
     "taro-ui": "^3.3.1",
     "wx-jsencrypt": "^3.0.0-rc.1.4"
   },

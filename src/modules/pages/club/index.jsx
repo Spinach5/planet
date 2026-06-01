@@ -8,7 +8,7 @@ import CategoryFilter from "../../../components/CategoryFilter";
 import Loading from "../../../components/Loading";
 import { useState, useCallback } from "react";
 import { AtIcon } from "taro-ui";
-import { getAllClub } from "../../../service/clubs";
+import { getAllClub } from "../../../service";
 
 export default function Index() {
 	const [clubs, setClubs] = useState([]);
@@ -63,14 +63,14 @@ export default function Index() {
 	return (
 
 		<SafeAreaView>
-			{/* 返回按钮 */}
-			<AtIcon
-				value="arrow-left"
-				color="#ffffff"
-				onClick={() => Taro.switchTab({ url: "/pages/index/index" })}
-			/>
-			{/* 标题 */}
-			<HeadStatus text="社团" />
+			<View className="uniform-page-header">
+							<AtIcon
+								value="arrow-left"
+								color="#ffffff"
+								onClick={() => Taro.switchTab({ url: "/pages/index/index" })}
+							/>
+							<HeadStatus text="社团" />
+						</View>
 
 			<View className="header">
 				{/* 搜索组件 */}

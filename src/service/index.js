@@ -14,6 +14,7 @@ export const getSemesterList = api('getSemesterList');
 export const getScores       = api('getScores');
 export const getStuInfo      = api('getStuInfo');
 export const getTimeTable    = api('getTimeTable');
+export const getAllClub      = api('getAllClub');
 
 // auth 直接转发
 export const auth = (...args) => getSchool().auth(...args);
