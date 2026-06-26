@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -9,6 +9,7 @@ import { IndexSwiper } from '@/components/IndexSwiper';
 import { GridContainer } from '@/components/GridContainer';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
+import userManager from '@/service/userInfo';
 import { getBanner } from '@/service/hubt/Banner';
 
 export default function HomeScreen() {
@@ -17,10 +18,12 @@ export default function HomeScreen() {
   const [bannerList, setBannerList] = useState<string[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Fetch banners only when logged in (original Taro logic)
   const fetchBanners = useCallback(async () => {
+    if (!userManager.checkLogin()) return;
     try {
       const images = await getBanner();
-      setBannerList(images);
+      if (images.length > 0) setBannerList(images);
     } catch {
       // Keep existing banners
     }
@@ -32,11 +35,22 @@ export default function HomeScreen() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Clear banners on logout (matching Taro useDidShow)
+  const wasLoggedIn = useRef(userManager.checkLogin());
+  useEffect(() => {
+    const loggedIn = userManager.checkLogin();
+    if (wasLoggedIn.current && !loggedIn) {
+      setBannerList([]);
+    }
+    wasLoggedIn.current = loggedIn;
+  });
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    if (!userManager.checkLogin()) { setRefreshing(false); return; }
     try {
       const images = await getBanner(true);
-      setBannerList(images);
+      if (images.length > 0) setBannerList(images);
     } catch {
       // Keep existing banners
     } finally {
