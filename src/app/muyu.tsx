@@ -6,6 +6,7 @@ import {
 import { router, Stack } from 'expo-router';
 import { Asset } from 'expo-asset';
 import { Image } from 'expo-image';
+import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -51,7 +52,7 @@ export default function MuYuPage() {
   const stickAnim = useMemo(() => new Animated.Value(0), []);
   const hitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const floatId = useRef(0);
-  const soundRef = useRef<{ play: () => void; pause: () => void } | null>(null);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const audioEntry = BUILTIN_AUDIOS[currentKey];
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -101,16 +102,18 @@ export default function MuYuPage() {
     if (!entry) return;
     try {
       if (soundRef.current) {
-        soundRef.current.pause();
+        await soundRef.current.unloadAsync();
         soundRef.current = null;
       }
-      // Use Web Audio API
-      const audio = new Audio(entry.src as unknown as string);
-      audio.onplay = () => setIsPlaying(true);
-      audio.onended = () => setIsPlaying(false);
-      audio.onpause = () => setIsPlaying(false);
-      soundRef.current = audio;
-      await audio.play();
+      const { sound } = await Audio.Sound.createAsync(entry.src);
+      soundRef.current = sound;
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded) {
+          if (status.isPlaying) setIsPlaying(true);
+          if (status.didJustFinish) setIsPlaying(false);
+        }
+      });
+      await sound.playAsync();
     } catch {
       // audio may not be available
     }
