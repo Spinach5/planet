@@ -7,3 +7,22 @@
   --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
   --font-serif: Georgia, 'Times New Roman', serif;
 }
+
+/* Force bottom tab bar on all screen widths — prevent web sidebar adaptation */
+[role="tablist"] {
+  flex-direction: row !important;
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  top: auto !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: unset !important;
+  padding: 4px 0 !important;
+}
+
+[role="tablist"] > * {
+  flex-direction: column !important;
+  flex: 1 !important;
+}

@@ -19,6 +19,10 @@ export default function TabLayout() {
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textSecondary,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
+        },
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: isDark ? '#333' : '#e0e0e0',
@@ -26,10 +30,11 @@ export default function TabLayout() {
           paddingBottom: Platform.OS === 'ios' ? BottomTabInset / 2 : 4,
           paddingTop: 4,
           height: Platform.OS === 'ios' ? BottomTabInset + 50 : 56,
-        },
-        tabBarLabelStyle: {
-          fontSize: 11,
-          fontWeight: '500',
+          // Force bottom tab bar on all screen widths (web adaptive fix)
+          position: 'absolute' as const,
+          bottom: 0,
+          left: 0,
+          right: 0,
         },
       }}
     >
