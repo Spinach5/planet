@@ -79,7 +79,7 @@ export async function getContributor(force = false): Promise<CleanedContributors
   }
 
   try {
-    const response = await giteeRequest.get('/repos/damn_2/taro_mini/contributors');
+    const response = await giteeRequest.get('/repos/dzh258/taro_mini/contributors');
     if (response.status !== 200 || !response.data) return null;
      
     const result = cleanContributors(response.data);
@@ -98,7 +98,7 @@ export async function getRepos(force = false): Promise<RepoItem[]> {
 
   try {
     // Use public endpoint to avoid auth requirement
-    const response = await giteeRequest.get('/users/damn_2/repos', {
+    const response = await giteeRequest.get('/users/dzh258/repos', {
       params: { page: 1, per_page: 100, sort: 'full_name', direction: 'asc' },
     });
     if (response.status !== 200 || !response.data) return [];
@@ -121,7 +121,7 @@ export async function getLatestCommit(force = false): Promise<LatestCommit | nul
   }
 
   try {
-    const response = await giteeRequest.get('/repos/damn_2/taro_mini/commits', {
+    const response = await giteeRequest.get('/repos/dzh258/taro_mini/commits', {
       params: { page: 1, per_page: 1 },
     });
     if (response.status !== 200 || !response.data) return null;

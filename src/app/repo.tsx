@@ -188,9 +188,9 @@ export default function RepoPage() {
               <Text style={s.urlLabel}>仓库地址：</Text>
               <Text
                 style={s.url}
-                onPress={() => { void copyToClipboard('https://gitee.com/damn_2/taro_mini'); }}
+                onPress={() => { void copyToClipboard('https://gitee.com/dzh258/taro_mini'); }}
               >
-                https://gitee.com/damn_2/taro_mini
+                https://gitee.com/dzh258/taro_mini
               </Text>
             </View>
 
