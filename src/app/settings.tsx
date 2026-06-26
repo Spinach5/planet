@@ -62,9 +62,10 @@ export default function SettingsPage() {
       try {
         const keys = await AsyncStorage.getAllKeys();
         let totalBytes = 0;
+        const encoder = new TextEncoder();
         for (const key of keys) {
           const val = await AsyncStorage.getItem(key);
-          if (val) totalBytes += val.length * 2; // UTF-16 approx bytes
+          if (val) totalBytes += encoder.encode(val).length + encoder.encode(key).length;
         }
         setCacheSize(formatBytes(totalBytes));
       } catch {
