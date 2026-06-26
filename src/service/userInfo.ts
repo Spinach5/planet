@@ -23,6 +23,7 @@ interface UserData {
   realName: string;
   stuId: string;
   encryptedPassword: string;
+  xhid: string;
   grade: string;
   majority: string;
   class: string;
@@ -50,6 +51,7 @@ class UserManager {
   stuId = '';
   password = '';
   encryptedPassword = '';
+  xhid = '';
   grade = '0';
   majority = '';
   class = '?';
@@ -68,6 +70,7 @@ class UserManager {
       realName: this.realName,
       stuId: this.stuId,
       encryptedPassword: this.encryptedPassword,
+      xhid: this.xhid,
       grade: this.grade,
       majority: this.majority,
       class: this.class,
@@ -117,6 +120,7 @@ class UserManager {
     if (values.realName !== undefined) this.realName = values.realName;
     if (values.stuId !== undefined) this.stuId = values.stuId;
     if (values.encryptedPassword !== undefined) this.encryptedPassword = values.encryptedPassword;
+    if (values.xhid !== undefined) this.xhid = values.xhid;
     if (values.grade !== undefined) this.grade = values.grade;
     if (values.majority !== undefined) this.majority = values.majority;
     if (values.class !== undefined) this.class = values.class;

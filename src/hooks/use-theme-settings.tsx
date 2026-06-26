@@ -1,29 +1,31 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const THEME_STORAGE_KEY = 'theme_dark_mode';
+const THEME_STORAGE_KEY = 'theme_mode';
+
+export type ThemeMode = 'system' | 'light' | 'dark';
 
 interface ThemeSettingsContextType {
-  /** Whether dark mode is manually overridden */
-  darkMode: boolean;
-  /** Toggle dark mode. Pass a boolean to set explicitly, or omit to toggle. */
-  toggleDarkMode: (value?: boolean) => Promise<void>;
-  /** Whether the override has been loaded from storage */
+  /** Current theme mode: system / light / dark */
+  themeMode: ThemeMode;
+  /** Set theme mode */
+  setThemeMode: (mode: ThemeMode) => Promise<void>;
+  /** Whether the preference has been loaded from storage */
   isLoaded: boolean;
 }
 
 const ThemeSettingsContext = createContext<ThemeSettingsContextType>({
-  darkMode: false,
-  toggleDarkMode: async (_value?: boolean) => {
+  themeMode: 'system',
+  setThemeMode: async (_mode: ThemeMode) => {
     // Default no-op, replaced by ThemeSettingsProvider
   },
   isLoaded: false,
 });
 
 /**
- * Hook to access manual dark mode override.
- * Use this for toggling dark mode in settings.
- * For reading the effective color scheme, continue using useColorScheme().
+ * Hook to access theme mode preference.
+ * Use this for toggling theme in settings.
  */
 export function useThemeSettings(): ThemeSettingsContextType {
   return useContext(ThemeSettingsContext);
@@ -34,27 +36,31 @@ export function useThemeSettings(): ThemeSettingsContextType {
  * considering both system preference and manual override.
  */
 export function useAppColorScheme(): 'light' | 'dark' {
-  const { darkMode, isLoaded } = useThemeSettings();
+  const { themeMode, isLoaded } = useThemeSettings();
+  const systemScheme = useRNColorScheme();
 
-  // Default to light mode (matching original Taro app)
-  // Only use dark mode if user has explicitly enabled it
   if (!isLoaded) {
     return 'light';
   }
 
-  return darkMode ? 'dark' : 'light';
+  if (themeMode === 'system') {
+    return systemScheme === 'dark' ? 'dark' : 'light';
+  }
+
+  return themeMode;
 }
 
 export function ThemeSettingsProvider({ children }: { children: ReactNode }) {
-  const [darkMode, setDarkMode] = useState(false);
+  // eslint-disable-next-line react/hook-use-state
+  const [themeMode, setThemeModeState] = useState<ThemeMode>('system');
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load saved preference on mount
   useEffect(() => {
     AsyncStorage.getItem(THEME_STORAGE_KEY)
       .then((value) => {
-        if (value !== null) {
-          setDarkMode(value === 'true');
+        if (value === 'light' || value === 'dark' || value === 'system') {
+          setThemeModeState(value);
         }
       })
       .catch(() => {
@@ -65,18 +71,17 @@ export function ThemeSettingsProvider({ children }: { children: ReactNode }) {
       });
   }, []);
 
-  const toggleDarkMode = useCallback(async (value?: boolean) => {
-    const newValue = value ?? !darkMode;
-    setDarkMode(newValue);
+  const setThemeMode = useCallback(async (mode: ThemeMode) => {
+    setThemeModeState(mode);
     try {
-      await AsyncStorage.setItem(THEME_STORAGE_KEY, String(newValue));
+      await AsyncStorage.setItem(THEME_STORAGE_KEY, mode);
     } catch {
       // ignore storage errors
     }
-  }, [darkMode]);
+  }, []);
 
   return (
-    <ThemeSettingsContext.Provider value={{ darkMode, toggleDarkMode, isLoaded }}>
+    <ThemeSettingsContext.Provider value={{ themeMode, setThemeMode, isLoaded }}>
       {children}
     </ThemeSettingsContext.Provider>
   );

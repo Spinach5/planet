@@ -1,40 +1,44 @@
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { HeadStatus } from "@/components/HeadStatus";
+import { MaterialIcon } from "@/components/MaterialIcon";
+import { ThemedView } from "@/components/themed-view";
+import { useTheme } from "@/hooks/use-theme";
+import { Asset } from "expo-asset";
+import { useAudioPlayer } from "expo-audio";
+import * as Haptics from "expo-haptics";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
+import { router, Stack } from "expo-router";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity, Animated, Modal,
-  ScrollView, Pressable,
-} from 'react-native';
-import { router, Stack } from 'expo-router';
-import { Asset } from 'expo-asset';
-import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedView } from '@/components/themed-view';
-import { HeadStatus } from '@/components/HeadStatus';
-import { MaterialIcon } from '@/components/MaterialIcon';
-import { useTheme } from '@/hooks/use-theme';
+  Animated,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const FLOAT_TEXTS = ['功德 +1', '+1', '咚~', '善哉'];
+const FLOAT_TEXTS = ["功德 +1", "+1", "咚~", "善哉"];
 
 // Resolve SVG assets properly for both native and web
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-const muyuAsset = Asset.fromModule(require('@/assets/images/muyu.svg'));
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-const muyuStickAsset = Asset.fromModule(require('@/assets/images/muyu-stick.svg'));
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-const audioMuyu = Asset.fromModule(require('@/assets/audio/muyu.mp3'));
-// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-const audioMoo = Asset.fromModule(require('@/assets/audio/moo.mp3'));
+const muyuAsset = Asset.fromModule(require("@/assets/images/muyu.svg"));
 
-interface AudioEntry {
-  key: string;
-  label: string;
-  uri: string;
-}
+ 
+const muyuStickAsset = Asset.fromModule(
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  require("@/assets/images/muyu-stick.svg"),
+);
+// Audio sources for expo-audio (direct require, works on native + web)
+const muyuAudioSource = require("@/assets/audio/muyu.mp3");
+const mooAudioSource = require("@/assets/audio/moo.mp3");
 
-const BUILTIN_AUDIOS: Record<string, AudioEntry> = {
-  muyu: { key: 'muyu', label: '木鱼声', uri: audioMuyu.uri },
-  moo: { key: 'moo', label: '牛叫声', uri: audioMoo.uri },
+const AUDIO_LABELS: Record<string, string> = {
+  muyu: "木鱼声",
+  moo: "牛叫声",
 };
 
 export default function MuYuPage() {
@@ -43,9 +47,17 @@ export default function MuYuPage() {
   const [merit, setMerit] = useState(0);
   const [isHitting, setIsHitting] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentKey, setCurrentKey] = useState('muyu');
+  const [currentKey, setCurrentKey] = useState("muyu");
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [floatTexts, setFloatTexts] = useState<Array<{ id: number; text: string; left: number; top: number; anim: Animated.Value }>>([]);
+  const [floatTexts, setFloatTexts] = useState<
+    Array<{
+      id: number;
+      text: string;
+      left: number;
+      top: number;
+      anim: Animated.Value;
+    }>
+  >([]);
 
   const scaleAnim = useMemo(() => new Animated.Value(1), []);
   const glowAnim = useMemo(() => new Animated.Value(0), []);
@@ -53,11 +65,14 @@ export default function MuYuPage() {
   const stickAnim = useMemo(() => new Animated.Value(0), []);
   const hitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const floatId = useRef(0);
-  const soundRef = useRef<HTMLAudioElement | null>(null);
 
-  const audioEntry = BUILTIN_AUDIOS[currentKey];
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-  const currentLabel = audioEntry ? audioEntry.label : '未知';
+  // expo-audio players (works on Android, iOS, and Web)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const muyuPlayer = useAudioPlayer(muyuAudioSource);
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+  const mooPlayer = useAudioPlayer(mooAudioSource);
+
+  const currentLabel = AUDIO_LABELS[currentKey] || "未知";
 
   const triggerHitEffect = useCallback(() => {
     if (hitTimer.current) clearTimeout(hitTimer.current);
@@ -65,19 +80,43 @@ export default function MuYuPage() {
     hitTimer.current = setTimeout(() => setIsHitting(false), 400);
 
     Animated.sequence([
-      Animated.timing(scaleAnim, { toValue: 0.88, duration: 60, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1.06, duration: 100, useNativeDriver: true }),
-      Animated.timing(scaleAnim, { toValue: 1, duration: 80, useNativeDriver: true }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.88,
+        duration: 60,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1.06,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 80,
+        useNativeDriver: true,
+      }),
     ]).start();
 
     glowAnim.setValue(0.8);
-    Animated.timing(glowAnim, { toValue: 0, duration: 400, useNativeDriver: true }).start();
+    Animated.timing(glowAnim, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
 
     rippleAnim.setValue(0.7);
-    Animated.timing(rippleAnim, { toValue: 0, duration: 600, useNativeDriver: true }).start();
+    Animated.timing(rippleAnim, {
+      toValue: 0,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
 
     stickAnim.setValue(1);
-    Animated.timing(stickAnim, { toValue: 0, duration: 250, useNativeDriver: true }).start();
+    Animated.timing(stickAnim, {
+      toValue: 0,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
   }, [scaleAnim, glowAnim, rippleAnim, stickAnim]);
 
   const addFloatText = useCallback(() => {
@@ -97,54 +136,63 @@ export default function MuYuPage() {
     });
   }, []);
 
-  const playAudio = useCallback(async (key: string) => {
-    const entry = BUILTIN_AUDIOS[key];
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (!entry) return;
-    try {
-      // Stop previous sound
-      if (soundRef.current) {
-        soundRef.current.pause();
-        soundRef.current = null;
-      }
-      // Use Web Audio API - works on web, may not work on native
-      const audio = new Audio(entry.uri);
-      audio.onplay = () => setIsPlaying(true);
-      audio.onended = () => setIsPlaying(false);
-      audio.onerror = () => setIsPlaying(false);
-      soundRef.current = audio;
-      await audio.play();
-    } catch {
-      setIsPlaying(false);
-    }
-  }, []);
+  const playAudio = useCallback(
+    (key: string) => {
+      const player = key === "muyu" ? muyuPlayer : mooPlayer;
+      void player.seekTo(0);
+      player.play();
+      setIsPlaying(true);
+      // Reset playing state after sound finishes (short sounds ~1s)
+      setTimeout(() => setIsPlaying(false), 600);
+    },
+    [muyuPlayer, mooPlayer],
+  );
 
   const handlePress = useCallback(() => {
     triggerHitEffect();
     addFloatText();
     setMerit((p) => p + 1);
     void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    void playAudio(currentKey);
+    playAudio(currentKey);
   }, [triggerHitEffect, addFloatText, playAudio, currentKey]);
 
-  const handleSelectAudio = useCallback((key: string) => {
-    setCurrentKey(key);
-    setShowAudioModal(false);
-    void playAudio(key);
-  }, [playAudio]);
+  const handleSelectAudio = useCallback(
+    (key: string) => {
+      setCurrentKey(key);
+      setShowAudioModal(false);
+      playAudio(key);
+    },
+    [playAudio],
+  );
 
-  const isDark = theme.background === '#000000';
-  const glowScale = glowAnim.interpolate({ inputRange: [0, 0.8], outputRange: [0.9, 1.5] });
-  const rippleScale = rippleAnim.interpolate({ inputRange: [0, 0.7], outputRange: [0.85, 1.4] });
-  const stickRotate = stickAnim.interpolate({ inputRange: [0, 0.4, 1], outputRange: ['50deg', '70deg', '50deg'] });
-  const stickTransY = stickAnim.interpolate({ inputRange: [0, 0.4, 1], outputRange: [0, 15, 0] });
+  const isDark = theme.background === "#000000";
+  const glowScale = glowAnim.interpolate({
+    inputRange: [0, 0.8],
+    outputRange: [0.9, 1.5],
+  });
+  const rippleScale = rippleAnim.interpolate({
+    inputRange: [0, 0.7],
+    outputRange: [0.85, 1.4],
+  });
+  const stickRotate = stickAnim.interpolate({
+    inputRange: [0, 0.4, 1],
+    outputRange: ["50deg", "70deg", "50deg"],
+  });
+  const stickTransY = stickAnim.interpolate({
+    inputRange: [0, 0.4, 1],
+    outputRange: [0, 15, 0],
+  });
 
   return (
     <ThemedView style={st.container}>
       <Stack.Screen options={{ headerShown: false }} />
       <LinearGradient
-        colors={isDark ? ['rgb(26,29,46)','rgb(35,39,64)','rgb(26,29,46)'] : ['#47a5fd','#cce5ff','#f2f5f9']}
-        locations={[0,0.28,1]}
+        colors={
+          isDark
+            ? ["rgb(26,29,46)", "rgb(35,39,64)", "rgb(26,29,46)"]
+            : ["#47a5fd", "#cce5ff", "#f2f5f9"]
+        }
+        locations={[0, 0.28, 1]}
         style={[st.gradient, { paddingTop: insets.top + 8 }]}
       >
         <View style={st.headerRow}>
@@ -164,35 +212,89 @@ export default function MuYuPage() {
           {/* Now Playing */}
           <View style={[st.nowPlaying, { backgroundColor: theme.surface }]}>
             <View style={[st.playingDot, isPlaying && st.playingDotActive]} />
-            <Text style={[st.playingText, { color: theme.text }]} numberOfLines={1}>
+            <Text
+              style={[st.playingText, { color: theme.text }]}
+              numberOfLines={1}
+            >
               当前音频：{currentLabel}
             </Text>
-            <Text style={st.playingStatus}>{isPlaying ? '播放中' : '待敲击'}</Text>
+            <Text style={st.playingStatus}>
+              {isPlaying ? "播放中" : "待敲击"}
+            </Text>
           </View>
 
           {/* Stage */}
           <View style={st.stage}>
-            <Animated.View style={[st.glow, { opacity: glowAnim, transform: [{ scale: glowScale }] }]} />
-            <Animated.View style={[st.ripple, { opacity: rippleAnim, transform: [{ scale: rippleScale }] }]} />
-            <Pressable onPress={handlePress} style={isHitting ? [st.muyuContainer, st.muyuContainerHitting] : st.muyuContainer}>
-              <Animated.View style={[st.stickWrap, { transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }]}>
-                <Image source={{ uri: muyuStickAsset.uri }} style={st.stickImg} contentFit="contain" />
+            <Animated.View
+              style={[
+                st.glow,
+                { opacity: glowAnim, transform: [{ scale: glowScale }] },
+              ]}
+            />
+            <Animated.View
+              style={[
+                st.ripple,
+                { opacity: rippleAnim, transform: [{ scale: rippleScale }] },
+              ]}
+            />
+            <Pressable
+              onPress={handlePress}
+              style={
+                isHitting
+                  ? [st.muyuContainer, st.muyuContainerHitting]
+                  : st.muyuContainer
+              }
+            >
+              <Animated.View
+                style={[
+                  st.stickWrap,
+                  {
+                    transform: [
+                      { rotate: stickRotate },
+                      { translateY: stickTransY },
+                    ],
+                  },
+                ]}
+              >
+                <Image
+                  source={{ uri: muyuStickAsset.uri }}
+                  style={st.stickImg}
+                  contentFit="contain"
+                />
               </Animated.View>
               <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
-                <Image source={{ uri: muyuAsset.uri }} style={st.fish} contentFit="contain" />
+                <Image
+                  source={{ uri: muyuAsset.uri }}
+                  style={st.fish}
+                  contentFit="contain"
+                />
               </Animated.View>
               <View style={st.floatLayer}>
                 {floatTexts.map((f) => {
-                  const translateY = f.anim.interpolate({ inputRange: [0, 1], outputRange: [0, -80] });
-                  const opacity = f.anim.interpolate({ inputRange: [0, 0.3, 1], outputRange: [1, 0.8, 0] });
-                  const scale = f.anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.2] });
+                  const translateY = f.anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0, -80],
+                  });
+                  const opacity = f.anim.interpolate({
+                    inputRange: [0, 0.3, 1],
+                    outputRange: [1, 0.8, 0],
+                  });
+                  const scale = f.anim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [1, 1.2],
+                  });
                   return (
                     <Animated.Text
                       key={f.id}
-                      style={[st.floatText, {
-                        left: `${String(f.left)}%`, top: `${String(f.top)}%`,
-                        opacity, transform: [{ translateY }, { scale }],
-                      }]}
+                      style={[
+                        st.floatText,
+                        {
+                          left: `${String(f.left)}%`,
+                          top: `${String(f.top)}%`,
+                          opacity,
+                          transform: [{ translateY }, { scale }],
+                        },
+                      ]}
                     >
                       {f.text}
                     </Animated.Text>
@@ -215,26 +317,45 @@ export default function MuYuPage() {
 
       {/* Audio Select Modal */}
       <Modal visible={showAudioModal} transparent animationType="fade">
-        <Pressable style={st.modalOverlay} onPress={() => setShowAudioModal(false)}>
-          <Pressable style={[st.modalContent, { backgroundColor: theme.surface }]} onPress={undefined}>
+        <Pressable
+          style={st.modalOverlay}
+          onPress={() => setShowAudioModal(false)}
+        >
+          <Pressable
+            style={[st.modalContent, { backgroundColor: theme.surface }]}
+            onPress={undefined}
+          >
             <Text style={[st.modalTitle, { color: theme.text }]}>选择音频</Text>
             <ScrollView style={st.modalList}>
-              {Object.values(BUILTIN_AUDIOS).map((item) => {
-                const isActive = currentKey === item.key;
+              {Object.entries(AUDIO_LABELS).map(([key, label]) => {
+                const isActive = currentKey === key;
                 return (
                   <TouchableOpacity
-                    key={item.key}
-                    style={[st.audioItem, isActive && { backgroundColor: theme.primaryContainer }]}
-                    onPress={() => handleSelectAudio(item.key)}
+                    key={key}
+                    style={[
+                      st.audioItem,
+                      isActive && { backgroundColor: theme.primaryContainer },
+                    ]}
+                    onPress={() => handleSelectAudio(key)}
                   >
-                    <Text style={[st.audioItemLabel, { color: theme.text }]}>{item.label}</Text>
-                    {isActive ? <MaterialIcon name="check" size={18} color={theme.primary} /> : null}
+                    <Text style={[st.audioItemLabel, { color: theme.text }]}>
+                      {label}
+                    </Text>
+                    {isActive ? (
+                      <MaterialIcon
+                        name="check"
+                        size={18}
+                        color={theme.primary}
+                      />
+                    ) : null}
                   </TouchableOpacity>
                 );
               })}
               <View style={[st.audioItem, st.audioItemImport]}>
                 <Text style={st.audioImportIcon}>+</Text>
-                <Text style={{ color: theme.textSecondary }}>本地导入（开发中）</Text>
+                <Text style={{ color: theme.textSecondary }}>
+                  本地导入（开发中）
+                </Text>
               </View>
             </ScrollView>
           </Pressable>
@@ -247,54 +368,166 @@ export default function MuYuPage() {
 const st = StyleSheet.create({
   container: { flex: 1 },
   gradient: { flex: 1 },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4, paddingHorizontal: 8 },
-  body: { alignItems: 'center', paddingBottom: 80 },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  body: { alignItems: "center", paddingBottom: 80 },
 
   meritCard: {
-    width: '90%', maxWidth: 340, marginTop: 8, marginBottom: 12,
-    paddingVertical: 20, paddingHorizontal: 24,
-    backgroundColor: '#fff9e6', borderRadius: 16, alignItems: 'center',
-    shadowColor: '#47a5fd', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 12, elevation: 4,
+    width: "90%",
+    maxWidth: 340,
+    marginTop: 8,
+    marginBottom: 12,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    backgroundColor: "#fff9e6",
+    borderRadius: 16,
+    alignItems: "center",
+    shadowColor: "#47a5fd",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 4,
   },
-  meritLabel: { fontSize: 14, color: '#888', letterSpacing: 2 },
-  meritValue: { fontSize: 48, fontWeight: 'bold', color: '#f5a623', marginTop: 4, textShadowColor: 'rgba(245,166,35,0.35)', textShadowOffset: { width: 0, height: 2 }, textShadowRadius: 8 },
+  meritLabel: { fontSize: 14, color: "#888", letterSpacing: 2 },
+  meritValue: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: "#f5a623",
+    marginTop: 4,
+    textShadowColor: "rgba(245,166,35,0.35)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 8,
+  },
 
   nowPlaying: {
-    width: '90%', maxWidth: 340, marginBottom: 12,
-    paddingVertical: 10, paddingHorizontal: 16, borderRadius: 12,
-    borderWidth: 1, borderColor: 'rgba(71,165,253,0.25)',
-    flexDirection: 'row', alignItems: 'center', gap: 10,
+    width: "90%",
+    maxWidth: 340,
+    marginBottom: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(71,165,253,0.25)",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  playingDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#47a5fd' },
+  playingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: "#47a5fd",
+  },
   playingDotActive: { opacity: 0.4 },
   playingText: { flex: 1, fontSize: 14 },
-  playingStatus: { fontSize: 12, color: '#47a5fd' },
+  playingStatus: { fontSize: 12, color: "#47a5fd" },
 
-  stage: { position: 'relative', width: '100%', maxWidth: 320, height: 300, alignItems: 'center', justifyContent: 'center' },
-  glow: { position: 'absolute', width: 220, height: 220, borderRadius: 110, backgroundColor: 'rgba(71,165,253,0.35)' },
-  ripple: { position: 'absolute', width: 200, height: 200, borderRadius: 100, borderWidth: 2, borderColor: 'rgba(71,165,253,0.5)' },
-  muyuContainer: { alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 2 },
+  stage: {
+    position: "relative",
+    width: "100%",
+    maxWidth: 320,
+    height: 300,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  glow: {
+    position: "absolute",
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: "rgba(71,165,253,0.35)",
+  },
+  ripple: {
+    position: "absolute",
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 2,
+    borderColor: "rgba(71,165,253,0.5)",
+  },
+  muyuContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+    zIndex: 2,
+  },
   muyuContainerHitting: { opacity: 1 },
   fish: { width: 200, height: 200 },
-  stickWrap: { position: 'absolute', top: -60, right: 10, zIndex: 3, width: 160, height: 160 },
+  stickWrap: {
+    position: "absolute",
+    top: -60,
+    right: 10,
+    zIndex: 3,
+    width: 160,
+    height: 160,
+  },
   stickImg: { width: 160, height: 160 },
-  floatLayer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 },
-  floatText: { position: 'absolute', fontSize: 22, fontWeight: 'bold', color: '#f5a623', textShadowColor: 'rgba(255,200,50,0.8)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 },
+  floatLayer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 10,
+  },
+  floatText: {
+    position: "absolute",
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#f5a623",
+    textShadowColor: "rgba(255,200,50,0.8)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
+  },
 
   audioBtn: {
-    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8,
-    marginTop: 24, paddingVertical: 10, paddingHorizontal: 20, borderRadius: 12,
-    borderWidth: 1, borderColor: 'rgba(71,165,253,0.3)',
-    shadowColor: '#47a5fd', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 6, elevation: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 24,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(71,165,253,0.3)",
+    shadowColor: "#47a5fd",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 3,
   },
-  audioBtnText: { fontSize: 15, color: '#0069cc' },
+  audioBtnText: { fontSize: 15, color: "#0069cc" },
 
-  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 40 },
-  modalContent: { borderRadius: 16, padding: 20, maxHeight: '70%' },
-  modalTitle: { fontSize: 18, fontWeight: '700', textAlign: 'center', marginBottom: 16 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    padding: 40,
+  },
+  modalContent: { borderRadius: 16, padding: 20, maxHeight: "70%" },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    marginBottom: 16,
+  },
   modalList: { maxHeight: 300 },
-  audioItem: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 10, marginBottom: 4 },
-  audioItemImport: { justifyContent: 'flex-start', gap: 10 },
-  audioImportIcon: { fontSize: 20, fontWeight: 'bold', color: '#47a5fd' },
+  audioItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    marginBottom: 4,
+  },
+  audioItemImport: { justifyContent: "flex-start", gap: 10 },
+  audioImportIcon: { fontSize: 20, fontWeight: "bold", color: "#47a5fd" },
   audioItemLabel: { fontSize: 16 },
 });

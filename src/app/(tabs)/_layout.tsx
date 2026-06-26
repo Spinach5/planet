@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Colors } from '@/constants/theme';
+import { useAppColorScheme } from '@/hooks/use-theme-settings';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import type { IconName } from '@/components/MaterialIcon';
 
@@ -10,7 +10,7 @@ function TabIcon({ name, color, size = 24 }: { name: IconName; color: string; si
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useAppColorScheme();
   const insets = useSafeAreaInsets();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];

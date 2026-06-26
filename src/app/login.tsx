@@ -35,11 +35,15 @@ export default function LoginPage() {
     if (!agreed) { showToast({ message: '请阅读并同意用户协议和隐私政策', type: 'warning' }); return; }
     setLoading(true);
     try {
-      await login(studentId, password);
-      showToast({ message: '登录成功', type: 'success' });
-      setTimeout(() => { router.back(); }, 1500);
+      const result = await login(studentId, password);
+      if (result.success) {
+        showToast({ message: result.message, type: 'success' });
+        setTimeout(() => { router.back(); }, 1500);
+      } else {
+        showToast({ message: result.message, type: 'error' });
+      }
     } catch {
-      showToast({ message: '登录失败，请检查学号和密码', type: 'error' });
+      showToast({ message: '网络请求失败，请稍后重试', type: 'error' });
     } finally { setLoading(false); }
   }, [studentId, password, agreed, showToast]);
 
