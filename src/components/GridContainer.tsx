@@ -90,10 +90,12 @@ export function GridContainer() {
 
 const styles = StyleSheet.create({
   grid: {
+    width: '100%',
     flexDirection: 'row',
     flexWrap: 'wrap',
     paddingVertical: 15,
-    borderRadius: 16,
+    borderRadius: 8,
     marginHorizontal: 8,
+    alignSelf: 'center',
   },
 });

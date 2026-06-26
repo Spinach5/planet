@@ -1,8 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
-import { View, Image, StyleSheet, Dimensions, FlatList, Text } from 'react-native';
+import { View, Image, StyleSheet, useWindowDimensions, FlatList, Text } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const SWIPER_HEIGHT = 180;
 
 interface BannerItem {
@@ -26,6 +25,7 @@ interface IndexSwiperProps {
  */
 export function IndexSwiper({ bannerList }: IndexSwiperProps) {
   const theme = useTheme();
+  const { width: screenW } = useWindowDimensions();
   const flatListRef = useRef<FlatList<BannerItem>>(null);
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -35,9 +35,11 @@ export function IndexSwiper({ bannerList }: IndexSwiperProps) {
     : DEFAULT_BANNERS;
 
   const onScroll = useCallback((event: { nativeEvent: { contentOffset: { x: number } } }) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / SCREEN_WIDTH);
+    const index = Math.round(event.nativeEvent.contentOffset.x / screenW);
     setActiveIndex(index);
-  }, []);
+  }, [screenW]);
+
+  const slideW = screenW - 16;
 
   return (
     <View style={styles.container}>
@@ -50,7 +52,7 @@ export function IndexSwiper({ bannerList }: IndexSwiperProps) {
         onScroll={onScroll}
         scrollEventThrottle={16}
         renderItem={({ item }) => (
-          <View style={styles.slide}>
+          <View style={[styles.slide, { width: slideW }]}>
             {item.url ? (
               <Image
                 source={{ uri: item.url }}
@@ -93,7 +95,6 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   slide: {
-    width: SCREEN_WIDTH - 16,
     height: SWIPER_HEIGHT,
   },
   image: {
