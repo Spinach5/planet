@@ -22,8 +22,12 @@ export default function LoginPage() {
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [studentIdError, setStudentIdError] = useState(false);
-  const [modalType, setModalType] = useState<'agreement' | 'privacy' | null>(null);
+  const [modalType, setModalType] = useState<'agreement' | 'privacy' | 'university' | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // University list (currently only HBUT)
+  const universityList = [{ name: '湖北工业大学', id: 'hbut' }];
+  const [universityIdx, setUniversityIdx] = useState(0);
 
   const handleLogin = useCallback(async () => {
     if (!studentId || studentId.length < 6) { setStudentIdError(true); return; }
@@ -56,6 +60,18 @@ export default function LoginPage() {
             </TouchableOpacity>
             <HeadStatus text="登录" />
           </View>
+
+          {/* University Picker */}
+          <TouchableOpacity
+            style={[styles.universityPicker, { backgroundColor: theme.surface }]}
+            onPress={() => setModalType('university')}
+          >
+            <ThemedText style={styles.universityName}>
+              {universityList[universityIdx].name}
+            </ThemedText>
+            <MaterialIcon name="chevron-down" size={18} color={theme.textSecondary} />
+          </TouchableOpacity>
+
           <View style={[styles.formCard, { backgroundColor: theme.surface }]}>
             <View style={styles.inputGroup}>
               <ThemedText style={styles.label}>学号</ThemedText>
@@ -97,17 +113,50 @@ export default function LoginPage() {
       <Modal visible={modalType !== null} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.surface }]}>
-            <Text style={styles.modalTitle}>{modalType === 'agreement' ? '用户协议' : '隐私政策'}</Text>
-            <ScrollView style={styles.modalBody}>
-              <ThemedText style={styles.modalText}>
-                {modalType === 'agreement'
-                  ? '欢迎使用"炖仔鸡"校园助手。本应用通过您的教务系统账号代为查询课程、成绩等信息。所有数据缓存在本地，密码加密存储。请妥善保管账号，不得用于违法违规活动。'
-                  : '我们重视您的隐私。账号信息仅用于代理登录教务系统，不会上传至第三方服务器。所有数据存储在您的设备本地。密码经过加密处理。您可以随时清除数据。'}
-              </ThemedText>
-            </ScrollView>
-            <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setModalType(null)}>
-              <Text style={styles.modalCloseText}>我知道了</Text>
-            </TouchableOpacity>
+            {modalType === 'university' ? (
+              <>
+                <Text style={styles.modalTitle}>选择学校</Text>
+                <ScrollView style={styles.modalBody}>
+                  {universityList.map((uni, idx) => (
+                    <TouchableOpacity
+                      key={uni.id}
+                      style={[
+                        styles.uniOption,
+                        idx === universityIdx && { backgroundColor: theme.primaryContainer },
+                      ]}
+                      onPress={() => { setUniversityIdx(idx); setModalType(null); }}
+                    >
+                      <ThemedText style={[
+                        styles.uniOptionText,
+                        idx === universityIdx && { color: theme.primary, fontWeight: '700' },
+                      ]}>
+                        {uni.name}
+                      </ThemedText>
+                      {idx === universityIdx ? (
+                        <MaterialIcon name="check" size={20} color={theme.primary} />
+                      ) : null}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setModalType(null)}>
+                  <Text style={styles.modalCloseText}>取消</Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                <Text style={styles.modalTitle}>{modalType === 'agreement' ? '用户协议' : '隐私政策'}</Text>
+                <ScrollView style={styles.modalBody}>
+                  <ThemedText style={styles.modalText}>
+                    {modalType === 'agreement'
+                      ? '欢迎使用"炖仔鸡"校园助手。本应用通过您的教务系统账号代为查询课程、成绩等信息。所有数据缓存在本地，密码加密存储。请妥善保管账号，不得用于违法违规活动。'
+                      : '我们重视您的隐私。账号信息仅用于代理登录教务系统，不会上传至第三方服务器。所有数据存储在您的设备本地。密码经过加密处理。您可以随时清除数据。'}
+                  </ThemedText>
+                </ScrollView>
+                <TouchableOpacity style={styles.modalCloseBtn} onPress={() => setModalType(null)}>
+                  <Text style={styles.modalCloseText}>我知道了</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -141,4 +190,8 @@ const styles = StyleSheet.create({
   modalText: { fontSize: 14, lineHeight: 22 },
   modalCloseBtn: { backgroundColor: '#47a5fd', borderRadius: 10, paddingVertical: 12, alignItems: 'center', marginTop: 12 },
   modalCloseText: { color: '#fff', fontSize: 15, fontWeight: '600' },
+  universityPicker: { marginHorizontal: 12, marginTop: 12, borderRadius: 10, paddingHorizontal: 16, paddingVertical: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  universityName: { fontSize: 16, fontWeight: '500' },
+  uniOption: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingVertical: 14, paddingHorizontal: 16, borderRadius: 8 },
+  uniOptionText: { fontSize: 16 },
 });
