@@ -3,6 +3,10 @@ import { PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import { ToastProvider } from '@/utils/toast';
 import { ThemeSettingsProvider, useAppColorScheme } from '@/hooks/use-theme-settings';
 import { Colors } from '@/constants/theme';
+import { runtimeLogger } from '@/utils/runtimeLogger';
+
+// Log app startup
+runtimeLogger.info('App', '应用启动');
 
 /** Custom Material Design 3 theme based on our brand colors */
 const customLightTheme = {

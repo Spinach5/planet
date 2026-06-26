@@ -4,7 +4,6 @@ import { router, Stack } from 'expo-router';
 import { ActivityIndicator } from 'react-native-paper';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Location from 'expo-location';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { HeadStatus } from '@/components/HeadStatus';
@@ -24,46 +23,56 @@ export default function WeatherPage() {
   const [daily, setDaily] = useState<Array<{date:string;code:number;hi:number;lo:number}>>([]);
   const [loading, setLoading] = useState(true); const [refreshing, setRefreshing] = useState(false);
 
-  // HBUT default coordinates (Wuhan)
-  const DEFAULT_LAT = 30.48;
-  const DEFAULT_LON = 114.41;
-
-  const fetchWeatherData = useCallback(async (lat: number, lon: number) => {
-    const params = new URLSearchParams({ latitude: String(lat), longitude: String(lon), current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation', hourly: 'temperature_2m,weather_code', daily: 'weather_code,temperature_2m_max,temperature_2m_min', timezone: 'Asia/Shanghai', forecast_days: '7' });
-    const resp = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
-    const data = (await resp.json()) as Record<string, unknown>;
-    const cur = data.current as Record<string, number> | undefined;
-    const dailyData = data.daily as Record<string, unknown[]> | undefined;
-    const hourlyData = data.hourly as Record<string, unknown[]> | undefined;
-    if (cur) setCurrent({ temp: Math.round(cur.temperature_2m), code: cur.weather_code, hum: cur.relative_humidity_2m, wind: cur.wind_speed_10m, precipitation: cur.precipitation, hi: dailyData ? Math.round(dailyData.temperature_2m_max[0] as number) : 0, lo: dailyData ? Math.round(dailyData.temperature_2m_min[0] as number) : 0, loc: `${lat.toFixed(1)},${lon.toFixed(1)}`, time: new Date().toLocaleTimeString('zh-CN') });
-    if (hourlyData) {
-      const times = hourlyData.time as string[]; const temps = hourlyData.temperature_2m as number[]; const codes = hourlyData.weather_code as number[];
-      setHourly(times.slice(0,24).map((_:string,i:number)=>({ time: `${String(new Date(times[i]).getHours())}:00`, temp: Math.round(temps[i]), code: codes[i] })));
-    }
-    if (dailyData) {
-      const dates = dailyData.time as string[]; const his = dailyData.temperature_2m_max as number[]; const los = dailyData.temperature_2m_min as number[]; const codes = dailyData.weather_code as number[];
-      setDaily(dates.map((_:string,i:number)=>({ date: dates[i], code: codes[i], hi: Math.round(his[i]), lo: Math.round(los[i]) })));
-    }
-  }, []);
+  // HBUT coordinates (Wuhan)
+  const LAT = 30.48;
+  const LON = 114.41;
 
   const fetchWeather = useCallback(async () => {
     setLoading(true);
     try {
-      let lat = DEFAULT_LAT;
-      let lon = DEFAULT_LON;
-      // Try GPS, fall back to default if it fails (e.g. on web)
-      try {
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        if (status === Location.PermissionStatus.GRANTED) {
-          const loc = await Location.getCurrentPositionAsync({});
-          lat = loc.coords.latitude;
-          lon = loc.coords.longitude;
-        }
-      } catch { /* use default coordinates */ }
-      await fetchWeatherData(lat, lon);
+      const params = new URLSearchParams({
+        latitude: String(LAT), longitude: String(LON),
+        current: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation',
+        hourly: 'temperature_2m,weather_code',
+        daily: 'weather_code,temperature_2m_max,temperature_2m_min',
+        timezone: 'Asia/Shanghai', forecast_days: '7',
+      });
+      const resp = await fetch(`https://api.open-meteo.com/v1/forecast?${params.toString()}`);
+      const data = (await resp.json()) as Record<string, unknown>;
+      const cur = data.current as Record<string, number> | undefined;
+      const dailyData = data.daily as Record<string, unknown[]> | undefined;
+      const hourlyData = data.hourly as Record<string, unknown[]> | undefined;
+      if (cur) setCurrent({
+        temp: Math.round(cur.temperature_2m), code: cur.weather_code,
+        hum: cur.relative_humidity_2m, wind: cur.wind_speed_10m,
+        precipitation: cur.precipitation,
+        hi: dailyData ? Math.round(dailyData.temperature_2m_max[0] as number) : 0,
+        lo: dailyData ? Math.round(dailyData.temperature_2m_min[0] as number) : 0,
+        loc: '湖北工业大学',
+        time: new Date().toLocaleTimeString('zh-CN'),
+      });
+      if (hourlyData) {
+        const times = hourlyData.time as string[];
+        const temps = hourlyData.temperature_2m as number[];
+        const codes = hourlyData.weather_code as number[];
+        setHourly(times.slice(0, 24).map((_, i) => ({
+          time: `${String(new Date(times[i]).getHours())}:00`,
+          temp: Math.round(temps[i]), code: codes[i],
+        })));
+      }
+      if (dailyData) {
+        const dates = dailyData.time as string[];
+        const his = dailyData.temperature_2m_max as number[];
+        const los = dailyData.temperature_2m_min as number[];
+        const codes = dailyData.weather_code as number[];
+        setDaily(dates.map((_, i) => ({
+          date: dates[i], code: codes[i],
+          hi: Math.round(his[i]), lo: Math.round(los[i]),
+        })));
+      }
     } catch { showToast({ message: '获取天气失败', type: 'error' }); }
     finally { setLoading(false); setRefreshing(false); }
-  }, [fetchWeatherData, showToast]);
+  }, [showToast]);
 
   useEffect(() => { if (!initialized.current) { initialized.current = true; void fetchWeather(); } }, [fetchWeather]);
 

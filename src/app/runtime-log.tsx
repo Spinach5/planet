@@ -10,19 +10,13 @@ import { HeadStatus } from '@/components/HeadStatus';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/utils/toast';
+import { runtimeLogger } from '@/utils/runtimeLogger';
 
 const levelColors: Record<string, string> = { DEBUG: '#999', INFO: '#0288d1', WARN: '#ed6c02', ERROR: '#d32f2f' };
-const mockLogs = [
-  { level: 'INFO' as const, message: '[App] 应用启动成功', time: '10:00:01' },
-  { level: 'INFO' as const, message: '[Cache] 从缓存加载用户信息成功', time: '10:00:02' },
-  { level: 'WARN' as const, message: '[Request] 请求超时，正在重试', time: '10:01:00' },
-  { level: 'ERROR' as const, message: '[Login] 登录失败: 密码错误', time: '10:02:00' },
-];
 
 export default function RuntimeLogPage() {
   const theme = useTheme(); const insets = useSafeAreaInsets(); const { showToast } = useToast();
-  // eslint-disable-next-line react/hook-use-state
-  const [logs] = useState(mockLogs);
+  const [logs, setLogs] = useState(() => runtimeLogger.getLogs());
 
   const copyAll = useCallback(async () => {
     const text = logs.map((l) => `[${l.time}] [${l.level}] ${l.message}`).join('\n');
@@ -30,7 +24,12 @@ export default function RuntimeLogPage() {
   }, [logs, showToast]);
 
   const clear = useCallback(() => {
-    Alert.alert('确认', '是否清除所有日志？', [{ text: '取消', style: 'cancel' }, { text: '确定', style: 'destructive', onPress: () => { showToast({ message: '日志已清除', type: 'success' }); } }]);
+    Alert.alert('确认', '是否清除所有日志？', [
+      { text: '取消', style: 'cancel' },
+      { text: '确定', style: 'destructive', onPress: () => {
+        void runtimeLogger.clear().then(() => { setLogs([]); showToast({ message: '日志已清除', type: 'success' }); });
+      } },
+    ]);
   }, [showToast]);
 
   const isDark = theme.background === '#000000';
