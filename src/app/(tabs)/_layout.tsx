@@ -52,15 +52,6 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="test"
-        options={{
-          title: '测试',
-          tabBarIcon: ({ color, size }) => (
-            <TabIcon name="test-tube" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="user"
         options={{
           title: '我的',
