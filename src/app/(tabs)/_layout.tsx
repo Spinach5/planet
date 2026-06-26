@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme, Platform } from 'react-native';
-import { Colors, BottomTabInset } from '@/constants/theme';
+import { useColorScheme } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Colors } from '@/constants/theme';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import type { IconName } from '@/components/MaterialIcon';
 
@@ -10,8 +11,10 @@ function TabIcon({ name, color, size = 24 }: { name: IconName; color: string; si
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const isDark = colorScheme === 'dark';
   const colors = Colors[isDark ? 'dark' : 'light'];
+  const bottomInset = insets.bottom > 0 ? insets.bottom : 8;
 
   return (
     <Tabs
@@ -27,10 +30,10 @@ export default function TabLayout() {
           backgroundColor: colors.background,
           borderTopColor: isDark ? '#333' : '#e0e0e0',
           borderTopWidth: 0.5,
-          paddingBottom: Platform.OS === 'ios' ? BottomTabInset / 2 : 4,
-          paddingTop: 4,
-          height: Platform.OS === 'ios' ? BottomTabInset + 50 : 56,
-          // Force bottom tab bar on all screen widths (web adaptive fix)
+          paddingBottom: bottomInset,
+          paddingTop: 6,
+          height: bottomInset + 50,
+          // Force bottom tab bar on all screen widths
           position: 'absolute' as const,
           bottom: 0,
           left: 0,
