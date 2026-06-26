@@ -43,7 +43,7 @@ export default function MuYuPage() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentKey, setCurrentKey] = useState('muyu');
   const [showAudioModal, setShowAudioModal] = useState(false);
-  const [floatTexts, setFloatTexts] = useState<Array<{ id: number; text: string; left: number; top: number }>>([]);
+  const [floatTexts, setFloatTexts] = useState<Array<{ id: number; text: string; left: number; top: number; anim: Animated.Value }>>([]);
 
   const scaleAnim = useMemo(() => new Animated.Value(1), []);
   const glowAnim = useMemo(() => new Animated.Value(0), []);
@@ -83,10 +83,16 @@ export default function MuYuPage() {
     const text = FLOAT_TEXTS[Math.floor(Math.random() * FLOAT_TEXTS.length)];
     const left = 30 + Math.random() * 40;
     const top = 35 + Math.random() * 20;
-    setFloatTexts((prev) => [...prev, { id, text, left, top }]);
-    setTimeout(() => {
+    const anim = new Animated.Value(0);
+    setFloatTexts((prev) => [...prev, { id, text, left, top, anim }]);
+
+    Animated.timing(anim, {
+      toValue: 1,
+      duration: 850,
+      useNativeDriver: true,
+    }).start(() => {
       setFloatTexts((prev) => prev.filter((f) => f.id !== id));
-    }, 900);
+    });
   }, []);
 
   const playAudio = useCallback(async (key: string) => {
@@ -173,11 +179,22 @@ export default function MuYuPage() {
                 <Image source={{ uri: muyuAsset.uri }} style={st.fish} contentFit="contain" />
               </Animated.View>
               <View style={st.floatLayer}>
-                {floatTexts.map((f) => (
-                  <Text key={f.id} style={[st.floatText, { left: `${String(f.left)}%`, top: `${String(f.top)}%` }]}>
-                    {f.text}
-                  </Text>
-                ))}
+                {floatTexts.map((f) => {
+                  const translateY = f.anim.interpolate({ inputRange: [0, 1], outputRange: [0, -80] });
+                  const opacity = f.anim.interpolate({ inputRange: [0, 0.3, 1], outputRange: [1, 0.8, 0] });
+                  const scale = f.anim.interpolate({ inputRange: [0, 1], outputRange: [1, 1.2] });
+                  return (
+                    <Animated.Text
+                      key={f.id}
+                      style={[st.floatText, {
+                        left: `${String(f.left)}%`, top: `${String(f.top)}%`,
+                        opacity, transform: [{ translateY }, { scale }],
+                      }]}
+                    >
+                      {f.text}
+                    </Animated.Text>
+                  );
+                })}
               </View>
             </Pressable>
           </View>
