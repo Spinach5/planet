@@ -43,6 +43,7 @@ export function GridItem({ url, icon, text }: GridItemProps) {
 
 const styles = StyleSheet.create({
   container: {
+    width: '25%',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
