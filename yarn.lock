@@ -2850,11 +2850,6 @@ expo-audio@^56.0.12:
   resolved "https://registry.npmmirror.com/expo-audio/-/expo-audio-56.0.12.tgz#13b9e0dc743ff2a3b44ab397ca409795ae45e474"
   integrity sha512-ne2UIO/HsQoBL9e+tGs5N9Sf3NyW5sJMm4sDkexbSJRc2IchLDG+9Msu/+l5N4RlZ8SiF42wRyWsh/Usg+SwOw==
 
-expo-av@^16.0.8:
-  version "16.0.8"
-  resolved "https://registry.npmmirror.com/expo-av/-/expo-av-16.0.8.tgz#b1671127f3b2ecaeb9c69fc2301cf791d4504dd6"
-  integrity sha512-cmVPftGR/ca7XBgs7R6ky36lF3OC0/MM/lpgX/yXqfv0jASTsh7AYX9JxHCwFmF+Z6JEB1vne9FDx4GiLcGreQ==
-
 expo-camera@^56.0.8:
   version "56.0.8"
   resolved "https://registry.npmmirror.com/expo-camera/-/expo-camera-56.0.8.tgz#a7803265516a302a33d92b5bdea06bbe3b88380e"

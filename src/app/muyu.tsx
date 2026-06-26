@@ -6,7 +6,6 @@ import {
 import { router, Stack } from 'expo-router';
 import { Asset } from 'expo-asset';
 import { Image } from 'expo-image';
-import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -22,18 +21,20 @@ const FLOAT_TEXTS = ['功德 +1', '+1', '咚~', '善哉'];
 const muyuAsset = Asset.fromModule(require('@/assets/images/muyu.svg'));
 // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 const muyuStickAsset = Asset.fromModule(require('@/assets/images/muyu-stick.svg'));
-const audioMuyu = require('@/assets/audio/muyu.mp3');
-const audioMoo = require('@/assets/audio/moo.mp3');
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+const audioMuyu = Asset.fromModule(require('@/assets/audio/muyu.mp3'));
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+const audioMoo = Asset.fromModule(require('@/assets/audio/moo.mp3'));
 
 interface AudioEntry {
   key: string;
   label: string;
-  src: number;
+  uri: string;
 }
 
 const BUILTIN_AUDIOS: Record<string, AudioEntry> = {
-  muyu: { key: 'muyu', label: '木鱼声', src: audioMuyu },
-  moo: { key: 'moo', label: '牛叫声', src: audioMoo },
+  muyu: { key: 'muyu', label: '木鱼声', uri: audioMuyu.uri },
+  moo: { key: 'moo', label: '牛叫声', uri: audioMoo.uri },
 };
 
 export default function MuYuPage() {
@@ -52,7 +53,7 @@ export default function MuYuPage() {
   const stickAnim = useMemo(() => new Animated.Value(0), []);
   const hitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const floatId = useRef(0);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<HTMLAudioElement | null>(null);
 
   const audioEntry = BUILTIN_AUDIOS[currentKey];
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -101,21 +102,20 @@ export default function MuYuPage() {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!entry) return;
     try {
+      // Stop previous sound
       if (soundRef.current) {
-        await soundRef.current.unloadAsync();
+        soundRef.current.pause();
         soundRef.current = null;
       }
-      const { sound } = await Audio.Sound.createAsync(entry.src);
-      soundRef.current = sound;
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          if (status.isPlaying) setIsPlaying(true);
-          if (status.didJustFinish) setIsPlaying(false);
-        }
-      });
-      await sound.playAsync();
+      // Use Web Audio API - works on web, may not work on native
+      const audio = new Audio(entry.uri);
+      audio.onplay = () => setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
+      audio.onerror = () => setIsPlaying(false);
+      soundRef.current = audio;
+      await audio.play();
     } catch {
-      // audio may not be available
+      setIsPlaying(false);
     }
   }, []);
 
