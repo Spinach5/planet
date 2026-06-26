@@ -1,0 +1,12 @@
+export { getCurrentWeek } from './CurrentWeek';
+export { getExtroInfo } from './ExtroInfo';
+export { getAllWeek } from './GetAllWeek';
+export { getStuInfo } from './StuInfo';
+export { getDailySchedule } from './DailySchedule';
+export { login } from './login';
+export { getCurrentSemester } from './CurrentSemester';
+export { getAllSchedule } from './AllSchedule';
+export { getExamInfo } from './ExamInfo';
+export { getScores } from './Scores';
+export { getTimeTable } from './GetTimeTable';
+export { getXhid } from './GetXhid';
