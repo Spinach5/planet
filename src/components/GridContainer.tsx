@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    padding: 15,
+    paddingVertical: 15,
     borderRadius: 16,
     marginHorizontal: 8,
   },
