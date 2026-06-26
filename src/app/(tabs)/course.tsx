@@ -16,6 +16,7 @@ import { getAllSchedule } from '@/service/hubt/AllSchedule';
 import { getTimeTable } from '@/service/hubt/GetTimeTable';
 import type { ClassTime } from '@/utils/hbut/timeHelper';
 import type { CourseCleaned } from '@/utils/hbut/courseHelper';
+import userManager from '@/service/userInfo';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
@@ -292,6 +293,9 @@ function computeGridCourses(
 }
 
 export default function CourseScreen() {
+  // Check login before any hooks (synchronous, no state dependency)
+  const isLoggedIn = userManager.checkLogin();
+
   const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [weekList, setWeekList] = useState<number[]>([]);
   const [showPicker, setShowPicker] = useState(false);
@@ -337,6 +341,17 @@ export default function CourseScreen() {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setGridCourses(items);
   }, [currentWeek, courses, timeTable, loading]);
+
+  // Show login prompt if not logged in
+  if (!isLoggedIn) {
+    return (
+      <SafeAreaView style={st.container} edges={['top']}>
+        <View style={st.center}>
+          <Text style={st.loadText}>请先登录</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   if (loading) {
     return (

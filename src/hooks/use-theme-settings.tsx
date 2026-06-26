@@ -1,6 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useColorScheme as useSystemColorScheme } from 'react-native';
 
 const THEME_STORAGE_KEY = 'theme_dark_mode';
 
@@ -35,13 +34,12 @@ export function useThemeSettings(): ThemeSettingsContextType {
  * considering both system preference and manual override.
  */
 export function useAppColorScheme(): 'light' | 'dark' {
-  const systemScheme = useSystemColorScheme();
   const { darkMode, isLoaded } = useThemeSettings();
 
-  // Before hydration, fall back to system
+  // Default to light mode (matching original Taro app)
+  // Only use dark mode if user has explicitly enabled it
   if (!isLoaded) {
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    return systemScheme ? systemScheme : 'light';
+    return 'light';
   }
 
   return darkMode ? 'dark' : 'light';
