@@ -102,16 +102,6 @@ export default function SettingsPage() {
     setShowClearConfirm(true);
   }, []);
 
-  const doClearCache = useCallback(async () => {
-    setShowClearConfirm(false);
-    const ud = await userManager.getFromCache();
-    await AsyncStorage.clear();
-    if (ud) await userManager.saveToCache();
-    await AsyncStorage.setItem(STORAGE_KEY_FORCE, String(forceUpdate));
-    await AsyncStorage.setItem(STORAGE_KEY_FEATURES, JSON.stringify(features));
-    showToast({ message: '缓存已清除', type: 'success' });
-  }, [showToast, forceUpdate, features]);
-
   const handleExpandToggle = useCallback(async () => {
     const target = !features.expand;
     if (!target) { updateFeature('expand', false); return; }
