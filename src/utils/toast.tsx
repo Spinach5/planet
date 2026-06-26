@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react';
 import { Snackbar } from 'react-native-paper';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
 
@@ -44,12 +45,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('');
   const [toastColor, setToastColor] = useState(TOAST_COLORS.info);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const insets = useSafeAreaInsets();
 
   const showToast = useCallback(({ message: msg, type = 'info', duration = 2000 }: ToastOptions) => {
-    // Clear any existing timer
-    if (hideTimer.current) {
-      clearTimeout(hideTimer.current);
-    }
+    if (hideTimer.current) clearTimeout(hideTimer.current);
 
     setMessage(msg);
     setToastColor(TOAST_COLORS[type]);
@@ -60,6 +59,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     }, duration);
   }, []);
 
+  const topOffset = Platform.OS === 'ios' ? insets.top + 8 : (insets.top || 24) + 8;
+
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
@@ -67,7 +68,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         visible={visible}
         onDismiss={() => setVisible(false)}
         duration={2000}
-        style={[styles.snackbar, { backgroundColor: toastColor }]}
+        style={[styles.snackbar, { backgroundColor: toastColor, top: topOffset }]}
         theme={{ colors: { inverseSurface: '#ffffff', inverseOnSurface: '#ffffff' } }}
       >
         {message}
@@ -79,6 +80,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 const styles = StyleSheet.create({
   snackbar: {
     borderRadius: 8,
-    marginBottom: 20,
+    zIndex: 9999,
   },
 });
