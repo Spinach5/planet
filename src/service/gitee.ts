@@ -50,11 +50,7 @@ function cleanContributors(rawData: any[]): CleanedContributors {
     contributions = contributions + commits;
   }
 
-  return {
-    contributors,
-    contributors_count: contributors.length,
-    contributions,
-  };
+  return { contributors, contributors_count: contributors.length, contributions };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -74,16 +70,16 @@ const CACHE_KEY_COMMIT = 'gitee_latest_commit';
 
 export async function getContributor(force = false): Promise<CleanedContributors | null> {
   if (!force) {
-    const cached = cacheManager.get<CleanedContributors>(CACHE_KEY_CONTRIBUTORS);
+    const cached = await cacheManager.getAsync<CleanedContributors>(CACHE_KEY_CONTRIBUTORS);
     if (cached) return cached;
   }
 
   try {
     const response = await giteeRequest.get('/repos/dzh258/taro_mini/contributors');
     if (response.status !== 200 || !response.data) return null;
-     
+
     const result = cleanContributors(response.data);
-    cacheManager.set(CACHE_KEY_CONTRIBUTORS, result);
+    void cacheManager.setAsync(CACHE_KEY_CONTRIBUTORS, result);
     return result;
   } catch {
     return null;
@@ -92,12 +88,11 @@ export async function getContributor(force = false): Promise<CleanedContributors
 
 export async function getRepos(force = false): Promise<RepoItem[]> {
   if (!force) {
-    const cached = cacheManager.get<RepoItem[]>(CACHE_KEY_REPOS);
+    const cached = await cacheManager.getAsync<RepoItem[]>(CACHE_KEY_REPOS);
     if (cached) return cached;
   }
 
   try {
-    // Use public endpoint to avoid auth requirement
     const response = await giteeRequest.get('/users/dzh258/repos', {
       params: { page: 1, per_page: 100, sort: 'full_name', direction: 'asc' },
     });
@@ -107,7 +102,7 @@ export async function getRepos(force = false): Promise<RepoItem[]> {
       name: r.full_name as string,
       url: r.html_url as string,
     }));
-    cacheManager.set(CACHE_KEY_REPOS, repos);
+    void cacheManager.setAsync(CACHE_KEY_REPOS, repos);
     return repos;
   } catch {
     return [];
@@ -116,7 +111,7 @@ export async function getRepos(force = false): Promise<RepoItem[]> {
 
 export async function getLatestCommit(force = false): Promise<LatestCommit | null> {
   if (!force) {
-    const cached = cacheManager.get<LatestCommit>(CACHE_KEY_COMMIT);
+    const cached = await cacheManager.getAsync<LatestCommit>(CACHE_KEY_COMMIT);
     if (cached) return cached;
   }
 
@@ -125,9 +120,9 @@ export async function getLatestCommit(force = false): Promise<LatestCommit | nul
       params: { page: 1, per_page: 1 },
     });
     if (response.status !== 200 || !response.data) return null;
-     
+
     const result = cleanLatestCommit(response.data);
-    if (result) cacheManager.set(CACHE_KEY_COMMIT, result);
+    if (result) void cacheManager.setAsync(CACHE_KEY_COMMIT, result);
     return result;
   } catch {
     return null;

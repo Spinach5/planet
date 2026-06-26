@@ -33,7 +33,7 @@ function extractBannerImages(html: string): string[] {
 export async function getBanner(forceRefresh = false): Promise<string[]> {
   // Return cached if available
   if (!forceRefresh) {
-    const cached = cacheManager.get<string[]>(CACHE_KEY);
+    const cached = await cacheManager.getAsync<string[]>(CACHE_KEY);
     if (cached) return cached;
   }
 
@@ -53,7 +53,7 @@ export async function getBanner(forceRefresh = false): Promise<string[]> {
     const images = extractBannerImages(html);
 
     // Cache indefinitely (cleared on force refresh)
-    cacheManager.set(CACHE_KEY, images);
+    void cacheManager.setAsync(CACHE_KEY, images);
 
     return images;
   } catch {
