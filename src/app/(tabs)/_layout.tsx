@@ -1,6 +1,12 @@
 import { Tabs } from 'expo-router';
-import { useColorScheme, Platform, Text } from 'react-native';
+import { useColorScheme, Platform } from 'react-native';
 import { Colors, BottomTabInset } from '@/constants/theme';
+import { MaterialIcon } from '@/components/MaterialIcon';
+import type { IconName } from '@/components/MaterialIcon';
+
+function TabIcon({ name, color, size = 24 }: { name: IconName; color: string; size?: number }) {
+  return <MaterialIcon name={name} size={size} color={color} />;
+}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
@@ -11,8 +17,8 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#007bff',
-        tabBarInactiveTintColor: '#666666',
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textSecondary,
         tabBarStyle: {
           backgroundColor: colors.background,
           borderTopColor: isDark ? '#333' : '#e0e0e0',
@@ -31,8 +37,8 @@ export default function TabLayout() {
         name="index"
         options={{
           title: '首页',
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>🏠</Text>
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="home" color={color} size={size} />
           ),
         }}
       />
@@ -40,8 +46,8 @@ export default function TabLayout() {
         name="course"
         options={{
           title: '课程',
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>📚</Text>
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="book-open-page-variant" color={color} size={size} />
           ),
         }}
       />
@@ -49,8 +55,8 @@ export default function TabLayout() {
         name="test"
         options={{
           title: '测试',
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>🧪</Text>
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="test-tube" color={color} size={size} />
           ),
         }}
       />
@@ -58,8 +64,8 @@ export default function TabLayout() {
         name="user"
         options={{
           title: '我的',
-          tabBarIcon: ({ focused }) => (
-            <Text style={{ fontSize: 22, opacity: focused ? 1 : 0.5 }}>👤</Text>
+          tabBarIcon: ({ color, size }) => (
+            <TabIcon name="account" color={color} size={size} />
           ),
         }}
       />
