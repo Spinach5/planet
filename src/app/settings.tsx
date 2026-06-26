@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, Switch, Modal, Text } from 'react-native';
 import { router, Stack } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -47,6 +47,7 @@ export default function SettingsPage() {
   const [forceUpdate, setForceUpdate] = useState(false);
   const [features, setFeatures] = useState<FeatureToggles>(DEFAULT_FEATURES);
   const [expandLoading, setExpandLoading] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY_FORCE).then((v) => setForceUpdate(v === 'true'));
@@ -67,19 +68,17 @@ export default function SettingsPage() {
   }, [forceUpdate]);
 
   const handleClearCache = useCallback(() => {
-    Alert.alert('提示', '是否清除所有缓存？用户信息将会保留。', [
-      { text: '取消', style: 'cancel' },
-      { text: '确定', onPress: () => {
-        void (async () => {
-          const ud = await userManager.getFromCache();
-          await AsyncStorage.clear();
-          if (ud) await userManager.saveToCache();
-          await AsyncStorage.setItem(STORAGE_KEY_FORCE, String(forceUpdate));
-          await AsyncStorage.setItem(STORAGE_KEY_FEATURES, JSON.stringify(features));
-          showToast({ message: '缓存已清除', type: 'success' });
-        })();
-      } },
-    ]);
+    setShowClearConfirm(true);
+  }, []);
+
+  const doClearCache = useCallback(async () => {
+    setShowClearConfirm(false);
+    const ud = await userManager.getFromCache();
+    await AsyncStorage.clear();
+    if (ud) await userManager.saveToCache();
+    await AsyncStorage.setItem(STORAGE_KEY_FORCE, String(forceUpdate));
+    await AsyncStorage.setItem(STORAGE_KEY_FEATURES, JSON.stringify(features));
+    showToast({ message: '缓存已清除', type: 'success' });
   }, [showToast, forceUpdate, features]);
 
   const handleExpandToggle = useCallback(async () => {
@@ -147,6 +146,24 @@ export default function SettingsPage() {
           </TouchableOpacity>
         </ScrollView>
       </LinearGradient>
+
+      {/* Clear Cache Confirm Modal */}
+      <Modal visible={showClearConfirm} transparent animationType="fade">
+        <View style={s.modalOverlay}>
+          <View style={[s.modalBox, { backgroundColor: theme.surface }]}>
+            <Text style={[s.modalTitle, { color: theme.text }]}>提示</Text>
+            <Text style={[s.modalMsg, { color: theme.textSecondary }]}>是否清除所有缓存？用户信息将会保留。</Text>
+            <View style={s.modalBtns}>
+              <TouchableOpacity style={s.modalBtn} onPress={() => setShowClearConfirm(false)}>
+                <Text style={{ fontSize: 16, color: theme.text }}>取消</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={s.modalBtn} onPress={() => { void doClearCache(); }}>
+                <Text style={{ fontSize: 16, color: '#ff4d4f', fontWeight: '600' }}>确定</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ThemedView>
   );
 }
@@ -163,4 +180,10 @@ const s = StyleSheet.create({
   divider: { height: StyleSheet.hairlineWidth, marginLeft: 16 },
   clearBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 16, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 16 },
   clearText: { fontSize: 15, fontWeight: '600' },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 40 },
+  modalBox: { borderRadius: 16, padding: 24 },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 12, textAlign: 'center' },
+  modalMsg: { fontSize: 15, marginBottom: 20, textAlign: 'center' },
+  modalBtns: { flexDirection: 'row', justifyContent: 'space-around' },
+  modalBtn: { paddingVertical: 10, paddingHorizontal: 30 },
 });
