@@ -1,6 +1,5 @@
-import { createContext, useContext, useState, useCallback, useRef, type ReactNode } from 'react';
-import { Snackbar } from 'react-native-paper';
-import { StyleSheet, Platform } from 'react-native';
+import { createContext, useContext, useState, useCallback, useRef, type ReactNode, useEffect, useMemo } from 'react';
+import { Animated, StyleSheet, Text } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ToastType = 'success' | 'error' | 'info' | 'warning';
@@ -21,14 +20,6 @@ const ToastContext = createContext<ToastContextType>({
   },
 });
 
-/**
- * Hook to show toast/snackbar messages.
- * Replaces Taro's Taro.showToast().
- *
- * Usage:
- *   const { showToast } = useToast();
- *   showToast({ message: '操作成功', type: 'success' });
- */
 export function useToast() {
   return useContext(ToastContext);
 }
@@ -41,9 +32,10 @@ const TOAST_COLORS: Record<ToastType, string> = {
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
-  const [visible, setVisible] = useState(false);
   const [message, setMessage] = useState('');
   const [toastColor, setToastColor] = useState(TOAST_COLORS.info);
+  const opacity = useMemo(() => new Animated.Value(0), []);
+  const translateY = useMemo(() => new Animated.Value(-20), []);
   const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const insets = useSafeAreaInsets();
 
@@ -52,34 +44,68 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
     setMessage(msg);
     setToastColor(TOAST_COLORS[type]);
-    setVisible(true);
+
+    // Animate in
+    Animated.parallel([
+      Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
+      Animated.timing(translateY, { toValue: 0, duration: 200, useNativeDriver: true }),
+    ]).start();
 
     hideTimer.current = setTimeout(() => {
-      setVisible(false);
+      Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }).start();
     }, duration);
+  }, [opacity, translateY]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (hideTimer.current) clearTimeout(hideTimer.current);
+    };
   }, []);
 
-  const topOffset = Platform.OS === 'ios' ? insets.top + 8 : (insets.top || 24) + 8;
+  const topOffset = Math.max(insets.top, 15) + 8;
 
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <Snackbar
-        visible={visible}
-        onDismiss={() => setVisible(false)}
-        duration={2000}
-        style={[styles.snackbar, { backgroundColor: toastColor, top: topOffset }]}
-        theme={{ colors: { inverseSurface: '#ffffff', inverseOnSurface: '#ffffff' } }}
+      <Animated.View
+        pointerEvents="none"
+        style={[
+          st.toast,
+          {
+            backgroundColor: toastColor,
+            top: topOffset,
+            opacity,
+            transform: [{ translateY }],
+          },
+        ]}
       >
-        {message}
-      </Snackbar>
+        <Text style={st.text}>{message}</Text>
+      </Animated.View>
     </ToastContext.Provider>
   );
 }
 
-const styles = StyleSheet.create({
-  snackbar: {
-    borderRadius: 8,
+const st = StyleSheet.create({
+  toast: {
+    position: 'absolute',
+    left: 20,
+    right: 20,
     zIndex: 9999,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 8,
+  },
+  text: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '500',
+    textAlign: 'center',
   },
 });
