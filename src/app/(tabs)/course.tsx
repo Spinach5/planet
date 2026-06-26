@@ -10,6 +10,8 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useTheme } from '@/hooks/use-theme';
 import { getCurrentWeek } from '@/service/hubt/CurrentWeek';
 import { getAllWeek } from '@/service/hubt/GetAllWeek';
 import { getAllSchedule } from '@/service/hubt/AllSchedule';
@@ -295,6 +297,11 @@ function computeGridCourses(
 export default function CourseScreen() {
   // Check login before any hooks (synchronous, no state dependency)
   const isLoggedIn = userManager.checkLogin();
+  const theme = useTheme();
+  const isDark = theme.background === '#000000';
+  const gradientColors: [string, ...string[]] = isDark
+    ? ['rgb(26,29,46)', 'rgb(35,39,64)', 'rgb(26,29,46)']
+    : ['#47a5fd', '#cce5ff', '#f2f5f9'];
 
   const [currentWeek, setCurrentWeek] = useState<number | null>(null);
   const [weekList, setWeekList] = useState<number[]>([]);
@@ -345,30 +352,42 @@ export default function CourseScreen() {
   // Show login prompt if not logged in
   if (!isLoggedIn) {
     return (
-      <SafeAreaView style={st.container} edges={['top']}>
-        <View style={st.center}>
-          <Text style={st.loadText}>请先登录</Text>
-        </View>
-      </SafeAreaView>
+      <View style={st.container}>
+        <LinearGradient colors={gradientColors} locations={[0, 0.28, 1]} style={st.gradient}>
+          <SafeAreaView style={st.safeArea} edges={['top']}>
+            <View style={st.center}>
+              <Text style={st.loadText}>请先登录</Text>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
     );
   }
 
   if (loading) {
     return (
-      <SafeAreaView style={st.container} edges={['top']}>
-        <View style={st.center}>
-          <ActivityIndicator size="large" color="#47a5fd" />
-          <Text style={st.loadText}>加载课表中...</Text>
-        </View>
-      </SafeAreaView>
+      <View style={st.container}>
+        <LinearGradient colors={gradientColors} locations={[0, 0.28, 1]} style={st.gradient}>
+          <SafeAreaView style={st.safeArea} edges={['top']}>
+            <View style={st.center}>
+              <ActivityIndicator size="large" color="#47a5fd" />
+              <Text style={st.loadText}>加载课表中...</Text>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
     );
   }
 
   if (currentWeek === null) {
     return (
-      <SafeAreaView style={st.container} edges={['top']}>
-        <View style={st.center}><Text>加载中...</Text></View>
-      </SafeAreaView>
+      <View style={st.container}>
+        <LinearGradient colors={gradientColors} locations={[0, 0.28, 1]} style={st.gradient}>
+          <SafeAreaView style={st.safeArea} edges={['top']}>
+            <View style={st.center}><Text>加载中...</Text></View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
     );
   }
 
@@ -376,8 +395,10 @@ export default function CourseScreen() {
   const { currentMonth, weekDates } = computeWeekDates();
 
   return (
-    <SafeAreaView style={st.container} edges={['top']}>
-      <View style={st.header}>
+    <View style={st.container}>
+      <LinearGradient colors={gradientColors} locations={[0, 0.28, 1]} style={st.gradient}>
+        <SafeAreaView style={st.safeArea} edges={['top']}>
+          <View style={st.header}>
         <TouchableOpacity style={st.btn}>
           <Text style={st.btnText}>📋</Text>
         </TouchableOpacity>
@@ -446,12 +467,16 @@ export default function CourseScreen() {
         course={selectedCourse}
         onClose={() => { setShowDetail(false); }}
       />
-    </SafeAreaView>
+        </SafeAreaView>
+      </LinearGradient>
+    </View>
   );
 }
 
 const st = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f7fa' },
+  gradient: { flex: 1 },
+  safeArea: { flex: 1 },
+  container: { flex: 1 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   loadText: { marginTop: 12, color: '#666', fontSize: 16 },
   header: { flexDirection: 'row', padding: 4, marginBottom: 8, gap: 18, alignItems: 'center' },
