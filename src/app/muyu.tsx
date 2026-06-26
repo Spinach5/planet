@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { router, Stack } from 'expo-router';
 import { Asset } from 'expo-asset';
+import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -165,16 +166,12 @@ export default function MuYuPage() {
             <Animated.View style={[st.glow, { opacity: glowAnim, transform: [{ scale: glowScale }] }]} />
             <Animated.View style={[st.ripple, { opacity: rippleAnim, transform: [{ scale: rippleScale }] }]} />
             <Pressable onPress={handlePress} style={isHitting ? [st.muyuContainer, st.muyuContainerHitting] : st.muyuContainer}>
-              <Animated.Image
-                source={{ uri: muyuStickAsset.uri }}
-                style={[st.stick, { transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }]}
-                resizeMode="contain"
-              />
-              <Animated.Image
-                source={{ uri: muyuAsset.uri }}
-                style={[st.fish, { transform: [{ scale: scaleAnim }] }]}
-                resizeMode="contain"
-              />
+              <Animated.View style={{ transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }}>
+                <Image source={{ uri: muyuStickAsset.uri }} style={st.stick} contentFit="contain" />
+              </Animated.View>
+              <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+                <Image source={{ uri: muyuAsset.uri }} style={st.fish} contentFit="contain" />
+              </Animated.View>
               <View style={st.floatLayer}>
                 {floatTexts.map((f) => (
                   <Text key={f.id} style={[st.floatText, { left: `${String(f.left)}%`, top: `${String(f.top)}%` }]}>
