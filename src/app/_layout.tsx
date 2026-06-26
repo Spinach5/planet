@@ -1,5 +1,4 @@
 import { Stack } from 'expo-router';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import { ToastProvider } from '@/utils/toast';
 import { ThemeSettingsProvider, useAppColorScheme } from '@/hooks/use-theme-settings';
@@ -52,20 +51,18 @@ function AppContent() {
 
   return (
     <PaperProvider theme={isDark ? customDarkTheme : customLightTheme}>
-      <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-        <ToastProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen
-              name="login"
-              options={{
-                presentation: 'modal',
-                animation: 'slide_from_bottom',
-              }}
-            />
-          </Stack>
-        </ToastProvider>
-      </ThemeProvider>
+      <ToastProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="login"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+            }}
+          />
+        </Stack>
+      </ToastProvider>
     </PaperProvider>
   );
 }
