@@ -97,7 +97,8 @@ export async function getRepos(force = false): Promise<RepoItem[]> {
   }
 
   try {
-    const response = await giteeRequest.get('/user/repos', {
+    // Use public endpoint to avoid auth requirement
+    const response = await giteeRequest.get('/users/damn_2/repos', {
       params: { page: 1, per_page: 100, sort: 'full_name', direction: 'asc' },
     });
     if (response.status !== 200 || !response.data) return [];
