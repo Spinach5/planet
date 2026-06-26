@@ -2,6 +2,13 @@
   "name": "planet",
   "main": "expo-router/entry",
   "version": "1.0.0",
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": ["expo-av"]
+      }
+    }
+  },
   "dependencies": {
     "@eslint/js": "^10.0.1",
     "@expo/ui": "~56.0.18",
@@ -12,6 +19,7 @@
     "expo": "~56.0.12",
     "expo-asset": "^56.0.17",
     "expo-audio": "^56.0.12",
+    "expo-av": "^16.0.8",
     "expo-camera": "^56.0.8",
     "expo-clipboard": "^56.0.4",
     "expo-constants": "~56.0.18",

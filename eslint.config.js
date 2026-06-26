@@ -112,6 +112,7 @@ export default tseslint.config(
       "**/animated-icon.web.tsx",
       "**/web-badge.tsx",
       "**/explore.tsx",
+      "**/muyu.tsx",
       "**/(tabs)/index.tsx",
       "**/(tabs)/course.tsx",
       "**/login.tsx",
