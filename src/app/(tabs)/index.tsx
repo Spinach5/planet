@@ -9,7 +9,6 @@ import { IndexSwiper } from '@/components/IndexSwiper';
 import { GridContainer } from '@/components/GridContainer';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
-import userManager from '@/service/userInfo';
 import { getBanner } from '@/service/hubt/Banner';
 
 export default function HomeScreen() {
@@ -19,12 +18,11 @@ export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchBanners = useCallback(async () => {
-    if (!userManager.checkLogin()) return;
     try {
       const images = await getBanner();
-      if (images.length > 0) setBannerList(images);
+      setBannerList(images);
     } catch {
-      // Silent fail
+      // Keep existing banners
     }
   }, []);
 
@@ -38,9 +36,9 @@ export default function HomeScreen() {
     setRefreshing(true);
     try {
       const images = await getBanner(true);
-      if (images.length > 0) setBannerList(images);
+      setBannerList(images);
     } catch {
-      // Silent fail
+      // Keep existing banners
     } finally {
       setRefreshing(false);
     }

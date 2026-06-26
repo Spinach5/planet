@@ -34,7 +34,7 @@ export async function getBanner(forceRefresh = false): Promise<string[]> {
   // Return cached if available
   if (!forceRefresh) {
     const cached = await cacheManager.getAsync<string[]>(CACHE_KEY);
-    if (cached) return cached;
+    if (cached && cached.length > 0) return cached;
   }
 
   try {
@@ -52,11 +52,15 @@ export async function getBanner(forceRefresh = false): Promise<string[]> {
     const html = String(response.data ?? '');
     const images = extractBannerImages(html);
 
-    // Cache indefinitely (cleared on force refresh)
-    void cacheManager.setAsync(CACHE_KEY, images);
+    // Only cache if we got results
+    if (images.length > 0) {
+      void cacheManager.setAsync(CACHE_KEY, images);
+    }
 
     return images;
   } catch {
-    return [];
+    // Return cached images on failure if available
+    const cached = await cacheManager.getAsync<string[]>(CACHE_KEY);
+    return cached ?? [];
   }
 }
