@@ -3,6 +3,8 @@ import {
   TabList,
   TabTrigger,
   TabSlot,
+} from 'expo-router/ui';
+import type {
   TabTriggerSlotProps,
   TabListProps,
 } from 'expo-router/ui';
