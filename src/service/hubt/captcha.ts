@@ -1,10 +1,14 @@
-// Captcha solver for HBUT academic system (chaoxing slider captcha)
-// Computes slider gap client-side by comparing shadeImage and cutoutImage
+// Captcha solver using Tencent CloudBase cloud function (same as original Taro project)
+import cloudbase from '@cloudbase/js-sdk';
 
 const CAPTCHA_ID = 'fdHguSojgSJag5B74ij8Bu8ZAzWlNgXM';
 const CAPTCHA_BASE = 'https://captcha.chaoxing.com';
 const REFERER = 'https://jwxt.hbut.edu.cn';
 const REFERER_LOGIN = `${REFERER}/admin/login`;
+
+// CloudBase config from original Taro project
+const CLOUDBASE_ENV = 'cloudbase-d0gl91v7x5514ed03';
+const CLOUDBASE_KEY = 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjlkMWRjMzFlLWI0ZDAtNDQ4Yi1hNzZmLWIwY2M2M2Q4MTQ5OCJ9.eyJhdWQiOiJjbG91ZGJhc2UtZDBnbDkxdjd4NTUxNGVkMDMiLCJleHAiOjI1MzQwMjMwMDc5OSwiaWF0IjoxNzgxODcyMDE5LCJhdF9oYXNoIjoidENDeFNQeEJUV21lcExaRUJyNExrZyIsInByb2plY3RfaWQiOiJjbG91ZGJhc2UtZDBnbDkxdjd4NTUxNGVkMDMiLCJtZXRhIjp7InBsYXRmb3JtIjoiQXBpS2V5In0sImFkbWluaXN0cmF0b3JfaWQiOiIyMDY0MTY4NjkyNDkxNzk2NDgyIiwidXNlcl90eXBlIjoiIiwiY2xpZW50X3R5cGUiOiJjbGllbnRfc2VydmVyIiwiaXNfc3lzdGVtX2FkbWluIjp0cnVlfQ.pCwuQucnRijSWhqzBXKFfAjIeWL6K75Emn_I9QJN86nI43NTfWqoYjRhsXUNzzve7sZcPk4sbCJJ1TQtfVtmjPLeAC4SH4IpGJBZHAwH9bumGxDAzf-Es6a7jrh19t8I8bCmrPHMQVtxpVr7OneRGsGdQOVjtn0T56l38WKyyqqt8wY-a68hWrVVp0hiJ3Wj5r6epxGgGGZcWjxgr3WlWyZZ4h5mYJgPs3BoG-bzsFANIzyRxca-VjdcdHpTI7NvwC3lxKA2-l7GNFH_reiUHl8lznfr7zRU1PrkaNO9B7XRX2x9SLZHf2BAGoo1TfFUrOfIQ4hPgMnsZ4eAOfidFg';
 
 function uuid4(): string {
   const key = '0123456789abcdef';
@@ -26,94 +30,49 @@ function parseJSONP(text: string): any {
     else if (text[i] === '}') { depth--; if (depth === 0) { end = i; break; } }
   }
   if (end === -1) throw new Error('JSONP unclosed');
-  return JSON.parse(text.slice(start, end + 1)) as unknown;
-}
-
-/**
- * Compute slider gap by comparing shadeImage and cutoutImage.
- * Uses canvas pixel comparison on web, falls back to edge detection.
- */
-async function computeGap(shadeB64: string, cutoutB64: string): Promise<number> {
-  // Shade image is usually the background with a cutout area
-  // Cutout image is the slider piece with transparent background
-  // The gap is the x-offset where the cutout matches the shade
-
-  try {
-    // Load both images and compare pixel differences to find the offset
-    const gap = await findGapByComparison(shadeB64, cutoutB64);
-    if (gap > 10) return gap;
-  } catch { /* fall through */ }
-
-  // Fallback: random estimate based on image width
-  return 80 + Math.floor(Math.random() * 100);
-}
-
-async function findGapByComparison(shadeB64: string, cutoutB64: string): Promise<number> {
    
-  const img1 = await loadImage(shadeB64);
-  const img2 = await loadImage(cutoutB64);
-
-  if (!img1 || !img2) return 0;
-
-  const w = Math.min(img1.width, img2.width);
-  const h = Math.min(img1.height, img2.height);
-
-  // Draw both images to canvases and compare pixel data
-  const canvas1 = document.createElement('canvas');
-  canvas1.width = w; canvas1.height = h;
-  const ctx1 = canvas1.getContext('2d');
-  if (!ctx1) return 0;
-  ctx1.drawImage(img1, 0, 0, w, h);
-  const data1 = ctx1.getImageData(0, 0, w, h).data;
-
-  const canvas2 = document.createElement('canvas');
-  canvas2.width = w; canvas2.height = h;
-  const ctx2 = canvas2.getContext('2d');
-  if (!ctx2) return 0;
-  ctx2.drawImage(img2, 0, 0, w, h);
-  const data2 = ctx2.getImageData(0, 0, w, h).data;
-
-  // Find x position with maximum pixel difference
-  let maxDiff = 0;
-  let bestX = 0;
-
-  for (let x = 10; x < w - 10; x++) {
-    let diff = 0;
-    for (let y = 0; y < h; y++) {
-      const idx = (y * w + x) * 4;
-      // Compare RGB values
-      const dr = Math.abs(data1[idx] - data2[idx]);
-      const dg = Math.abs(data1[idx + 1] - data2[idx + 1]);
-      const db = Math.abs(data1[idx + 2] - data2[idx + 2]);
-      diff += (dr + dg + db);
-    }
-    if (diff > maxDiff) {
-      maxDiff = diff;
-      bestX = x;
-    }
-  }
-
-  return bestX;
+  return JSON.parse(text.slice(start, end + 1));
 }
 
-async function loadImage(b64: string): Promise<HTMLImageElement | null> {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => resolve(null);
-    if (b64.startsWith('data:')) {
-      img.src = b64;
-    } else if (b64.startsWith('http')) {
-      img.src = b64;
-    } else {
-      img.src = `data:image/png;base64,${b64}`;
-    }
-    setTimeout(() => resolve(null), 5000);
-  });
+// Simple hash for captcha encryption params (matching original Taro)
+function md5Hash(s: string): string {
+  let hash = 0;
+  for (let i = 0; i < s.length; i++) {
+    const chr = s.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+// Init cloudbase SDK (lazy, cached)
+let cloudbaseApp: ReturnType<typeof cloudbase.init> | null = null;
+function getCloudbase() {
+  cloudbaseApp ??= cloudbase.init({
+      env: CLOUDBASE_ENV,
+      accessKey: CLOUDBASE_KEY,
+    });
+  return cloudbaseApp;
 }
 
 /**
- * Solve the slider captcha.
+ * Call the cloud function to compute captcha gap.
+ * This is the same approach as the original Taro project.
+ */
+async function callCaptchaCloud(shadeImage: string, cutoutImage: string): Promise<number> {
+  const app = getCloudbase();
+  const res = await app.callFunction({
+    name: 'captcha',
+    data: { shadeImage, cutoutImage },
+  });
+   
+   
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  return ((res.result as { x?: number })?.x) ?? 0;
+}
+
+/**
+ * Solve the slider captcha using the cloud function for gap computation.
  * Returns the validate code on success.
  */
 export async function solveCaptcha(): Promise<{ success: boolean; validate?: string }> {
@@ -128,9 +87,9 @@ export async function solveCaptcha(): Promise<{ success: boolean; validate?: str
       const t = String(confData.t as number);
 
       // 2. Generate encryption params
-      const captchaKey = md5(t + uuid4());
-      const token = `${md5(`${t}${CAPTCHA_ID}slide${captchaKey}`)}:${String(Number(t) + 300000)}`;
-      const iv = md5(`${CAPTCHA_ID}slide${String(Date.now())}${uuid4()}`);
+      const captchaKey = md5Hash(`${t}${uuid4()}`);
+      const token = `${md5Hash(`${t}${CAPTCHA_ID}slide${captchaKey}`)}:${String(Number(t) + 300000)}`;
+      const iv = md5Hash(`${CAPTCHA_ID}slide${String(Date.now())}${uuid4()}`);
 
       // 3. Get slider images
       const imgForm = new URLSearchParams({
@@ -162,8 +121,8 @@ export async function solveCaptcha(): Promise<{ success: boolean; validate?: str
       const verifyToken = imgData.token as string;
       if (!verifyToken) continue;
 
-      // 4. Compute gap client-side
-      const gap = await computeGap(vo.shadeImage, vo.cutoutImage);
+      // 4. Call cloud function to compute gap (matching original Taro approach)
+      const gap = await callCaptchaCloud(vo.shadeImage, vo.cutoutImage);
       if (gap < 10) continue;
 
       // 5. Submit verification
@@ -210,17 +169,4 @@ export async function solveCaptcha(): Promise<{ success: boolean; validate?: str
   }
 
   return { success: false };
-}
-
-// Simple MD5 implementation for captcha params
-function md5(s: string): string {
-  // Use SubtleCrypto if available
-  // Fallback: simple hash for captcha params
-  let hash = 0;
-  for (let i = 0; i < s.length; i++) {
-    const chr = s.charCodeAt(i);
-    hash = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return Math.abs(hash).toString(16);
 }

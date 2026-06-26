@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
+    "@cloudbase/js-sdk": "^3.5.4",
     "@eslint/js": "^10.0.1",
     "@expo/ui": "~56.0.18",
     "@expo/vector-icons": "^15.1.1",
