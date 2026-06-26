@@ -4,6 +4,7 @@ import {
   ScrollView, Pressable,
 } from 'react-native';
 import { router, Stack } from 'expo-router';
+import { Asset } from 'expo-asset';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -14,8 +15,11 @@ import { useTheme } from '@/hooks/use-theme';
 
 const FLOAT_TEXTS = ['功德 +1', '+1', '咚~', '善哉'];
 
-const muyuSvg = require('@/assets/images/muyu.svg');
-const muyuStickSvg = require('@/assets/images/muyu-stick.svg');
+// Resolve SVG assets properly for both native and web
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+const muyuAsset = Asset.fromModule(require('@/assets/images/muyu.svg'));
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+const muyuStickAsset = Asset.fromModule(require('@/assets/images/muyu-stick.svg'));
 const audioMuyu = require('@/assets/audio/muyu.mp3');
 const audioMoo = require('@/assets/audio/moo.mp3');
 
@@ -162,12 +166,12 @@ export default function MuYuPage() {
             <Animated.View style={[st.ripple, { opacity: rippleAnim, transform: [{ scale: rippleScale }] }]} />
             <Pressable onPress={handlePress} style={isHitting ? [st.muyuContainer, st.muyuContainerHitting] : st.muyuContainer}>
               <Animated.Image
-                source={muyuStickSvg}
+                source={{ uri: muyuStickAsset.uri }}
                 style={[st.stick, { transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }]}
                 resizeMode="contain"
               />
               <Animated.Image
-                source={muyuSvg}
+                source={{ uri: muyuAsset.uri }}
                 style={[st.fish, { transform: [{ scale: scaleAnim }] }]}
                 resizeMode="contain"
               />
