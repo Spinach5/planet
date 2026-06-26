@@ -22,6 +22,11 @@ interface FeatureToggles { expand: boolean; club: boolean; food: boolean; book: 
 const DEFAULT_FEATURES: FeatureToggles = { expand: false, club: false, food: false, book: false, other: false };
 let serverConnected = false;
 
+function formatBytes(bytes: number): string {
+  const gb = bytes / (1024 * 1024 * 1024);
+  return `${gb.toFixed(2)} GB`;
+}
+
 async function getFeatures(): Promise<FeatureToggles> {
   try { const raw = await AsyncStorage.getItem(STORAGE_KEY_FEATURES); if (raw) return { ...DEFAULT_FEATURES, ...JSON.parse(raw) as Partial<FeatureToggles> }; } catch { /* ignore */ }
   return { ...DEFAULT_FEATURES };
@@ -48,11 +53,36 @@ export default function SettingsPage() {
   const [features, setFeatures] = useState<FeatureToggles>(DEFAULT_FEATURES);
   const [expandLoading, setExpandLoading] = useState(false);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [cacheSize, setCacheSize] = useState('计算中...');
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY_FORCE).then((v) => setForceUpdate(v === 'true'));
     void getFeatures().then(setFeatures);
+    void (async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        let totalBytes = 0;
+        for (const key of keys) {
+          const val = await AsyncStorage.getItem(key);
+          if (val) totalBytes += val.length * 2; // UTF-16 approx bytes
+        }
+        setCacheSize(formatBytes(totalBytes));
+      } catch {
+        setCacheSize('0.00 GB');
+      }
+    })();
   }, []);
+
+  const doClearCache = useCallback(async () => {
+    setShowClearConfirm(false);
+    const ud = await userManager.getFromCache();
+    await AsyncStorage.clear();
+    if (ud) await userManager.saveToCache();
+    await AsyncStorage.setItem(STORAGE_KEY_FORCE, String(forceUpdate));
+    await AsyncStorage.setItem(STORAGE_KEY_FEATURES, JSON.stringify(features));
+    setCacheSize('0.00 GB');
+    showToast({ message: '缓存已清除', type: 'success' });
+  }, [showToast, forceUpdate, features]);
 
   const updateFeature = useCallback((key: keyof FeatureToggles, value: boolean) => {
     setFeatures((prev) => {
@@ -140,6 +170,10 @@ export default function SettingsPage() {
             <View style={[s.divider, { backgroundColor: theme.backgroundElement }]} />
             <SettingRow label="其他" desc="首页显示其他入口" value={features.other} onToggle={() => updateFeature('other', !features.other)} disabled={!features.expand} />
           </View>
+          <View style={[s.cacheSizeRow, { backgroundColor: theme.surface }]}>
+            <ThemedText style={s.cacheSizeLabel} themeColor="textSecondary">缓存占用空间</ThemedText>
+            <ThemedText style={s.cacheSizeValue}>{cacheSize}</ThemedText>
+          </View>
           <TouchableOpacity style={[s.clearBtn, { backgroundColor: theme.surface }]} onPress={handleClearCache}>
             <ThemedText style={s.clearText} themeColor="error">清除缓存</ThemedText>
             <MaterialIcon name="chevron-right" size={16} color="#ff4d4f" />
@@ -178,7 +212,10 @@ const s = StyleSheet.create({
   rowLabel: { fontSize: 15, fontWeight: '500' }, labelDisabled: { opacity: 0.5 },
   rowDesc: { fontSize: 12, marginTop: 2 },
   divider: { height: StyleSheet.hairlineWidth, marginLeft: 16 },
-  clearBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 16, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 16 },
+  cacheSizeRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 16, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 14 },
+  cacheSizeLabel: { fontSize: 15 },
+  cacheSizeValue: { fontSize: 15, fontWeight: '600', color: '#47a5fd' },
+  clearBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginHorizontal: 12, marginTop: 8, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 16 },
   clearText: { fontSize: 15, fontWeight: '600' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 40 },
   modalBox: { borderRadius: 16, padding: 24 },
