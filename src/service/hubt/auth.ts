@@ -1,5 +1,7 @@
 import { hbutRequest } from '../../utils/request';
 import encryptPassword from '../../utils/hbut/loginEncrypt';
+import { solveCaptcha } from './captcha';
+import { runtimeLogger } from '../../utils/runtimeLogger';
 
 interface AuthResult {
   success: boolean;
@@ -9,6 +11,7 @@ interface AuthResult {
 }
 
 export async function auth(stuID: string, password: string): Promise<AuthResult> {
+  // Step 1: Encrypt password
   let encodedPassword: string;
   try {
     encodedPassword = encryptPassword(password);
@@ -20,12 +23,24 @@ export async function auth(stuID: string, password: string): Promise<AuthResult>
     return { success: false, message: `加密异常: ${err.message ?? '未知错误'}` };
   }
 
+  // Step 2: Solve slider captcha
+  runtimeLogger.info('Auth', '正在求解滑块验证码...');
+  const captchaResult = await solveCaptcha();
+  let validate = '';
+  if (captchaResult.success && captchaResult.validate) {
+    validate = captchaResult.validate;
+    runtimeLogger.info('Auth', '验证码求解成功');
+  } else {
+    runtimeLogger.warn('Auth', '验证码求解失败，尝试无验证码登录');
+  }
+
+  // Step 3: Build login params
   const params = new URLSearchParams();
   params.append('username', stuID);
   params.append('password', encodedPassword);
-  params.append('rememberMe', '1');
   params.append('vcode', '');
-  params.append('jcaptchaCode', '');
+  if (validate) params.append('jcaptchaCode', validate);
+  params.append('rememberMe', '1');
 
   const loginConfig = {
     headers: {
@@ -36,38 +51,45 @@ export async function auth(stuID: string, password: string): Promise<AuthResult>
     withCredentials: true,
   };
 
+  // Step 4: Submit login
   try {
     const response = await hbutRequest.post('/admin/login', params.toString(), loginConfig);
+    const httpStatus = response.status;
+
+    // Redirect (302) means success — cookies saved
+    if (httpStatus >= 300 && httpStatus < 400) {
+      return { success: true, message: '登录成功' };
+    }
+
     const responseData = response.data;
 
-    // Check if response is JSON (failure case)
+    // JSON response handling
     if (typeof responseData === 'object' && responseData !== null) {
-      if (responseData.code !== 0 && responseData.code !== 200) {
-        return {
-          success: false,
-          message: responseData.message ?? responseData.msg ?? '登录失败',
-          data: responseData,
-        };
+      // ret !== "0" means wrong password
+      if (responseData.ret !== undefined && String(responseData.ret) !== '0') {
+        return { success: false, message: '密码输入错误' };
+      }
+
+      const codeVal = responseData.code !== undefined ? responseData.code : responseData.ret;
+      if (codeVal !== undefined && codeVal !== 0 && codeVal !== 200 && String(codeVal) !== '0') {
+        return { success: false, message: String(responseData.message ?? responseData.msg ?? '登录失败') };
       }
     }
 
-    if (response.status !== 200) {
-      return { success: false, message: `HTTP 错误: ${response.status}` };
+    if (httpStatus !== 200) {
+      return { success: false, message: `HTTP 错误: ${String(httpStatus)}` };
     }
 
-    return {
-      success: true,
-      message: '登录请求已完成，请验证',
-      data: responseData,
-    };
+    return { success: true, message: '登录成功' };
   } catch (error: unknown) {
+    runtimeLogger.error('Auth', '登录请求失败', error);
     const err = error as { response?: { data?: Record<string, unknown> }; message?: string };
     if (err.response) {
       const errorData = err.response.data;
       if (typeof errorData === 'object') {
         return {
           success: false,
-          message: errorData.message ?? errorData.msg ?? '请求失败',
+          message: typeof errorData.message === 'string' ? errorData.message : (typeof errorData.msg === 'string' ? errorData.msg : '请求失败'),
           data: errorData,
         };
       }
