@@ -314,6 +314,7 @@ export default function CourseScreen() {
   const [showDetail, setShowDetail] = useState(false);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     void (async () => {
       try {
         const [week, weeks] = await Promise.all([getCurrentWeek(), getAllWeek()]);
@@ -323,9 +324,10 @@ export default function CourseScreen() {
         console.error('获取周数失败', err);
       }
     })();
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
     void (async () => {
       try {
         const [scheduleData, timeData] = await Promise.all([
@@ -340,7 +342,7 @@ export default function CourseScreen() {
         setLoading(false);
       }
     })();
-  }, []);
+  }, [isLoggedIn]);
 
   useEffect(() => {
     if (loading || currentWeek === null || !timeTable.length || !courses.length) return;
