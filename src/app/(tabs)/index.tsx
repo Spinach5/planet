@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, TouchableOpacity, Text, RefreshControl } from 'react-native';
+import { router } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/themed-view';
@@ -67,9 +68,9 @@ export default function HomeScreen() {
         >
           {/* Header with weather */}
           <HeadStatus text="首页">
-            <TouchableOpacity style={styles.weatherBtn}>
+            <TouchableOpacity style={styles.weatherBtn} onPress={() => router.push('/weather')}>
               <MaterialIcon name="weather-sunny" color="#47a5fd" size={20} />
-              <Text style={styles.weatherTemp}>--°</Text>
+              <Text style={styles.weatherTemp}>天气</Text>
             </TouchableOpacity>
           </HeadStatus>
 
