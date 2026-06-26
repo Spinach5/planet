@@ -174,7 +174,7 @@ export default function RepoPage() {
         >
           {/* Header */}
           <View style={s.headerRow}>
-            <TouchableOpacity onPress={() => router.back()}>
+            <TouchableOpacity onPress={() => { if (router.canGoBack()) { router.back(); } else { router.replace('/(tabs)/user'); } }}>
               <MaterialIcon name="arrow-left" size={24} color="#fff" />
             </TouchableOpacity>
             <HeadStatus text="项目仓库" />
