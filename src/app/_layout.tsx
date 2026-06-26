@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router';
-import { useColorScheme } from 'react-native';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 import { ToastProvider } from '@/utils/toast';
+import { ThemeSettingsProvider, useAppColorScheme } from '@/hooks/use-theme-settings';
 import { Colors } from '@/constants/theme';
 
 /** Custom Material Design 3 theme based on our brand colors */
@@ -46,8 +46,8 @@ const customDarkTheme = {
   },
 };
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
+function AppContent() {
+  const colorScheme = useAppColorScheme();
   const isDark = colorScheme === 'dark';
 
   return (
@@ -67,5 +67,13 @@ export default function RootLayout() {
         </ToastProvider>
       </ThemeProvider>
     </PaperProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeSettingsProvider>
+      <AppContent />
+    </ThemeSettingsProvider>
   );
 }

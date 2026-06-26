@@ -63,6 +63,10 @@ export default function UserScreen() {
         ) : null}
 
         <ThemedView style={styles.menuSection}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/settings')}>
+            <Text style={styles.menuItemText}>设置</Text>
+          </TouchableOpacity>
+          <View style={styles.menuDivider} />
           <TouchableOpacity style={styles.menuItem}>
             <Text style={styles.menuItemText}>账号管理</Text>
           </TouchableOpacity>
