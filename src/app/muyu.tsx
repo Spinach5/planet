@@ -166,8 +166,8 @@ export default function MuYuPage() {
             <Animated.View style={[st.glow, { opacity: glowAnim, transform: [{ scale: glowScale }] }]} />
             <Animated.View style={[st.ripple, { opacity: rippleAnim, transform: [{ scale: rippleScale }] }]} />
             <Pressable onPress={handlePress} style={isHitting ? [st.muyuContainer, st.muyuContainerHitting] : st.muyuContainer}>
-              <Animated.View style={{ transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }}>
-                <Image source={{ uri: muyuStickAsset.uri }} style={st.stick} contentFit="contain" />
+              <Animated.View style={[st.stickWrap, { transform: [{ rotate: stickRotate }, { translateY: stickTransY }] }]}>
+                <Image source={{ uri: muyuStickAsset.uri }} style={st.stickImg} contentFit="contain" />
               </Animated.View>
               <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
                 <Image source={{ uri: muyuAsset.uri }} style={st.fish} contentFit="contain" />
@@ -256,7 +256,8 @@ const st = StyleSheet.create({
   muyuContainer: { alignItems: 'center', justifyContent: 'center', position: 'relative', zIndex: 2 },
   muyuContainerHitting: { opacity: 1 },
   fish: { width: 200, height: 200 },
-  stick: { width: 160, height: 160, position: 'absolute', top: -60, right: 10, zIndex: 3 },
+  stickWrap: { position: 'absolute', top: -60, right: 10, zIndex: 3, width: 160, height: 160 },
+  stickImg: { width: 160, height: 160 },
   floatLayer: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 10 },
   floatText: { position: 'absolute', fontSize: 22, fontWeight: 'bold', color: '#f5a623', textShadowColor: 'rgba(255,200,50,0.8)', textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 8 },
 
