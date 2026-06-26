@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { router, Stack } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { Audio } from 'expo-av';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedView } from '@/components/themed-view';
@@ -47,7 +46,7 @@ export default function MuYuPage() {
   const stickAnim = useMemo(() => new Animated.Value(0), []);
   const hitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const floatId = useRef(0);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const soundRef = useRef<{ play: () => void; pause: () => void } | null>(null);
 
   const audioEntry = BUILTIN_AUDIOS[currentKey];
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -90,20 +89,19 @@ export default function MuYuPage() {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!entry) return;
     try {
-      if (soundRef.current !== null) {
-        await soundRef.current.unloadAsync();
+      if (soundRef.current) {
+        soundRef.current.pause();
+        soundRef.current = null;
       }
-      const result = await Audio.Sound.createAsync(entry.src);
-      soundRef.current = result.sound;
-      result.sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          if (status.isPlaying) setIsPlaying(true);
-          if (status.didJustFinish) setIsPlaying(false);
-        }
-      });
-      await result.sound.playAsync();
+      // Use Web Audio API
+      const audio = new Audio(entry.src as unknown as string);
+      audio.onplay = () => setIsPlaying(true);
+      audio.onended = () => setIsPlaying(false);
+      audio.onpause = () => setIsPlaying(false);
+      soundRef.current = audio;
+      await audio.play();
     } catch {
-      // audio may not be available in some environments
+      // audio may not be available
     }
   }, []);
 
