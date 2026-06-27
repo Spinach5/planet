@@ -1,25 +1,38 @@
-import { hbutRequest } from '../../utils/request';
-import cacheManager from '../../utils/cache';
+import axios from "axios";
+import cacheManager from "../../utils/cache";
 
-const CACHE_KEY = 'bannerImages';
+const CACHE_KEY = "bannerImages";
+const BANNER_URL = "https://www.hbut.edu.cn/";
 
 /**
  * Extract banner image URLs from HBUT homepage HTML.
  */
 function extractBannerImages(html: string): string[] {
   const images: string[] = [];
-  if (typeof html !== 'string') return images;
+  if (typeof html !== "string") return images;
 
-  // Match img src attributes in banner/slider sections
-  const imgRegex = /<img[^>]+src="([^"]+)"[^>]*>/gi;
+  // Match all img src attributes
+  const imgRegex = /<img[^>]+src=["']([^"']+)["'][^>]*>/gi;
   let match: RegExpExecArray | null;
   while ((match = imgRegex.exec(html)) !== null) {
-    const src = match[1];
-    if (src && (src.includes('banner') || src.includes('slide') || src.includes('focus') || src.includes('jpg') || src.includes('png'))) {
-      // Make relative URLs absolute
-      const fullUrl = src.startsWith('http') ? src : `https://www.hbut.edu.cn${src.startsWith('/') ? '' : '/'}${src}`;
+    const src = match[1].trim();
+    if (!src) continue;
+
+    // Skip icons, logos, backgrounds, and internal CMS placeholders
+    if (/icon|logo|avatar|_bg|bg_|qr-?code|wechat|wx-?code/i.test(src)) continue;
+    // Skip virtual_attach_file (CMS internal, may require auth)
+    if (/virtual_attach_file/i.test(src)) continue;
+
+    // Match images with standard extensions
+    const isImageFile = /\.(jpe?g|png|webp)(\?|$)/i.test(src);
+
+    if (isImageFile) {
+      const fullUrl = src.startsWith("http")
+        ? src
+        : `https://www.hbut.edu.cn${src.startsWith("/") ? "" : "/"}${src}`;
       if (!images.includes(fullUrl)) images.push(fullUrl);
     }
+
     if (images.length >= 6) break;
   }
 
@@ -28,7 +41,7 @@ function extractBannerImages(html: string): string[] {
 
 /**
  * Fetch banner images from the HBUT school homepage.
- * Matches Taro's getBanner() — fetches HTML, extracts image URLs, caches result.
+ * Fetches HTML from www.hbut.edu.cn, extracts image URLs, caches result.
  */
 export async function getBanner(forceRefresh = false): Promise<string[]> {
   // Return cached if available
@@ -38,18 +51,17 @@ export async function getBanner(forceRefresh = false): Promise<string[]> {
   }
 
   try {
-    const response = await hbutRequest.get('/', {
+    const response = await axios.get(BANNER_URL, {
+      timeout: 10000,
+      responseType: "text",
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        Referer: 'https://www.hbut.edu.cn',
-        Origin: 'https://www.hbut.edu.cn',
+        "User-Agent":
+          "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36",
       },
-      withCredentials: true,
-      responseType: 'text',
     });
 
     if (response.status !== 200) return [];
-    const html = String(response.data ?? '');
+    const html = String(response.data ?? "");
     const images = extractBannerImages(html);
 
     // Only cache if we got results

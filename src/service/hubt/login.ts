@@ -29,22 +29,22 @@ export async function login(stuID: string, password: string): Promise<LoginResul
 
     // Step 3: Get student information
     runtimeLogger.info('Login', '正在获取学生信息...');
-    const stuInfo = await getStuInfo() as Record<string, unknown>;
+    const stuInfo = await getStuInfo();
     runtimeLogger.info('Login', '获取学生信息成功');
 
-    // Step 4: Save to userManager
+    // Step 4: Save to userManager — use mapped fields from CleanStuInfo
     userManager.stuId = stuID;
     userManager.password = password;
     userManager.isLoggedIn = true;
+    userManager.xhid = xhid;
 
-    if (typeof stuInfo.realName === 'string') userManager.realName = stuInfo.realName;
-    if (typeof stuInfo.xh === 'string') userManager.stuId = stuInfo.xh;
-    if (typeof stuInfo.college === 'string') userManager.college = stuInfo.college;
-    if (typeof stuInfo.majority === 'string') userManager.majority = stuInfo.majority;
-    if (typeof stuInfo.className === 'string') userManager.class = stuInfo.className;
-    if (typeof stuInfo.grade === 'string') userManager.grade = stuInfo.grade;
+    userManager.realName = stuInfo.realName;
+    userManager.college = stuInfo.college;
+    userManager.majority = stuInfo.majority;
+    userManager.class = stuInfo.class;
+    userManager.grade = stuInfo.grade;
+    userManager.university = '湖北工业大学';
 
-    userManager.setField('xhid', xhid);
     await userManager.saveToCache();
 
     runtimeLogger.info('Login', '登录流程完成，用户信息已保存');

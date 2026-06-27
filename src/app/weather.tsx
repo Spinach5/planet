@@ -10,6 +10,7 @@ import { MaterialIcon } from '@/components/MaterialIcon';
 import type { IconName } from '@/components/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/utils/toast';
+import { Loading } from '@/components/Loading';
 import { weatherManager } from '@/service/weatherInfo';
 import { runtimeLogger } from '@/utils/runtimeLogger';
 
@@ -32,6 +33,12 @@ export default function WeatherPage() {
       setArea(weatherManager.getCurrentArea());
       setHourly(weatherManager.get24HourForecast());
       setDaily(weatherManager.getDailyForecast());
+      if (weatherManager.locationSource === 'default') {
+        showToast({
+          message: '定位失败，已使用默认城市',
+          type: 'warning',
+        });
+      }
       runtimeLogger.info('Weather', '天气数据加载成功');
     } catch (e) {
       setError(true);
@@ -55,7 +62,7 @@ export default function WeatherPage() {
       <LinearGradient colors={isDark ? ['rgb(26,29,46)','rgb(35,39,64)','rgb(26,29,46)'] : ['#47a5fd','#cce5ff','#f2f5f9']} locations={[0,0.28,1]} style={[st.gradient, { paddingTop: insets.top + 8 }]}>
         <ScrollView style={st.scroll} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={['#47a5fd']} tintColor="#47a5fd" />}>
           <View style={st.headerRow}><TouchableOpacity onPress={() => router.back()}><MaterialIcon name="arrow-left" size={24} color="#fff" /></TouchableOpacity><HeadStatus text="天气" /></View>
-          {loading ? <View style={st.center}><Text style={{ color: '#fff', fontSize: 16 }}>加载天气中...</Text></View> :
+          {loading ? <Loading overlay={false} text="加载天气中..." /> :
           error ? <View style={[st.card, { backgroundColor: theme.surface }]}><View style={st.center}><MaterialIcon name="weather-cloudy-alert" size={48} color={theme.textSecondary} /><ThemedText style={{ marginTop: 12, fontSize: 16 }} themeColor="textSecondary">天气数据加载失败</ThemedText><TouchableOpacity style={[st.retry, { backgroundColor: theme.primary }]} onPress={onRefresh}><Text style={{ color: '#fff', fontWeight: '600' }}>重试</Text></TouchableOpacity></View></View> :
           current ? <>
             <View style={[st.card, { backgroundColor: theme.surface }]}>

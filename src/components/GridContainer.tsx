@@ -1,6 +1,7 @@
 import { View, StyleSheet, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { GridItem } from './GridItem';
 import type { IconName } from '@/components/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
@@ -65,6 +66,13 @@ export function GridContainer() {
     });
     return () => subscription.remove();
   }, [loadFeatures]);
+
+  // Refresh when tab gains focus (user returns from settings, etc.)
+  useFocusEffect(
+    useCallback(() => {
+      void loadFeatures();
+    }, [loadFeatures]),
+  );
 
   const visibleItems = TOGGLEABLE.filter((item) => features[item.key]);
   const gridItems: GridEntry[] = [...ALWAYS_VISIBLE, ...visibleItems];

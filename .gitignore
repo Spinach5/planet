@@ -9,15 +9,20 @@ dist/
 web-build/
 expo-env.d.ts
 .vscode/
+taro/
 
 # Native
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
 *.mobileprovision
+
+# Android signing (credentials — do not commit)
+**/keystore.properties
 
 # Metro
 .metro-health-check*
@@ -32,6 +37,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript

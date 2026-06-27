@@ -591,6 +591,14 @@
   resolved "https://registry.npmmirror.com/@cloudbase/adapter-interface/-/adapter-interface-0.7.1.tgz#3fa4c8e59cfaff5b8c985d9e292105e1c7b51874"
   integrity sha512-BjHTAvIMSLxbp26SeT6qLiSSBygz3kAVno/PMwwBwjgzVkVUvuZGVcvf1mhHxY/BjdRGLrd6X60OgvymV/aAUw==
 
+"@cloudbase/adapter-rn@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.npmmirror.com/@cloudbase/adapter-rn/-/adapter-rn-1.0.3.tgz#860d6202d1bc439fd5418bb9ca5ee478d229c01e"
+  integrity sha512-Wjf/NL2aV6Cmz1oA3s6g8OPIsWKD7BiuI7rCvdHqCfXGdcnSm6zuEtNCGwVy/36YdlEywoaFGAfqVKWCDj6Ayw==
+  dependencies:
+    "@cloudbase/adapter-interface" "^0.7.1"
+    react-native-mmkv "^3.3.3"
+
 "@cloudbase/adapter-wx_mp@^1.2.1", "@cloudbase/adapter-wx_mp@^1.3.1":
   version "1.3.1"
   resolved "https://registry.npmmirror.com/@cloudbase/adapter-wx_mp/-/adapter-wx_mp-1.3.1.tgz#d850f470d136e48559b3cd95c5a87590f73a04ad"
@@ -2105,7 +2113,7 @@ bser@2.1.1:
   dependencies:
     node-int64 "^0.4.0"
 
-bson@^7.1.1:
+bson@^7.1.1, bson@^7.3.1:
   version "7.3.1"
   resolved "https://registry.npmmirror.com/bson/-/bson-7.3.1.tgz#0cfaf8cfededa55c5e5ea0169738f2a439e7948d"
   integrity sha512-h/C0qe6857pQhcSJHLfsR1uYGj98Ge3wKAD3Ed9KqH3wcVh+BM4Jq4xISD7vs9OPuT07n+q3QQVjslJ286j6ag==
@@ -2387,6 +2395,11 @@ cross-spawn@^7.0.6:
     path-key "^3.1.0"
     shebang-command "^2.0.0"
     which "^2.0.1"
+
+crypto-js@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmmirror.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
+  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
 
 css-in-js-utils@^3.1.0:
   version "3.1.0"
@@ -3946,6 +3959,11 @@ jwt-decode@^3.1.2:
   resolved "https://registry.npmmirror.com/jwt-decode/-/jwt-decode-3.1.2.tgz#3fb319f3675a2df0c2895c8f5e9fa4b67b04ed59"
   integrity sha512-UfpWE/VZn0iP50d8cz9NrZLM9lSWhcJ+0Gt/nm4by88UL+J1SiKN8/5dkjMmbEzwL2CAe+67GsegCbIKtbp75A==
 
+jwt-decode@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.npmmirror.com/jwt-decode/-/jwt-decode-4.0.0.tgz#2270352425fd413785b2faf11f6e755c5151bd4b"
+  integrity sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==
+
 keyv@^4.5.4:
   version "4.5.4"
   resolved "https://registry.npmmirror.com/keyv/-/keyv-4.5.4.tgz#a879a99e29452f942439f2a405e3af8b31d4de93"
@@ -4923,6 +4941,11 @@ react-native-is-edge-to-edge@^1.3.1:
   version "1.3.1"
   resolved "https://registry.npmmirror.com/react-native-is-edge-to-edge/-/react-native-is-edge-to-edge-1.3.1.tgz#feb9a6a8faf0874298947edd556e5af22044e139"
   integrity sha512-NIXU/iT5+ORyCc7p0z2nnlkouYKX425vuU1OEm6bMMtWWR9yvb+Xg5AZmImTKoF9abxCPqrKC3rOZsKzUYgYZA==
+
+react-native-mmkv@^3.3.3:
+  version "3.3.3"
+  resolved "https://registry.npmmirror.com/react-native-mmkv/-/react-native-mmkv-3.3.3.tgz#1f0326f6314e23725af8145964343224d074e6cd"
+  integrity sha512-GMsfOmNzx0p5+CtrCFRVtpOOMYNJXuksBVARSQrCFaZwjUyHJdQzcN900GGaFFNTxw2fs8s5Xje//RDKj9+PZA==
 
 react-native-pager-view@8.0.1:
   version "8.0.1"

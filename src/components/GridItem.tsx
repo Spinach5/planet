@@ -1,8 +1,8 @@
 import { View, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
-import { router } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { MaterialIcon } from '@/components/MaterialIcon';
 import type { IconName } from '@/components/MaterialIcon';
+import { useDebouncedPush } from '@/utils/useDebouncedPush';
 
 interface GridItemProps {
   url: string;
@@ -19,9 +19,10 @@ export function GridItem({ url, icon, text }: GridItemProps) {
   // Grid is screenW - 16 (margins), 4 items per row
   const itemW = (screenW - 16) / 4;
   const iconSz = Math.min(itemW * 0.55, 72);
+  const push = useDebouncedPush();
 
   const handlePress = () => {
-    try { router.push(url); } catch { /* page may not exist */ }
+    try { push(url); } catch { /* page may not exist */ }
   };
 
   return (

@@ -1,13 +1,15 @@
 import { HeadStatus } from "@/components/HeadStatus";
+import { Loading } from "@/components/Loading";
 import { MaterialIcon } from "@/components/MaterialIcon";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useTheme } from "@/hooks/use-theme";
-import { useThemeSettings } from "@/hooks/use-theme-settings";
 import type { ThemeMode } from "@/hooks/use-theme-settings";
+import { useThemeSettings } from "@/hooks/use-theme-settings";
 import userManager from "@/service/userInfo";
 import encryptPassword from "@/utils/hbut/loginEncrypt";
 import { serverGet, serverPost } from "@/utils/serverRequest";
+import { runtimeLogger } from "@/utils/runtimeLogger";
 import { useToast } from "@/utils/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
@@ -42,11 +44,15 @@ const DEFAULT_FEATURES: FeatureToggles = {
   book: false,
   other: false,
 };
-let serverConnected = false;
+function isServerConnected(): boolean {
+  return !!userManager.getServerToken();
+}
 
 function formatBytes(bytes: number): string {
-  const gb = bytes / (1024 * 1024 * 1024);
-  return `${gb.toFixed(2)} GB`;
+  const mb = bytes / (1024 * 1024);
+  if (mb < 1) return `${(bytes / 1024).toFixed(2)} KB`;
+  if (mb < 1024) return `${mb.toFixed(2)} MB`;
+  return `${(mb / 1024).toFixed(2)} GB`;
 }
 
 async function getFeatures(): Promise<FeatureToggles> {
@@ -120,16 +126,14 @@ export default function SettingsPage() {
       try {
         const keys = await AsyncStorage.getAllKeys();
         let totalBytes = 0;
-        const encoder = new TextEncoder();
         for (const key of keys) {
           const val = await AsyncStorage.getItem(key);
           if (val)
-            totalBytes +=
-              encoder.encode(val).length + encoder.encode(key).length;
+            totalBytes += val.length + key.length;
         }
         setCacheSize(formatBytes(totalBytes));
       } catch {
-        setCacheSize("0.00 GB");
+        setCacheSize("计算失败");
       }
     })();
   }, []);
@@ -137,6 +141,8 @@ export default function SettingsPage() {
   const doClearCache = useCallback(async () => {
     setShowClearConfirm(false);
     const ud = await userManager.getFromCache();
+    // Clear in-memory logs first, otherwise next log write restores them from memory
+    await runtimeLogger.clear();
     await AsyncStorage.clear();
     if (ud) await userManager.saveToCache();
     await AsyncStorage.setItem(STORAGE_KEY_FORCE, String(forceUpdate));
@@ -179,19 +185,26 @@ export default function SettingsPage() {
 
   const handleExpandToggle = useCallback(async () => {
     const target = !features.expand;
+
+    // 关闭：直接更新
     if (!target) {
       updateFeature("expand", false);
       return;
     }
-    if (serverConnected) {
+
+    // 本次会话已连接过服务器，直接开启
+    if (isServerConnected()) {
       updateFeature("expand", true);
       return;
     }
+
+    // 前置校验
     const stuId = userManager.stuId;
     if (!stuId || !userManager.password) {
       showToast({ message: "请先登录教务系统", type: "warning" });
       return;
     }
+
     let ep = userManager.getEncryptedPassword();
     if (!ep) {
       try {
@@ -202,35 +215,38 @@ export default function SettingsPage() {
         return;
       }
     }
+
+    const sid = userManager.getSchoolId() || "hbut";
     setExpandLoading(true);
+
     try {
-      const sid = userManager.getSchoolId() || "hbut";
+      // 1. 检查用户是否已注册
       const checkRes = await serverGet<{ exists: boolean }>(
         "/api/v1/auth/check-user",
         { stuId, schoolId: sid },
       );
+
       if (checkRes.success && checkRes.data?.exists) {
+        // 已注册，调用幂等 register 获取 token
         const regRes = await serverPost<{ token: string }>(
           "/api/v1/auth/register",
-          {
-            stuId,
-            password: ep,
-            schoolId: sid,
-            nickName: userManager.realName,
-          },
+          { stuId, password: ep, schoolId: sid, nickName: userManager.realName },
         );
         if (regRes.success && regRes.data?.token) {
           userManager.setServerToken(regRes.data.token);
           if (!userManager.getSchoolId()) userManager.setSchoolId(sid);
         }
-        serverConnected = true;
+        // token saved, isServerConnected() returns true now
         updateFeature("expand", true);
         return;
       }
+
+      // 2. 未注册，隐藏 loading 后弹窗确认
+      setExpandLoading(false);
       const confirmed = await new Promise<boolean>((r) =>
         Alert.alert(
           "用户注册",
-          "使用拓展功能需要将个人信息上传到服务器，是否同意？",
+          "使用拓展功能需要将你的个人信息上传到服务器，是否同意？",
           [
             { text: "取消", onPress: () => r(false) },
             { text: "同意", onPress: () => r(true) },
@@ -238,20 +254,28 @@ export default function SettingsPage() {
         ),
       );
       if (!confirmed) return;
+
+      // 3. 同意后，显示 loading 并注册
+      setExpandLoading(true);
       const regRes = await serverPost<{ token: string }>(
         "/api/v1/auth/register",
         { stuId, password: ep, schoolId: sid, nickName: userManager.realName },
       );
       if (regRes.success && regRes.data?.token) {
         userManager.setServerToken(regRes.data.token);
-        serverConnected = true;
+        if (!userManager.getSchoolId()) userManager.setSchoolId(sid);
+        // token saved, isServerConnected() returns true now
         updateFeature("expand", true);
         showToast({ message: "注册成功", type: "success" });
-      } else
-        showToast({ message: regRes.message ?? "注册失败", type: "error" });
+      } else {
+        showToast({
+          message: regRes.message ?? "注册失败，请稍后重试",
+          type: "error",
+        });
+      }
     } catch (e) {
       showToast({
-        message: e instanceof Error ? e.message : "网络错误",
+        message: e instanceof Error ? e.message : "网络连接失败，请稍后重试",
         type: "error",
       });
     } finally {
@@ -284,7 +308,10 @@ export default function SettingsPage() {
         locations={[0, 0.28, 1]}
         style={[s.gradient, { paddingTop: insets.top + 8 }]}
       >
-        <ScrollView style={s.scrollView}>
+        <ScrollView
+          style={s.scrollView}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 20 }}
+        >
           <View style={s.headerRow}>
             <TouchableOpacity onPress={() => router.back()}>
               <MaterialIcon name="arrow-left" size={24} color="#ffffff" />
@@ -464,6 +491,9 @@ export default function SettingsPage() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {/* Server connecting loading overlay — matches Taro showLoading */}
+      {expandLoading ? <Loading overlay text="正在连接远程服务器..." /> : null}
     </ThemedView>
   );
 }
@@ -480,7 +510,7 @@ const s = StyleSheet.create({
   },
   group: {
     marginHorizontal: 12,
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: "hidden",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -507,7 +537,7 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
     marginHorizontal: 12,
     marginTop: 16,
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 14,
   },
@@ -519,7 +549,7 @@ const s = StyleSheet.create({
     justifyContent: "space-between",
     marginHorizontal: 12,
     marginTop: 8,
-    borderRadius: 20,
+    borderRadius: 12,
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
@@ -546,7 +576,7 @@ const s = StyleSheet.create({
     gap: 12,
     paddingVertical: 14,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 4,
   },
   themeOptionText: { fontSize: 16 },

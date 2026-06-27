@@ -4,10 +4,19 @@ import { getXhid } from './GetXhid';
 
 const CACHE_KEY = 'ScoresData';
 
-export async function getScores(): Promise<unknown> {
-  const cached = await cacheManager.getAsync<unknown>(CACHE_KEY);
-  if (cached) {
-    return cached;
+export interface ScoresData {
+  gpa: number;
+  averageScore: number;
+  notPass: number;
+  gpaRank: string;
+  gottenCredits: number;
+  chosenClass: number;
+}
+
+export async function getScores(forceRefresh = false): Promise<ScoresData> {
+  if (!forceRefresh) {
+    const cached = await cacheManager.getAsync<ScoresData>(CACHE_KEY);
+    if (cached) return cached;
   }
 
   const loginConfig = {
@@ -20,29 +29,33 @@ export async function getScores(): Promise<unknown> {
   };
 
   const xhid = await getXhid();
-  const response = await hbutRequest.get(
-    `/admin/xsd/xskp/xyqk?xhid=${xhid}`,
-    loginConfig,
-  );
+  const response = await hbutRequest.get(`/admin/xsd/xskp/xyqk?xhid=${xhid}`, loginConfig);
 
   if (response.status !== 200) {
-    throw new Error('获取成绩数据失败：网络请求失败');
+    throw new Error('获取成绩数据失败');
   }
 
-  const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const raw = typeof response.data === 'string' ? JSON.parse(response.data) as Record<string, unknown> : response.data as Record<string, unknown>;
 
-  if (data?.ret !== 0) {
-    throw new Error('获取成绩数据失败：接口返回 ret 不为 0');
+  if (raw.ret !== 0) {
+    throw new Error('获取成绩数据失败：ret 不为 0');
   }
 
-  const scoresData = data.data;
-  if (!scoresData) {
-    throw new Error('获取成绩数据失败：响应数据中无成绩数据');
-  }
-  if (typeof scoresData !== 'object') {
-    throw new Error('获取成绩数据失败：响应数据格式异常');
+  const d = raw.data as Record<string, unknown> | undefined;
+  if (!d || typeof d !== 'object') {
+    throw new Error('获取成绩数据失败：格式异常');
   }
 
-  await cacheManager.setAsync(CACHE_KEY, scoresData);
-  return scoresData;
+  const result: ScoresData = {
+    gpa: Number(d.gpa ?? 0),
+    averageScore: Number(d.pjcj ?? 0),
+    notPass: Number(d.bjgms ?? 0),
+    gpaRank: String(d.gpazypm ?? ''),
+    gottenCredits: Number(d.hdzxf ?? 0),
+    chosenClass: Number(d.yxkms ?? 0),
+  };
+
+  await cacheManager.setAsync(CACHE_KEY, result);
+  return result;
 }

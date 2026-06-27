@@ -1,13 +1,15 @@
-// AsyncStorage requires window/global which doesn't exist during SSR
+// In React Native, there's no `window` — use `global` check instead.
+// In SSR (Node.js), AsyncStorage isn't available.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let _AsyncStorage: any = null;
 
 try {
-  if (typeof window !== 'undefined') {
+  // React Native uses `global`, Web uses `window`. Check both.
+  if (typeof global !== 'undefined' || typeof window !== 'undefined') {
     // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     _AsyncStorage = require('@react-native-async-storage/async-storage').default;
   }
-} catch { /* SSR - no AsyncStorage */ }
+} catch { /* SSR or module not available */ }
 
 function getStorage() {
   return _AsyncStorage as {

@@ -33,6 +33,6 @@ const st = StyleSheet.create({
   container:{flex:1},gradient:{flex:1},scroll:{flex:1,paddingHorizontal:8},
   headerRow:{flexDirection:'row',alignItems:'center',gap:6,marginBottom:4},
   group:{marginHorizontal:8,marginBottom:20},title:{fontSize:18,fontWeight:'600',marginBottom:10},
-  list:{gap:8},card:{flexDirection:'row',alignItems:'center',gap:10,borderRadius:10,padding:14},
+  list:{gap:8},card:{flexDirection:'row',alignItems:'center',gap:10,borderRadius:12,padding:14},
   itemText:{fontSize:15},
 });

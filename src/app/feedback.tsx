@@ -49,8 +49,8 @@ const s = StyleSheet.create({
   headerRow:{flexDirection:'row',alignItems:'center',gap:6,marginBottom:4},
   card:{borderRadius:12,padding:16,marginHorizontal:8,marginBottom:16},
   label:{fontSize:15,fontWeight:'600',marginBottom:10},
-  ta:{borderRadius:8,borderWidth:1,padding:12,fontSize:15,minHeight:120},
-  input:{borderRadius:8,borderWidth:1,padding:12,fontSize:15},
+  ta:{borderRadius:12,borderWidth:1,padding:12,fontSize:15,minHeight:120},
+  input:{borderRadius:12,borderWidth:1,padding:12,fontSize:15},
   btn:{flexDirection:'row',alignItems:'center',justifyContent:'center',gap:8,paddingVertical:14,borderRadius:12,marginHorizontal:8},
   btnText:{fontSize:16,fontWeight:'600',color:'#fff'},
 });

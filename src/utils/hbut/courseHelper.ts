@@ -1,3 +1,7 @@
+function stripHtml(str: string): string {
+  return (str || '').replace(/<[^>]*>/g, '');
+}
+
 export interface CourseRaw {
   kcmc: string;
   tmc: string;
@@ -10,6 +14,7 @@ export interface CourseRaw {
   zongxs: string;
   xingqi: string;
   djc: string;
+  djs: string;
 }
 
 export interface CourseCleaned {
@@ -30,15 +35,16 @@ export function extractCourseData(courseList: CourseRaw[]): CourseCleaned[] {
   const map = new Map<string, CourseCleaned>();
 
   for (const item of courseList) {
-    const key = `${item.kcmc}|${item.zcstr}|${item.xingqi}`;
+    const name = stripHtml(item.kcmc);
+    const key = `${name}|${item.zcstr}|${item.xingqi}|${item.djs}`;
 
     if (!map.has(key)) {
       map.set(key, {
-        kcmc: item.kcmc,
-        tmc: item.tmc,
-        croommc: item.croommc,
+        kcmc: name,
+        tmc: stripHtml(item.tmc),
+        croommc: stripHtml(item.croommc),
         xqmc: item.xqmc,
-        jxbzc: item.jxbzc,
+        jxbzc: stripHtml(item.jxbzc),
         kcxz: item.kcxz,
         zcstr: item.zcstr.split(',').map(Number),
         xf: item.xf,

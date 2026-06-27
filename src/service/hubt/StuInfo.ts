@@ -4,8 +4,18 @@ import { getXhid } from './GetXhid';
 
 const CACHE_KEY = 'StuInfo';
 
-export async function getStuInfo(): Promise<unknown> {
-  const cached = await cacheManager.getAsync<unknown>(CACHE_KEY);
+export interface CleanStuInfo {
+  realName: string;
+  stuId: string;
+  grade: string;
+  majority: string;
+  class: string;
+  college: string;
+  xhid: string;
+}
+
+export async function getStuInfo(): Promise<CleanStuInfo> {
+  const cached = await cacheManager.getAsync<CleanStuInfo>(CACHE_KEY);
   if (cached) {
     return cached;
   }
@@ -29,20 +39,33 @@ export async function getStuInfo(): Promise<unknown> {
     throw new Error('获取个人信息失败：网络请求失败');
   }
 
-  const data = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const rawData = typeof response.data === 'string' ? JSON.parse(response.data) as Record<string, unknown> : response.data as Record<string, unknown>;
 
-  if (data?.ret !== 0) {
+  if (rawData?.ret !== 0) {
     throw new Error('获取个人信息失败：接口返回 ret 不为 0');
   }
 
-  const stuInfo = data.data;
-  if (!stuInfo) {
+  const stuInfoRaw = (rawData.data as Record<string, unknown> | undefined);
+
+  if (!stuInfoRaw) {
     throw new Error('获取个人信息失败：响应数据中无个人信息');
   }
-  if (typeof stuInfo !== 'object') {
-    throw new Error('获取成绩数据失败：响应数据格式异常');
+  if (typeof stuInfoRaw !== 'object') {
+    throw new Error('获取个人信息失败：响应数据格式异常');
   }
 
-  await cacheManager.setAsync(CACHE_KEY, stuInfo);
-  return stuInfo;
+  // Map HBUT raw fields to clean names (matching Taro project)
+  const cleanInfo: CleanStuInfo = {
+    realName: String(stuInfoRaw.xm ?? ''),
+    stuId: String(stuInfoRaw.xh ?? ''),
+    grade: String(stuInfoRaw.sznj ?? ''),
+    majority: String(stuInfoRaw.zymc ?? ''),
+    class: String(stuInfoRaw.bjmc ?? ''),
+    college: String(stuInfoRaw.skyx ?? ''),
+    xhid,
+  };
+
+  await cacheManager.setAsync(CACHE_KEY, cleanInfo);
+  return cleanInfo;
 }
