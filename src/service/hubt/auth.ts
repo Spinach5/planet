@@ -1,4 +1,4 @@
-import { hbutRequest } from '../../utils/request';
+import { clearHbutCookies, hbutRequest } from '../../utils/request';
 import encryptPassword from '../../utils/hbut/loginEncrypt';
 import { solveCaptcha } from './captcha';
 import { runtimeLogger } from '../../utils/runtimeLogger';
@@ -11,6 +11,11 @@ interface AuthResult {
 }
 
 export async function auth(stuID: string, password: string): Promise<AuthResult> {
+  // Clear stale session cookies from previous attempts.
+  // A failed login can leave a poisoned session cookie that
+  // causes subsequent attempts to always fail.
+  await clearHbutCookies();
+
   // Step 1: Encrypt password
   let encodedPassword: string;
   try {

@@ -3,10 +3,10 @@ import type { AxiosResponse } from 'axios';
 import CookiesManager from './cookies';
 import { API_BASE } from '../config/api';
 
-const createRequest = (baseURL: string, cookiesPrefix = '') => {
-  const cookieManager = new CookiesManager(cookiesPrefix);
-  void cookieManager.init();
+const hbutCookieManager = new CookiesManager('hbut');
+void hbutCookieManager.init();
 
+const createRequest = (baseURL: string, cookieManager: CookiesManager) => {
   const instance = axios.create({
     baseURL,
     timeout: 15000,
@@ -43,5 +43,11 @@ const createRequest = (baseURL: string, cookiesPrefix = '') => {
   return instance;
 };
 
-export const hbutRequest = createRequest(API_BASE.hbut, 'hbut');
-export default createRequest('');
+export const hbutRequest = createRequest(API_BASE.hbut, hbutCookieManager);
+
+/** Clear HBUT session cookies — call before each login to start fresh */
+export async function clearHbutCookies(): Promise<void> {
+  await hbutCookieManager.clear();
+}
+
+export default createRequest('', new CookiesManager(''));
