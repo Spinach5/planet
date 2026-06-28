@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, Stack } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  ActivityIndicator,
   Modal,
   ScrollView,
   StyleSheet,
@@ -280,6 +281,16 @@ export default function LoginPage() {
           </View>
         </View>
       </Modal>
+
+      {/* Loading overlay — blocks all interaction during login */}
+      {loading ? (
+        <View style={styles.loadingOverlay}>
+          <View style={[styles.loadingBox, { backgroundColor: theme.surface }]}>
+            <ActivityIndicator size="large" color="#47a5fd" />
+            <Text style={styles.loadingText}>登录中...</Text>
+          </View>
+        </View>
+      ) : null}
     </ThemedView>
   );
 }
@@ -383,4 +394,29 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   uniOptionText: { fontSize: 16 },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 999,
+  },
+  loadingBox: {
+    borderRadius: 16,
+    paddingHorizontal: 40,
+    paddingVertical: 30,
+    alignItems: "center",
+    gap: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  loadingText: {
+    fontSize: 15,
+    color: "#666",
+    fontWeight: "500",
+  },
 });

@@ -61,18 +61,38 @@ export async function auth(stuID: string, password: string): Promise<AuthResult>
       return { success: true, message: '登录成功' };
     }
 
-    const responseData = response.data;
+    let responseData = response.data;
+
+    // Parse string response as JSON if needed (axios responseType is 'text')
+    if (typeof responseData === "string") {
+      try {
+        responseData = JSON.parse(responseData);
+      } catch {
+        // Not JSON — e.g. HTML page after redirect
+      }
+    }
 
     // JSON response handling
-    if (typeof responseData === 'object' && responseData !== null) {
+    if (typeof responseData === "object" && responseData !== null) {
       // ret !== "0" means wrong password
-      if (responseData.ret !== undefined && String(responseData.ret) !== '0') {
-        return { success: false, message: '密码输入错误' };
+      if (responseData.ret !== undefined && String(responseData.ret) !== "0") {
+        return { success: false, message: "密码输入错误" };
       }
 
-      const codeVal = responseData.code !== undefined ? responseData.code : responseData.ret;
-      if (codeVal !== undefined && codeVal !== 0 && codeVal !== 200 && String(codeVal) !== '0') {
-        return { success: false, message: String(responseData.message ?? responseData.msg ?? '登录失败') };
+      const codeVal =
+        responseData.code !== undefined ? responseData.code : responseData.ret;
+      if (
+        codeVal !== undefined &&
+        codeVal !== 0 &&
+        codeVal !== 200 &&
+        String(codeVal) !== "0"
+      ) {
+        return {
+          success: false,
+          message: String(
+            responseData.message ?? responseData.msg ?? "登录失败",
+          ),
+        };
       }
     }
 

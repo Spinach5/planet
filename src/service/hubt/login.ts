@@ -50,14 +50,9 @@ export async function login(stuID: string, password: string): Promise<LoginResul
     runtimeLogger.info('Login', '登录流程完成，用户信息已保存');
     return { success: true, message: '登录成功' };
   } catch (error) {
-    runtimeLogger.error('Login', '登录后续流程失败', error);
-    // Even if xhid/stuInfo fails, the login cookie is already set
-    // Mark as logged in with basic info
-    userManager.stuId = stuID;
-    userManager.password = password;
-    userManager.isLoggedIn = true;
-    await userManager.saveToCache();
-
-    return { success: true, message: '登录成功（部分信息获取失败）' };
+    runtimeLogger.error("Login", "获取学生信息失败", error);
+    // Auth may have returned success (cookies set) but if we can't
+    // fetch student info, the credentials are likely wrong.
+    return { success: false, message: "账号或者密码错误" };
   }
 }
