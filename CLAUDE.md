@@ -31,9 +31,7 @@ Two strategies are used in parallel:
 
 1. **Platform file extensions** — `.web.tsx` / `.web.ts` files are auto-loaded on web:
    - `src/hooks/use-color-scheme.web.ts` — hydrates color scheme client-side to support static rendering
-   - `src/components/animated-icon.web.tsx` — simplified web animations (splash overlay is null on web)
-   - `src/components/app-tabs.web.tsx` — uses `expo-router/ui` Tabs for web (floating pill bar)
-   - `src/components/app-tabs.tsx` — uses `expo-router/unstable-native-tabs` NativeTabs for native (system tab bar)
+   - `src/components/feature/animated-icon.web.tsx` — simplified web animations (splash overlay is null on web)
 
 2. **`Platform.select()` / `Platform.OS` checks** — inline platform branching for smaller differences (font families, dev menu shortcuts, insets, SymbolView icon names).
 
@@ -47,7 +45,7 @@ Two strategies are used in parallel:
 ### Key components
 
 - **`ThemedText`** / **`ThemedView`** — building blocks; accept a `type` or `themeColor` key and automatically resolve the current theme color. Prefer these over raw `<Text>` / `<View>`.
-- **`Collapsible`** (`src/components/ui/collapsible.tsx`) — animated expandable section using `react-native-reanimated` (`FadeIn`)
+- **`Collapsible`** (`src/components/base/ui/collapsible.tsx`) — animated expandable section using `react-native-reanimated` (`FadeIn`)
 - **`ExternalLink`** — wraps expo-router's `Link`; opens in-app browser on native, new tab on web
 - **`AnimatedIcon`** / **`AnimatedSplashOverlay`** — logo animation and full-screen splash (native only; web splash is a no-op)
 

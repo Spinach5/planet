@@ -20,6 +20,12 @@ export { GridContainer } from './layout/GridContainer';
 export { GridItem } from './layout/GridItem';
 export { HeadStatus } from './layout/HeadStatus';
 
+// Base UI
+export { Collapsible } from './base/ui/collapsible';
+
 // Feature
+export { AnimatedIcon, AnimatedSplashOverlay } from './feature/animated-icon';
+export { HintRow } from './feature/hint-row';
 export { IndexSwiper } from './feature/IndexSwiper';
 export { ExternalLink } from './feature/external-link';
+export { WebBadge } from './feature/web-badge';
