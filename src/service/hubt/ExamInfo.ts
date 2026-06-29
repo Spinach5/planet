@@ -1,7 +1,5 @@
-import cacheManager from "../../utils/cache";
 import { hbutRequest } from "../../utils/request";
-
-const CACHE_KEY_PREFIX = "ExamInfoData_";
+import { withCache } from "@/service/utils";
 
 interface ExamItem {
   kcmc: string;
@@ -56,46 +54,36 @@ function extractExamInfo(raw: Record<string, unknown>): ExamResult {
  * Get exam info for a semester, sorted by exam time.
  * Matches the original Taro getExamInfo.
  */
-export async function getExamInfo(
-  semester: string,
-  forceRefresh = false,
-): Promise<ExamResult> {
-  const cacheKey = CACHE_KEY_PREFIX + semester;
+export const getExamInfo = withCache(
+  async (semester: string, _forceRefresh = false): Promise<ExamResult> => {
+    const loginConfig = {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+        Referer: "https://jwxt.hbut.edu.cn",
+        Origin: "https://jwxt.hbut.edu.cn",
+      },
+      withCredentials: true,
+    };
 
-  if (!forceRefresh) {
-    const cached = await cacheManager.getAsync<ExamResult>(cacheKey);
-    if (cached) return cached;
-  }
+    const response = await hbutRequest.get(
+      `admin/xsd/kwglXsdKscx/ajaxXsksList?xnxq=${semester}`,
+      loginConfig,
+    );
 
-  const loginConfig = {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-      Referer: "https://jwxt.hbut.edu.cn",
-      Origin: "https://jwxt.hbut.edu.cn",
-    },
-    withCredentials: true,
-  };
+    if (response.status !== 200) {
+      throw new Error("获取考试信息失败：网络请求失败");
+    }
 
-  const response = await hbutRequest.get(
-    `admin/xsd/kwglXsdKscx/ajaxXsksList?xnxq=${semester}`,
-    loginConfig,
-  );
+    const data =
+      typeof response.data === "string"
+        ? (JSON.parse(response.data) as Record<string, unknown>)
+        : (response.data as Record<string, unknown>);
 
-  if (response.status !== 200) {
-    throw new Error("获取考试信息失败：网络请求失败");
-  }
+    if (data?.ret !== 0) {
+      throw new Error("获取考试信息失败：接口返回 ret 不为 0");
+    }
 
-  const data =
-    typeof response.data === "string"
-      ? (JSON.parse(response.data) as Record<string, unknown>)
-      : (response.data as Record<string, unknown>);
-
-  if (data?.ret !== 0) {
-    throw new Error("获取考试信息失败：接口返回 ret 不为 0");
-  }
-
-  const examResults = extractExamInfo(data);
-
-  await cacheManager.setAsync(cacheKey, examResults);
-  return examResults;
-}
+    return extractExamInfo(data);
+  },
+  { cacheKey: "ExamInfoData", ttl: 30 * 60 * 1000, keyBuilder: (args) => args[0] as string },
+);
