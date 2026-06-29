@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
+import { getContentUriAsync } from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform } from "react-native";
 import { runtimeLogger } from "@/utils/runtimeLogger";
@@ -16,7 +17,7 @@ const GITEE_CONFIG = {
 
 const RELEASES_URL = `https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/releases/latest`;
 
-const CACHED_APK_KEY = "cached_apk";
+const CACHED_APK_KEY = "cached_apk_info";
 
 // ============================================================
 // Types
@@ -40,16 +41,20 @@ interface GiteeRelease {
   }>;
 }
 
-interface CachedApk {
+interface CachedApkInfo {
   version: string;
   apkPath: string;
+  size: number;
 }
 
 // ============================================================
 // Path helpers
 // ============================================================
 
-const updateDir = new FileSystem.Directory(FileSystem.Paths.cache, "update");
+const updateDir = new FileSystem.Directory(
+  FileSystem.Paths.cache,
+  "app_updates",
+);
 const zipFile = new FileSystem.File(updateDir, "update.zip");
 const extractDir = new FileSystem.Directory(updateDir, "extracted");
 
@@ -68,7 +73,7 @@ function normalizeVersion(ver: string): string {
   return ver.replace(/^v/, "").replace(/-.*$/, "");
 }
 
-/** Parse "X.Y.Z" into a comparable number */
+/** Parse "X.Y.Z" into comparable number: major*10000 + minor*100 + patch */
 function versionToCode(ver: string): number {
   const parts = ver.split(".");
   const major = parseInt(parts[0] ?? "0", 10);
@@ -86,7 +91,7 @@ function getLocalVersion(): string {
 }
 
 // ============================================================
-// Public API
+// 1. 检查更新
 // ============================================================
 
 export async function checkUpdate(): Promise<CheckResult> {
@@ -95,20 +100,23 @@ export async function checkUpdate(): Promise<CheckResult> {
   const cached = await getCachedApk();
   const localVersion = getLocalVersion();
 
-  let remoteData: GiteeRelease;
+  let release: GiteeRelease;
   try {
     const resp = await fetch(RELEASES_URL);
     if (!resp.ok) {
-      runtimeLogger.error("Update", `Gitee API 返回非 200: ${String(resp.status)}`);
+      runtimeLogger.error(
+        "Update",
+        `Gitee API 返回非 200: ${String(resp.status)}`,
+      );
       throw new Error(`服务器返回 ${String(resp.status)}`);
     }
-    remoteData = (await resp.json()) as GiteeRelease;
+    release = (await resp.json()) as GiteeRelease;
   } catch (err) {
     runtimeLogger.error("Update", "获取 Release 信息失败", err);
     throw err;
   }
 
-  const remoteRaw = remoteData.tag_name;
+  const remoteRaw = release.tag_name;
   const remoteVersion = normalizeVersion(remoteRaw);
   const localNorm = normalizeVersion(localVersion);
 
@@ -117,46 +125,56 @@ export async function checkUpdate(): Promise<CheckResult> {
     `版本比较: 本地=${localVersion} (${localNorm}) vs 远程=${remoteRaw} (${remoteVersion})`,
   );
 
-  const remoteCode = versionToCode(remoteVersion);
-  const localCode = versionToCode(localNorm);
-
-  if (remoteCode <= localCode) {
+  if (versionToCode(remoteVersion) <= versionToCode(localNorm)) {
+    // Already up-to-date — clean up any stale cache
+    if (cached) {
+      await cleanupFiles();
+    }
     runtimeLogger.info("Update", "已是最新版本");
     return { hasUpdate: false };
   }
 
-  // Find zip asset (non-archive zip)
-  const zipAsset = remoteData.assets.find(
+  // Find download asset: prefer zip (non-archive), fallback to apk
+  const zipAsset = release.assets.find(
     (a) => a.name.endsWith(".zip") && !a.name.includes("archive"),
   );
-  if (!zipAsset) {
-    runtimeLogger.error("Update", "Release 中未找到 zip 下载文件");
+  const apkAsset = release.assets.find((a) => a.name.endsWith(".apk"));
+  const downloadAsset = zipAsset ?? apkAsset;
+
+  if (!downloadAsset) {
+    runtimeLogger.error("Update", "Release 中未找到下载文件");
     throw new Error("未找到下载文件");
   }
 
-  // If we already have this version cached, skip download
-  if (cached && cached.version === remoteVersion) {
-    runtimeLogger.info("Update", `版本 ${remoteVersion} 已有缓存 APK，直接安装`);
-    return {
-      hasUpdate: true,
-      name: remoteData.name,
-      body: remoteData.body,
-      remoteVersion,
-    };
+  // If we already have this version cached, return without zipUrl
+  if (cached?.version === remoteVersion) {
+    const cachedFile = new FileSystem.File(cached.apkPath);
+    if (cachedFile.exists) {
+      runtimeLogger.info(
+        "Update",
+        `版本 ${remoteVersion} 已有缓存 APK，直接安装`,
+      );
+      return {
+        hasUpdate: true,
+        name: release.name,
+        body: release.body,
+        remoteVersion,
+      };
+    }
   }
 
   runtimeLogger.info("Update", `发现新版本: ${remoteVersion}`);
   return {
     hasUpdate: true,
-    name: remoteData.name,
-    body: remoteData.body,
-    zipUrl: zipAsset.browser_download_url,
+    name: release.name,
+    body: release.body,
+    zipUrl: downloadAsset.browser_download_url,
     remoteVersion,
   };
 }
 
 // ============================================================
-// Download with progress + resume support
+// 2. 下载（支持进度回调 + 取消 + 直接下载 .apk）
 // ============================================================
 
 let currentDownloadTask: FileSystem.DownloadTask | null = null;
@@ -168,25 +186,36 @@ export function cancelDownload(): void {
   }
 }
 
-export async function downloadZip(
+export async function downloadUpdate(
   url: string,
-  onProgress: (pct: number, status: string) => void,
+  onProgress: (percent: number, statusText: string) => void,
 ): Promise<string> {
   ensureDir(updateDir);
 
-  // Clean up previous download
-  cleanupFilesSync();
+  // Clean up previous download files
+  if (updateDir.exists) {
+    updateDir.delete();
+  }
+  ensureDir(updateDir);
+
+  const isApk = url.toLowerCase().endsWith(".apk");
+  const targetFile = isApk
+    ? new FileSystem.File(updateDir, "update.apk")
+    : zipFile;
 
   runtimeLogger.info("Update", `开始下载: ${url}`);
   onProgress(0, "准备下载...");
 
-  const task = FileSystem.File.createDownloadTask(url, zipFile, {
+  const task = FileSystem.File.createDownloadTask(url, targetFile, {
     onProgress: ({ bytesWritten, totalBytes }) => {
-      const pct = totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0;
-      if (pct >= 100) {
+      const percent =
+        totalBytes > 0
+          ? Math.round((bytesWritten / totalBytes) * 100)
+          : 0;
+      if (percent >= 100) {
         onProgress(100, "下载完成，准备安装...");
-      } else if (pct > 0) {
-        onProgress(pct, `下载中 ${String(pct)}%`);
+      } else if (percent > 0) {
+        onProgress(percent, `下载中 ${String(percent)}%`);
       }
     },
   });
@@ -196,7 +225,6 @@ export async function downloadZip(
   try {
     const result = await task.downloadAsync();
     if (!result) {
-      // Paused — won't happen unless we explicitly pause
       throw new Error("下载被暂停");
     }
     runtimeLogger.info("Update", `下载完成: ${result.uri}`);
@@ -211,47 +239,53 @@ export async function downloadZip(
 }
 
 // ============================================================
-// Extract APK from zip
+// 3. 解压（如果下载的是 ZIP 包；APK 直接返回）
 // ============================================================
 
-export async function extractApk(zipPath: string): Promise<string> {
-  runtimeLogger.info("Update", `开始解压: ${zipPath}`);
+export async function extractApkIfNeeded(
+  downloadedPath: string,
+): Promise<string> {
+  // If it's already an APK, no extraction needed
+  if (downloadedPath.toLowerCase().endsWith(".apk")) {
+    runtimeLogger.info("Update", `直接使用 APK: ${downloadedPath}`);
+    return downloadedPath;
+  }
 
-  // Dynamic import fflate
+  runtimeLogger.info("Update", `开始解压: ${downloadedPath}`);
+
   const fflate = await import("fflate");
 
-  // Read zip file as Uint8Array
-  const zipFileObj = new FileSystem.File(zipPath);
-  const bytes = zipFileObj.bytesSync();
+  const zipFileObj = new FileSystem.File(downloadedPath);
+  const bytes = await zipFileObj.bytes();
 
-  // Unzip in memory
   const unzipped = fflate.unzipSync(bytes);
 
-  // Ensure extract directory exists
   ensureDir(extractDir);
 
   let apkPath = "";
 
   for (const [filename, data] of Object.entries(unzipped)) {
-    const apkFile = new FileSystem.File(extractDir, filename);
+    const file = new FileSystem.File(extractDir, filename);
 
     // Ensure parent directory exists for nested paths
-    const parentDir = apkFile.parentDirectory;
+    const parentDir = file.parentDirectory;
     if (parentDir.uri !== extractDir.uri) {
       ensureDir(parentDir);
     }
 
-    // Write extracted file
-    apkFile.write(data as Uint8Array);
+    file.write(data as Uint8Array);
 
     if (filename.toLowerCase().endsWith(".apk")) {
-      apkPath = apkFile.uri;
-      runtimeLogger.info("Update", `找到 APK: ${filename} (${String(apkFile.size)} bytes)`);
+      apkPath = file.uri;
+      runtimeLogger.info(
+        "Update",
+        `找到 APK: ${filename} (${String(file.size)} bytes)`,
+      );
     }
   }
 
   if (!apkPath) {
-    runtimeLogger.error("Update", "zip 中未找到 .apk 文件");
+    runtimeLogger.error("Update", "ZIP 中未找到 APK 文件");
     // List what was extracted for debugging
     const extracted = extractDir.list().map((f) =>
       f instanceof FileSystem.File ? f.uri : f.uri,
@@ -265,7 +299,94 @@ export async function extractApk(zipPath: string): Promise<string> {
 }
 
 // ============================================================
-// APK cache
+// 4. 安装权限引导
+// ============================================================
+
+/**
+ * 跳转到系统设置的「安装未知应用」页面
+ */
+export async function openInstallPermissionSettings(): Promise<void> {
+  if (Platform.OS !== "android") return;
+
+  const packageName = Constants.expoConfig?.android?.package ?? "";
+
+  try {
+    await IntentLauncher.startActivityAsync(
+      "android.settings.MANAGE_UNKNOWN_APP_SOURCES",
+      { data: `package:${packageName}` },
+    );
+    runtimeLogger.info("Update", "已跳转安装权限设置页");
+  } catch {
+    // Fallback: generic app settings page
+    runtimeLogger.warn("Update", "MANAGE_UNKNOWN_APP_SOURCES 失败，尝试通用设置页");
+    try {
+      await IntentLauncher.startActivityAsync(
+        "android.settings.APPLICATION_DETAILS_SETTINGS",
+        { data: `package:${packageName}` },
+      );
+    } catch (err) {
+      runtimeLogger.error("Update", "无法打开设置页面", err);
+      throw new Error("请手动前往系统设置开启「安装未知应用」权限");
+    }
+  }
+}
+
+// ============================================================
+// 5. 调起系统安装器
+// ============================================================
+
+export async function installApk(apkPath: string): Promise<void> {
+  runtimeLogger.info("Update", `调起安装: ${apkPath}`);
+
+  if (Platform.OS !== "android") {
+    throw new Error("仅支持 Android 安装");
+  }
+
+  const apkFile = new FileSystem.File(apkPath);
+
+  if (!apkFile.exists) {
+    runtimeLogger.error("Update", `APK 文件不存在: ${apkPath}`);
+    throw new Error("安装包不存在，请重新下载");
+  }
+
+  runtimeLogger.info("Update", `APK 文件大小: ${String(apkFile.size)} bytes`);
+
+  // contentUri: try new API getter first, fallback to legacy async
+  let contentUri = apkFile.contentUri as string | undefined;
+
+  if (!contentUri) {
+    runtimeLogger.info("Update", "contentUri getter 为空，尝试 legacy API");
+    contentUri = await getContentUriAsync(apkFile.uri);
+  }
+
+  if (!contentUri) {
+    runtimeLogger.error("Update", "无法获取 contentUri");
+    throw new Error("无法获取安装包访问权限");
+  }
+
+  runtimeLogger.info("Update", `Content URI: ${contentUri}`);
+
+  // ACTION_VIEW with RETURN_RESULT extra — this tells the package installer
+  // to call setResult(), which prevents startActivityForResult from returning
+  // RESULT_CANCELED immediately.
+  await IntentLauncher.startActivityAsync(
+    "android.intent.action.VIEW",
+    {
+      data: contentUri,
+      type: "application/vnd.android.package-archive",
+      flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
+      extra: {
+        "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
+        "android.intent.extra.RETURN_RESULT": true,
+      },
+    },
+  );
+
+  runtimeLogger.info("Update", "安装器已调起");
+}
+
+// ============================================================
+// 6. APK 缓存管理
 // ============================================================
 
 export async function cacheApk(
@@ -273,15 +394,27 @@ export async function cacheApk(
   version: string,
 ): Promise<void> {
   if (!version) return;
-  const data: CachedApk = { version, apkPath };
-  await AsyncStorage.setItem(CACHED_APK_KEY, JSON.stringify(data));
+
+  try {
+    const file = new FileSystem.File(apkPath);
+    const info: CachedApkInfo = {
+      version,
+      apkPath,
+      size: file.size ?? 0,
+    };
+    await AsyncStorage.setItem(CACHED_APK_KEY, JSON.stringify(info));
+    runtimeLogger.info("Update", `APK 已缓存: ${apkPath}`);
+  } catch (err) {
+    runtimeLogger.warn("Update", "缓存 APK 信息失败", err);
+  }
 }
 
-async function getCachedApk(): Promise<CachedApk | null> {
+async function getCachedApk(): Promise<CachedApkInfo | null> {
   try {
     const raw = await AsyncStorage.getItem(CACHED_APK_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw) as CachedApk;
+    const data = JSON.parse(raw) as CachedApkInfo;
+
     // Verify file still exists
     const cachedFile = new FileSystem.File(data.apkPath);
     if (!cachedFile.exists) {
@@ -300,37 +433,7 @@ export async function getCachedApkPath(): Promise<string | null> {
 }
 
 // ============================================================
-// Install
-// ============================================================
-
-export async function installApk(apkPath: string): Promise<void> {
-  runtimeLogger.info("Update", `调起安装: ${apkPath}`);
-
-  if (Platform.OS !== "android") {
-    throw new Error("仅支持 Android 安装");
-  }
-
-  try {
-    const apkFile = new FileSystem.File(apkPath);
-    const contentUri = apkFile.contentUri;
-
-    await IntentLauncher.startActivityAsync(
-      "android.intent.action.VIEW",
-      {
-        data: contentUri,
-        flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-        type: "application/vnd.android.package-archive",
-      },
-    );
-    runtimeLogger.info("Update", "安装器已调起");
-  } catch (err) {
-    runtimeLogger.error("Update", "调起安装器失败", err);
-    throw new Error("无法打开安装程序，请检查系统设置");
-  }
-}
-
-// ============================================================
-// Cleanup
+// 7. 清理临时文件
 // ============================================================
 
 function cleanupFilesSync(): void {
