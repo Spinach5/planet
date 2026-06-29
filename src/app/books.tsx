@@ -13,15 +13,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/utils/toast';
 import { getBookList, getBookCategories, type BookItem } from '@/service/server/books';
 import userManager from '@/service/userInfo';
-
-function getHashCode(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) { hash = (hash << 5) - hash + str.charCodeAt(i); hash |= 0; }
-  return Math.abs(hash);
-}
-function getColorFromName(name: string): string {
-  return `hsl(${String(getHashCode(name) % 360)}, 70%, 55%)`;
-}
+import { getColorFromName } from '@/utils/color';
 
 const BOOK_TYPE_OPTIONS = [
   { label: '全部', value: '' },
