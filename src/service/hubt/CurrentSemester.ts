@@ -22,13 +22,13 @@ export const getCurrentSemester = withCache(
       throw new Error('获取当前学期失败：网络请求失败');
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const data = typeof response.data === 'string' ? JSON.parse(response.data) as Record<string, unknown> : response.data as Record<string, unknown>;
 
-    if (data?.ret !== 0) {
+    if (data.ret !== 0) {
       throw new Error('获取当前学期失败：接口返回 ret 不为 0');
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string
     const semesterData = String(data.data ?? '');
     return semesterData;
   },
