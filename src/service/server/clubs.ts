@@ -1,9 +1,6 @@
 // Clubs API — matches Taro src/service/hbut/clubs.js
 import { serverGet, serverPost } from "@/utils/serverRequest";
-import cacheManager from "@/utils/cache";
-
-const CACHE_KEY_CLUBS = "v1_clubs";
-const CACHE_KEY_CATEGORIES = "v1_club_categories";
+import { withCache } from "@/service/utils";
 
 export interface ClubItem {
   id: number;
@@ -20,39 +17,29 @@ export interface ClubItem {
   image_url?: string;
 }
 
-export async function getAllClub(forceRefresh = false): Promise<{
-  clubs: ClubItem[];
-  categories: string[];
-}> {
-  if (!forceRefresh) {
-    const cached = await cacheManager.getAsync<ClubItem[]>(CACHE_KEY_CLUBS);
-    const cachedCats = await cacheManager.getAsync<string[]>(CACHE_KEY_CATEGORIES);
-    if (cached && Array.isArray(cached)) {
-      return { clubs: cached, categories: cachedCats ?? ["全部"] };
-    }
-  }
-  const [clubRes, catRes] = await Promise.all([
-    serverGet<ClubItem[]>("/api/v1/clubs"),
-    serverGet<string[]>("/api/v1/clubs/categories"),
-  ]);
-  const clubs = clubRes.data ?? [];
-  void cacheManager.setAsync(CACHE_KEY_CLUBS, clubs);
-  const categories = ["全部", ...(catRes.data ?? [])];
-  void cacheManager.setAsync(CACHE_KEY_CATEGORIES, categories);
-  return { clubs, categories };
-}
+export const getAllClub = withCache(
+  async (_forceRefresh = false): Promise<{ clubs: ClubItem[]; categories: string[] }> => {
+    const [clubRes, catRes] = await Promise.all([
+      serverGet<ClubItem[]>("/api/v1/clubs"),
+      serverGet<string[]>("/api/v1/clubs/categories"),
+    ]);
+    const clubs = clubRes.data ?? [];
+    const categories = ["全部", ...(catRes.data ?? [])];
+    return { clubs, categories };
+  },
+  { cacheKey: "v1_clubs", ttl: 5 * 60 * 1000 },
+);
 
 export async function getClubDetail(id: number): Promise<ClubItem> {
   const res = await serverGet<ClubItem>(`/api/v1/clubs/${id}`);
-  if (res && res.data) return res.data;
+  if (res.data) return res.data;
   throw new Error("社团不存在");
 }
 
 export async function addClub(data: Record<string, unknown>): Promise<{ success: boolean; message?: string }> {
   const res = await serverPost<{ success: boolean; message?: string }>("/api/v1/clubs", data);
-  if (res?.success) {
-    cacheManager.removeAsync(CACHE_KEY_CLUBS);
-    cacheManager.removeAsync(CACHE_KEY_CATEGORIES);
+  if (res.success) {
+    await getAllClub.invalidate();
   }
   return res;
 }
