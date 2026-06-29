@@ -65,6 +65,7 @@ class CookiesManager {
 
   async clear(): Promise<this> {
     this.cookies = {};
+    this.loaded = false;
     await this.saveToCache();
     return this;
   }
