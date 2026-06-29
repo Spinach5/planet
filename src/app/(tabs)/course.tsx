@@ -7,7 +7,9 @@ import { getCurrentWeek } from "@/service/hubt/CurrentWeek";
 import { getExtroInfo } from "@/service/hubt/ExtroInfo";
 import { getAllWeek } from "@/service/hubt/GetAllWeek";
 import { getTimeTable } from "@/service/hubt/GetTimeTable";
+import { login } from "@/service/hubt/login";
 import userManager from "@/service/userInfo";
+import { runtimeLogger } from "@/utils/runtimeLogger";
 import type { CourseCleaned } from "@/utils/hbut/courseHelper";
 import type { ClassTime } from "@/utils/hbut/timeHelper";
 import { useToast } from "@/utils/toast";
@@ -781,8 +783,8 @@ export default function CourseScreen() {
           setCurrentSemester(latest);
           setIsCurrentSemester(true);
         }
-      } catch {
-        /* ignore */
+      } catch (err) {
+        runtimeLogger.error('Course', '获取学期列表失败', err);
       }
     })();
   }, [isLoggedIn]);
@@ -799,7 +801,7 @@ export default function CourseScreen() {
         const weeksNum = weeksRaw.map((w) => parseInt(w.zc, 10));
         setWeekList(weeksNum);
         setWeekDataList(weeksRaw as WeekDataItem[]);
-        const weekNum = parseInt(week, 10);
+        const weekNum = Number(week); // defensive: getCurrentWeek may return string from old cache
         // 只有当前学期才用实际周数，非当前学期默认第一周
         if (isCurrentSemester) {
           setRealCurrentWeek(weekNum);
@@ -811,8 +813,8 @@ export default function CourseScreen() {
           setRealCurrentWeek(null);
           setCurrentWeek(weeksNum[0] ?? 1);
         }
-      } catch {
-        /* ignore */
+      } catch (err) {
+        runtimeLogger.error('Course', '获取当前周数/周次列表失败', err);
       }
     })();
   }, [isLoggedIn, currentSemester]);
@@ -831,8 +833,8 @@ export default function CourseScreen() {
         setCourses(scheduleData);
         setTimeTable(timeData);
         setPracticeData(extroData);
-      } catch {
-        /* ignore */
+      } catch (err) {
+        runtimeLogger.error('Course', '加载课表/时间表/备注失败', err);
       } finally {
         setLoading(false);
       }
@@ -861,8 +863,42 @@ export default function CourseScreen() {
         setTimeTable(timeData);
         setPracticeData(extroData);
         showToast({ message: "刷新成功", type: "success" });
-      } catch {
-        showToast({ message: "刷新失败", type: "error" });
+      } catch (err) {
+        runtimeLogger.error('Course', '刷新课表失败', err);
+
+        // Try auto re-login — session cookies may have expired
+        const { stuId, password } = userManager.getAccount();
+        if (stuId && password) {
+          runtimeLogger.info('Course', '检测到请求失败，尝试自动重新登录恢复会话...');
+          try {
+            const loginResult = await login(stuId, password);
+            if (loginResult.success) {
+              runtimeLogger.info('Course', '自动重新登录成功，重试刷新课表');
+              try {
+                const [scheduleData, timeData, extroData] = await Promise.all([
+                  getAllSchedule(true, currentSemester),
+                  getTimeTable(currentSemester),
+                  getExtroInfo(currentSemester, true),
+                ]);
+                setCourses(scheduleData);
+                setTimeTable(timeData);
+                setPracticeData(extroData);
+                showToast({ message: "刷新成功", type: "success" });
+                return;
+              } catch (retryErr) {
+                runtimeLogger.error('Course', '重新登录后刷新仍失败', retryErr);
+              }
+            } else {
+              runtimeLogger.warn('Course', `自动重新登录失败: ${loginResult.message}`);
+            }
+          } catch (reloginErr) {
+            runtimeLogger.error('Course', '自动重新登录异常', reloginErr);
+          }
+        } else {
+          runtimeLogger.warn('Course', '无可用登录凭据（App 重启后需手动登录），无法自动恢复会话');
+        }
+
+        showToast({ message: "刷新失败，请尝试重新登录", type: "error" });
       } finally {
         setLoading(false);
       }

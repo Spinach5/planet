@@ -37,7 +37,7 @@ export async function getExtroInfo(
   const cacheKey = CACHE_KEY_PREFIX + semester;
 
   if (!forceRefresh) {
-    const cached = cacheManager.get<PracticeItem[]>(cacheKey);
+    const cached = await cacheManager.getAsync<PracticeItem[]>(cacheKey);
     if (cached) return cached;
   }
 

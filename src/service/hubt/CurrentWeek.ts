@@ -2,11 +2,12 @@ import cacheManager from '../../utils/cache';
 import { hbutRequest } from '../../utils/request';
 
 const CACHE_KEY = 'CurrentWeek';
+const CACHE_TTL = 60 * 60 * 1000; // 1 hour — week changes on Monday, 1h staleness is acceptable
 
 export async function getCurrentWeek(): Promise<number> {
   const cached = await cacheManager.getAsync<number>(CACHE_KEY);
   if (cached !== null) {
-    return cached;
+    return Number(cached); // normalize: old cache may have stored string
   }
 
   const loginConfig = {
@@ -30,11 +31,11 @@ export async function getCurrentWeek(): Promise<number> {
     throw new Error('获取当前周数失败：接口返回 ret 不为 0');
   }
 
-  const currentWeek = data.data?.xlzc;
-  if (currentWeek === undefined || currentWeek === null) {
-    throw new Error('获取当前周数失败：响应数据中无 xlzc 字段');
+  const currentWeek = Number(data.data?.xlzc);
+  if (isNaN(currentWeek)) {
+    throw new Error('获取当前周数失败：响应数据中 xlzc 不是有效数字');
   }
 
-  await cacheManager.setAsync(CACHE_KEY, currentWeek);
+  await cacheManager.setAsync(CACHE_KEY, currentWeek, CACHE_TTL);
   return currentWeek;
 }
