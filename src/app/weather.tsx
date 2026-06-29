@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl } 
 import { router, Stack } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedView } from '@/components/themed-view';
-import { ThemedText } from '@/components/themed-text';
-import { HeadStatus } from '@/components/HeadStatus';
-import { MaterialIcon } from '@/components/MaterialIcon';
-import type { IconName } from '@/components/MaterialIcon';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { HeadStatus } from '@/components/layout/HeadStatus';
+import { MaterialIcon } from '@/components/base/MaterialIcon';
+import type { IconName } from '@/components/base/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/utils/toast';
-import { Loading } from '@/components/Loading';
+import { Loading } from '@/components/base/Loading';
 import { weatherManager } from '@/service/weatherInfo';
 import { runtimeLogger } from '@/utils/runtimeLogger';
 

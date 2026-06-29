@@ -1,6 +1,6 @@
-import { HeadStatus } from "@/components/HeadStatus";
-import { MaterialIcon } from "@/components/MaterialIcon";
-import { ThemedView } from "@/components/themed-view";
+import { HeadStatus } from "@/components/layout/HeadStatus";
+import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { ThemedView } from "@/components/themed/ThemedView";
 import { useTheme } from "@/hooks/use-theme";
 import { Asset } from "expo-asset";
 import { useAudioPlayer } from "expo-audio";

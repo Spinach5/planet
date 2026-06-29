@@ -1,6 +1,6 @@
 import { ActivityIndicator } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
+import { ThemedText } from '@/components/themed/ThemedText';
 import { useTheme } from '@/hooks/use-theme';
 
 interface LoadingOverlayProps {

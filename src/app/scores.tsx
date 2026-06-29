@@ -1,7 +1,7 @@
-import { HeadStatus } from "@/components/HeadStatus";
-import { MaterialIcon } from "@/components/MaterialIcon";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { HeadStatus } from "@/components/layout/HeadStatus";
+import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { ThemedText } from "@/components/themed/ThemedText";
+import { ThemedView } from "@/components/themed/ThemedView";
 import { useTheme } from "@/hooks/use-theme";
 import type { CourseScoreItem } from "@/service/hubt/CourseScores";
 import { getCourseScores } from "@/service/hubt/CourseScores";

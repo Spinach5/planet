@@ -1,7 +1,7 @@
 import { View, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
-import { MaterialIcon } from '@/components/MaterialIcon';
-import type { IconName } from '@/components/MaterialIcon';
+import { ThemedText } from '@/components/themed/ThemedText';
+import { MaterialIcon } from '@/components/base/MaterialIcon';
+import type { IconName } from '@/components/base/MaterialIcon';
 import { useDebouncedPush } from '@/utils/useDebouncedPush';
 
 interface GridItemProps {

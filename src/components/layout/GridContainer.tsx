@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { GridItem } from './GridItem';
-import type { IconName } from '@/components/MaterialIcon';
+import type { IconName } from '@/components/base/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
 
 const STORAGE_KEY_FEATURES = 'settings_feature_toggles';

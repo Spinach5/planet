@@ -1,8 +1,8 @@
-import { HeadStatus } from "@/components/HeadStatus";
-import type { IconName } from "@/components/MaterialIcon";
-import { MaterialIcon } from "@/components/MaterialIcon";
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
+import { HeadStatus } from "@/components/layout/HeadStatus";
+import type { IconName } from "@/components/base/MaterialIcon";
+import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { ThemedText } from "@/components/themed/ThemedText";
+import { ThemedView } from "@/components/themed/ThemedView";
 import { useTheme } from "@/hooks/use-theme";
 import userManager from "@/service/userInfo";
 import { useDebouncedPush } from "@/utils/useDebouncedPush";

@@ -2,11 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator } from 'react-native-paper';
-import { ThemedView } from '@/components/themed-view';
+import { ThemedView } from '@/components/themed/ThemedView';
 import { useTheme } from '@/hooks/use-theme';
 import { useToast } from '@/utils/toast';
-import { MaterialIcon } from '@/components/MaterialIcon';
-import { HeadStatus } from '@/components/HeadStatus';
+import { MaterialIcon } from '@/components/base/MaterialIcon';
+import { HeadStatus } from '@/components/layout/HeadStatus';
 import { getMessages, sendMessage, type Message } from '@/service/server/chat';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 

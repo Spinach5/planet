@@ -1,5 +1,5 @@
-import type { IconName } from "@/components/MaterialIcon";
-import { MaterialIcon } from "@/components/MaterialIcon";
+import type { IconName } from "@/components/base/MaterialIcon";
+import { MaterialIcon } from "@/components/base/MaterialIcon";
 import { Colors } from "@/constants/theme";
 import { useAppColorScheme } from "@/hooks/use-theme-settings";
 import { Tabs } from "expo-router";

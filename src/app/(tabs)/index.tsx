@@ -3,11 +3,11 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Text, RefreshControl } 
 import { useDebouncedPush } from '@/utils/useDebouncedPush';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedView } from '@/components/themed-view';
-import { HeadStatus } from '@/components/HeadStatus';
-import { IndexSwiper } from '@/components/IndexSwiper';
-import { GridContainer } from '@/components/GridContainer';
-import { MaterialIcon } from '@/components/MaterialIcon';
+import { ThemedView } from '@/components/themed/ThemedView';
+import { HeadStatus } from '@/components/layout/HeadStatus';
+import { IndexSwiper } from '@/components/feature/IndexSwiper';
+import { GridContainer } from '@/components/layout/GridContainer';
+import { MaterialIcon } from '@/components/base/MaterialIcon';
 import { useTheme } from '@/hooks/use-theme';
 import userManager from '@/service/userInfo';
 import { getBanner } from '@/service/hubt/Banner';

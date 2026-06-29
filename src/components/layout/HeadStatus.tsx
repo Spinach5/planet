@@ -1,5 +1,5 @@
 import { View, StyleSheet } from 'react-native';
-import { ThemedText } from '@/components/themed-text';
+import { ThemedText } from '@/components/themed/ThemedText';
 import type { ReactNode } from 'react';
 
 interface HeadStatusProps {

@@ -1,5 +1,5 @@
-import { MaterialIcon } from "@/components/MaterialIcon";
-import { ThemedText } from "@/components/themed-text";
+import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { ThemedText } from "@/components/themed/ThemedText";
 import { useTheme } from "@/hooks/use-theme";
 import { getAllSchedule } from "@/service/hubt/AllSchedule";
 import { getSemesterList } from "@/service/hubt/CurrentSemester";

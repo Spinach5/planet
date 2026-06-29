@@ -1,4 +1,4 @@
-import { ThemedText } from "@/components/themed-text";
+import { ThemedText } from "@/components/themed/ThemedText";
 import { useTheme } from "@/hooks/use-theme";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
