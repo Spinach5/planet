@@ -1,11 +1,7 @@
 // Books API — matches Taro src/service/hbut/book.js
 import { serverGet, serverPost, serverPut, serverDelete, serverUpload } from "@/utils/serverRequest";
-import cacheManager from "@/utils/cache";
+import { withCache } from "@/service/utils";
 import userManager from "@/service/userInfo";
-
-const CACHE_KEY_BOOKS = "v1_books";
-const CACHE_KEY_CATEGORIES = "v1_book_categories";
-const CACHE_TTL = 5 * 60 * 1000;
 
 export interface BookItem {
   id: number;
@@ -62,36 +58,30 @@ function normalizeBook(b: Record<string, unknown>): BookItem {
   };
 }
 
-export async function getBookList(forceRefresh = false): Promise<{ books: BookItem[]; total: number }> {
-  if (!forceRefresh) {
-    const cached = await cacheManager.getAsync<{ books: BookItem[]; total: number }>(CACHE_KEY_BOOKS);
-    if (cached?.books) return cached;
-  }
-  const res = await serverGet<Record<string, unknown>[]>("/api/v1/books", { page: "1", pageSize: "200" });
-  const books = (res.data ?? []).map(normalizeBook);
-  const data = { books, total: books.length };
-  void cacheManager.setAsync(CACHE_KEY_BOOKS, data, CACHE_TTL);
-  return data;
-}
+export const getBookList = withCache(
+  async (_forceRefresh = false): Promise<{ books: BookItem[]; total: number }> => {
+    const res = await serverGet<Array<Record<string, unknown>>>("/api/v1/books", { page: "1", pageSize: "200" });
+    const books = (res.data ?? []).map(normalizeBook);
+    return { books, total: books.length };
+  },
+  { cacheKey: "v1_books", ttl: 5 * 60 * 1000, resultValidator: (r) => !!r.books },
+);
 
-export async function getBookCategories(forceRefresh = false): Promise<string[]> {
-  if (!forceRefresh) {
-    const cached = await cacheManager.getAsync<string[]>(CACHE_KEY_CATEGORIES);
-    if (cached) return cached;
-  }
-  const res = await serverGet<string[]>("/api/v1/books/categories");
-  const cats = (res.data ?? []).filter((c) => c !== "全部");
-  const categories = ["全部", ...cats];
-  void cacheManager.setAsync(CACHE_KEY_CATEGORIES, categories, CACHE_TTL);
-  return categories;
-}
+export const getBookCategories = withCache(
+  async (_forceRefresh = false): Promise<string[]> => {
+    const res = await serverGet<string[]>("/api/v1/books/categories");
+    const cats = (res.data ?? []).filter((c) => c !== "全部");
+    return ["全部", ...cats];
+  },
+  { cacheKey: "v1_book_categories", ttl: 5 * 60 * 1000, resultValidator: (r) => r.length > 0 },
+);
 
 export async function getBookDetail(id: number): Promise<BookItem> {
   const res = await serverGet<Record<string, unknown>>(
     `/api/v1/books/${id}`,
     getAuthParams() as Record<string, string>,
   );
-  if (res?.data) return normalizeBook(res.data);
+  if (res.data) return normalizeBook(res.data);
   throw new Error("书籍不存在");
 }
 
@@ -105,13 +95,13 @@ function getAuthParams(): Record<string, unknown> {
 
 export async function createBook(data: Record<string, unknown>): Promise<{ success: boolean; id?: number; message?: string }> {
   const res = await serverPost<{ success: boolean; id?: number; message?: string }>("/api/v1/books", { ...data, ...getAuthParams() });
-  if (res?.success) cacheManager.removeAsync(CACHE_KEY_BOOKS);
+  if (res.success) void getBookList.invalidate();
   return res;
 }
 
 export async function updateBook(id: number, data: Record<string, unknown>): Promise<{ success: boolean; message?: string }> {
   const res = await serverPut<{ success: boolean; message?: string }>(`/api/v1/books/${id}`, { ...data, ...getAuthParams() });
-  if (res?.success) cacheManager.removeAsync(CACHE_KEY_BOOKS);
+  if (res.success) void getBookList.invalidate();
   return res;
 }
 
@@ -120,7 +110,7 @@ export async function toggleWantBook(id: number): Promise<{ want_count: number; 
     `/api/v1/books/${id}/want`,
     getAuthParams(),
   );
-  if (!res?.data) throw new Error("操作失败");
+  if (!res.data) throw new Error("操作失败");
   return res.data;
 }
 
@@ -129,16 +119,16 @@ export async function deleteBook(id: number): Promise<{ success: boolean; messag
     `/api/v1/books/${id}`,
     getAuthParams() as Record<string, string>,
   );
-  const ok = !!(res?.success);
-  if (ok) cacheManager.removeAsync(CACHE_KEY_BOOKS);
-  return { success: ok, message: res?.message };
+  const ok = res.success;
+  if (ok) void getBookList.invalidate();
+  return { success: ok, message: res.message };
 }
 
 export async function uploadBookImage(
   fileUri: string,
 ): Promise<{ url: string }> {
   const res = await serverUpload("/api/v1/books/upload", fileUri);
-  if (!res?.data?.url) throw new Error(res?.message ?? "上传失败");
+  if (!res.data?.url) throw new Error(res.message ?? "上传失败");
   // Resolve relative path to full URL
   const url = res.data.url.startsWith("http")
     ? res.data.url
