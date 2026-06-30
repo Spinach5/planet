@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
-import { getContentUriAsync } from "expo-file-system/legacy";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform } from "react-native";
 import { runtimeLogger } from "@/utils/runtimeLogger";
@@ -421,13 +420,7 @@ export async function installApk(apkPath: string): Promise<void> {
     throw new Error(`APK 文件异常，大小仅 ${String(fileSize)} bytes`);
   }
 
-  // contentUri: try new API getter first, fallback to legacy async
-  let contentUri = apkFile.contentUri as string | undefined;
-
-  if (!contentUri) {
-    runtimeLogger.info("Update", "contentUri getter 为空，使用 legacy API");
-    contentUri = await getContentUriAsync(apkFile.uri);
-  }
+  const contentUri = apkFile.contentUri;
 
   if (!contentUri) {
     throw new Error("无法获取 contentUri，FileProvider 未正确配置");
@@ -435,24 +428,26 @@ export async function installApk(apkPath: string): Promise<void> {
 
   runtimeLogger.info("Update", `Content URI: ${contentUri}`);
 
-  // ACTION_VIEW + FLAG_GRANT_READ_URI_PERMISSION + RETURN_RESULT
-  // RETURN_RESULT tells the package installer to call setResult(),
-  // preventing startActivityForResult from returning CANCELED immediately.
-  // Do NOT add FLAG_ACTIVITY_NEW_TASK — incompatible with startActivityForResult.
-  await IntentLauncher.startActivityAsync(
-    "android.intent.action.VIEW",
-    {
-      data: contentUri,
-      type: "application/vnd.android.package-archive",
-      flags: 1, // FLAG_GRANT_READ_URI_PERMISSION
-      extra: {
-        "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
-        "android.intent.extra.RETURN_RESULT": true,
-      },
-    },
-  );
+  const FLAG_GRANT_READ_URI_PERMISSION = 1;
+  const FLAG_ACTIVITY_NEW_TASK = 268435456;
 
-  runtimeLogger.info("Update", "安装器已调起");
+  try {
+    await IntentLauncher.startActivityAsync(
+      "android.intent.action.VIEW",
+      {
+        data: contentUri,
+        type: "application/vnd.android.package-archive",
+        flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK,
+        extra: {
+          "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
+        },
+      },
+    );
+    runtimeLogger.info("Update", "安装器已调起");
+  } catch (err) {
+    runtimeLogger.error("Update", "调起安装器失败", err);
+    throw new Error("无法打开安装程序，请检查是否已授予安装未知应用权限");
+  }
 }
 
 // ============================================================
