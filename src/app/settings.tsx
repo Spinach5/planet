@@ -21,7 +21,6 @@ import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Modal,
-  Platform,
   ScrollView,
   StyleSheet,
   Switch,
@@ -33,17 +32,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import * as Application from "expo-application";
 
-/** 将 versionCode 转换为语义化版本号 (如 108 -> "1.0.8") */
+/** 获取本机应用版本号 */
 function getNativeVersion(): string {
   try {
-    if (Platform.OS === "android" && Application.nativeBuildVersion) {
-      const versionCode = parseInt(String(Application.nativeBuildVersion), 10);
-      if (!isNaN(versionCode) && versionCode > 0) {
-        const major = Math.floor(versionCode / 10000);
-        const minor = Math.floor((versionCode % 10000) / 100);
-        const patch = versionCode % 100;
-        return `${major}.${minor}.${patch}`;
-      }
+    if (Application.nativeAppVersion) {
+      return Application.nativeAppVersion;
     }
     return Constants.expoConfig?.version ?? "1.0.0";
   } catch {
