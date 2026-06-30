@@ -14,6 +14,7 @@ import { runtimeLogger } from "@/utils/runtimeLogger";
 import { serverGet, serverPost } from "@/utils/serverRequest";
 import { useToast } from "@/utils/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as FileSystem from "expo-file-system";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, Stack } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
@@ -129,12 +130,27 @@ export default function SettingsPage() {
     void getFeatures().then(setFeatures);
     void (async () => {
       try {
+        // 计算 AsyncStorage 大小
         const keys = await AsyncStorage.getAllKeys();
         let totalBytes = 0;
         for (const key of keys) {
           const val = await AsyncStorage.getItem(key);
           if (val) totalBytes += val.length + key.length;
         }
+
+        // 加上 app_updates 目录大小
+        try {
+          const updateDir = new FileSystem.Directory(
+            FileSystem.Paths.cache,
+            "app_updates",
+          );
+          if (updateDir.exists) {
+            totalBytes += updateDir.size ?? 0;
+          }
+        } catch {
+          // ignore
+        }
+
         setCacheSize(formatBytes(totalBytes));
       } catch {
         setCacheSize("计算失败");

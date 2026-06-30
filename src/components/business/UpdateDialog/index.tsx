@@ -187,6 +187,7 @@ const s = StyleSheet.create({
     lineHeight: 20,
     marginBottom: 16,
     maxHeight: 200,
+    textAlign: "center",
   },
   cachedBadge: {
     flexDirection: "row",
