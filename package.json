@@ -1,7 +1,7 @@
 {
   "name": "planet",
   "main": "expo-router/entry",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "dependencies": {
     "@cloudbase/adapter-rn": "^1.0.3",
     "@cloudbase/js-sdk": "^3.5.4",

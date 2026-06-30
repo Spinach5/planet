@@ -2,7 +2,7 @@
   "expo": {
     "name": "Project",
     "slug": "Project",
-    "version": "1.0.1",
+    "version": "1.0.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "project",
@@ -11,7 +11,6 @@
       "icon": "./assets/expo.icon"
     },
     "android": {
-      "permissions": ["android.permission.REQUEST_INSTALL_PACKAGES"],
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -19,7 +18,11 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.Project"
+      "package": "com.anonymous.Project",
+      "permissions": [
+        "android.permission.REQUEST_INSTALL_PACKAGES",
+        "android.permission.INTERNET"
+      ]
     },
     "web": {
       "output": "static",
