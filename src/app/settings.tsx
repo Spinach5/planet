@@ -1,22 +1,13 @@
 import { Loading } from "@/components/base/Loading";
 import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { UpdateDialog } from "@/components/business/UpdateDialog";
 import { HeadStatus } from "@/components/layout/HeadStatus";
 import { ThemedText } from "@/components/themed/ThemedText";
 import { ThemedView } from "@/components/themed/ThemedView";
 import { useTheme } from "@/hooks/use-theme";
 import type { ThemeMode } from "@/hooks/use-theme-settings";
 import { useThemeSettings } from "@/hooks/use-theme-settings";
-import {
-  cacheApk,
-  cancelDownload,
-  checkUpdate,
-  cleanupFiles,
-  downloadZip,
-  extractApk,
-  getCachedApkPath,
-  installApk,
-  openInstallPermissionSettings,
-} from "@/service/update";
+import { useAppUpdate } from "@/hooks/useAppUpdate";
 import userManager from "@/service/userInfo";
 import encryptPassword from "@/utils/hbut/loginEncrypt";
 import { runtimeLogger } from "@/utils/runtimeLogger";
@@ -25,7 +16,7 @@ import { useToast } from "@/utils/toast";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, Stack } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Modal,
@@ -37,7 +28,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import packageJson from "../../package.json";
+import Constants from "expo-constants";
 
 const STORAGE_KEY_FORCE = "settings_force_update";
 const STORAGE_KEY_FEATURES = "settings_feature_toggles";
@@ -129,17 +120,7 @@ export default function SettingsPage() {
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [cacheSize, setCacheSize] = useState("计算中...");
 
-  // Update states
-  const [checkingUpdate, setCheckingUpdate] = useState(false);
-  const [showDownloadModal, setShowDownloadModal] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
-  const [downloadStatus, setDownloadStatus] = useState("准备下载...");
-  const updateInfoRef = useRef<{
-    name: string;
-    body: string;
-    remoteVersion: string;
-    zipUrl: string;
-  } | null>(null);
+  const appUpdate = useAppUpdate();
 
   useEffect(() => {
     void AsyncStorage.getItem(STORAGE_KEY_FORCE).then((v) =>
@@ -207,156 +188,11 @@ export default function SettingsPage() {
   }, []);
 
   const handleCheckUpdate = useCallback(async () => {
-    setCheckingUpdate(true);
-    try {
-      const result = await checkUpdate();
-      if (!result.hasUpdate) {
-        Alert.alert("提示", "已是最新版本");
-        return;
-      }
-
-      updateInfoRef.current = {
-        name: result.name ?? "",
-        body: result.body ?? "",
-        remoteVersion: result.remoteVersion ?? "",
-        zipUrl: result.zipUrl ?? "",
-      };
-
-      // If we already have a cached APK for this version, go straight to install
-      if (!result.zipUrl) {
-        const cachedPath = await getCachedApkPath();
-        if (cachedPath) {
-          try {
-            await installApk(cachedPath);
-          } catch (installErr) {
-            const msg =
-              installErr instanceof Error ? installErr.message : "安装失败";
-            if (
-              msg.includes("权限") ||
-              msg.includes("permission") ||
-              msg.includes("Permission")
-            ) {
-              Alert.alert(
-                "需要安装权限",
-                "请在设置中开启「允许安装未知应用」权限，然后重试",
-                [
-                  { text: "取消", style: "cancel" },
-                  {
-                    text: "去设置",
-                    onPress: () => {
-                      void openInstallPermissionSettings();
-                    },
-                  },
-                ],
-              );
-            } else {
-              Alert.alert("安装失败", msg);
-            }
-          }
-          return;
-        }
-      }
-
-      Alert.alert(
-        `发现新版本 v${result.remoteVersion ?? ""}`,
-        `${result.name ?? ""}\n\n${result.body ?? ""}`,
-        [
-          { text: "取消", style: "cancel" },
-          {
-            text: "更新",
-            onPress: () => {
-              void startDownload();
-            },
-          },
-        ],
-      );
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "检查更新失败";
-      runtimeLogger.error("Update", msg, err);
-      Alert.alert("检查更新失败", msg, [
-        { text: "取消", style: "cancel" },
-        {
-          text: "重试",
-          onPress: () => {
-            void handleCheckUpdate();
-          },
-        },
-      ]);
-    } finally {
-      setCheckingUpdate(false);
+    const result = await appUpdate.checkUpdate(true);
+    if (result && !result.hasUpdate) {
+      Alert.alert("提示", "已是最新版本");
     }
-  }, []);
-
-  const startDownload = useCallback(async () => {
-    const info = updateInfoRef.current;
-    if (!info?.zipUrl) return;
-
-    setShowDownloadModal(true);
-    setDownloadProgress(0);
-    setDownloadStatus("准备下载...");
-
-    try {
-      const zipPath = await downloadZip(info.zipUrl, (pct, status) => {
-        setDownloadProgress(pct);
-        setDownloadStatus(status);
-      });
-
-      const apkPath = await extractApk(zipPath);
-      await cacheApk(apkPath, info.remoteVersion);
-      setShowDownloadModal(false);
-
-      // 调起安装器
-      try {
-        await installApk(apkPath);
-      } catch (installErr) {
-        const msg =
-          installErr instanceof Error ? installErr.message : "安装失败";
-        runtimeLogger.error("Update", "安装失败", installErr);
-
-        // 如果是权限问题，引导用户去设置
-        if (
-          msg.includes("权限") ||
-          msg.includes("permission") ||
-          msg.includes("Permission")
-        ) {
-          Alert.alert(
-            "需要安装权限",
-            "请在设置中开启「允许安装未知应用」权限，然后重试",
-            [
-              { text: "取消", style: "cancel" },
-              {
-                text: "去设置",
-                onPress: () => {
-                  void openInstallPermissionSettings();
-                },
-              },
-            ],
-          );
-        } else {
-          Alert.alert("安装失败", msg, [{ text: "确定", style: "cancel" }]);
-        }
-      }
-    } catch (err) {
-      setShowDownloadModal(false);
-      const msg = err instanceof Error ? err.message : "下载失败";
-      runtimeLogger.error("Update", msg, err);
-      Alert.alert("下载失败", "请检查网络后重试", [
-        {
-          text: "取消",
-          style: "cancel",
-          onPress: () => {
-            void cleanupFiles();
-          },
-        },
-        {
-          text: "重试",
-          onPress: () => {
-            void startDownload();
-          },
-        },
-      ]);
-    }
-  }, []);
+  }, [appUpdate]);
 
   const handleExpandToggle = useCallback(async () => {
     const target = !features.expand;
@@ -530,17 +366,19 @@ export default function SettingsPage() {
               style={[s.divider, { backgroundColor: theme.backgroundElement }]}
             />
             <TouchableOpacity
-              style={[s.row, checkingUpdate && s.rowDisabled]}
+              style={[s.row, appUpdate.step === "checking" && s.rowDisabled]}
               onPress={() => {
                 void handleCheckUpdate();
               }}
-              disabled={checkingUpdate}
+              disabled={appUpdate.step === "checking"}
             >
               <View style={s.rowLeft}>
                 <ThemedText style={s.rowLabel}>检查更新</ThemedText>
               </View>
               <ThemedText style={s.versionText} themeColor="textSecondary">
-                {checkingUpdate ? "检查中..." : packageJson.version}
+                {appUpdate.step === "checking"
+                  ? "检查中..."
+                  : Constants.expoConfig?.version ?? "1.0.0"}
               </ThemedText>
               <MaterialIcon
                 name="chevron-right"
@@ -627,50 +465,25 @@ export default function SettingsPage() {
         </ScrollView>
       </LinearGradient>
 
-      {/* Download Progress Modal */}
-      <Modal visible={showDownloadModal} transparent animationType="fade">
-        <View style={s.modalOverlay}>
-          <View style={[s.modalBox, { backgroundColor: theme.surface }]}>
-            <Text style={[s.modalTitle, { color: theme.text }]}>正在更新</Text>
-            <Text style={[s.modalMsg, { color: theme.textSecondary }]}>
-              {downloadStatus}
-            </Text>
-            <View style={s.progressBarBg}>
-              <View
-                style={[
-                  s.progressBarFill,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  { width: `${String(downloadProgress)}%` } as any,
-                ]}
-              />
-            </View>
-            <Text
-              style={{
-                textAlign: "center",
-                fontSize: 14,
-                color: theme.textSecondary,
-                marginBottom: 16,
-              }}
-            >
-              {String(downloadProgress)}%
-            </Text>
-            <TouchableOpacity
-              style={s.modalBtn}
-              onPress={() => {
-                cancelDownload();
-                setShowDownloadModal(false);
-                void cleanupFiles();
-              }}
-            >
-              <Text
-                style={{ fontSize: 16, color: "#ff4d4f", fontWeight: "600" }}
-              >
-                取消
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <UpdateDialog
+        step={appUpdate.step}
+        updateInfo={appUpdate.updateInfo}
+        downloadProgress={appUpdate.downloadProgress}
+        downloadStatus={appUpdate.downloadStatus}
+        errorMessage={appUpdate.errorMessage}
+        onConfirm={() => {
+          void appUpdate.startUpdate();
+        }}
+        onCancel={() => {
+          appUpdate.cancelUpdate();
+        }}
+        onRetry={() => {
+          void appUpdate.retry();
+        }}
+        onOpenPermissionSettings={() => {
+          appUpdate.openPermissionSettings();
+        }}
+      />
 
       {/* Clear Cache Confirm Modal */}
       <Modal visible={showClearConfirm} transparent animationType="fade">

@@ -2,13 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as IntentLauncher from "expo-intent-launcher";
 import { Platform } from "react-native";
-import { runtimeLogger } from "@/utils/runtimeLogger";
 import Constants from "expo-constants";
-import packageJson from "../../package.json";
-
-// ============================================================
-// Config
-// ============================================================
+import { runtimeLogger } from "@/utils/runtimeLogger";
 
 const GITEE_CONFIG = {
   owner: "damn_2",
@@ -17,22 +12,17 @@ const GITEE_CONFIG = {
 
 const RELEASES_URL = `https://gitee.com/api/v5/repos/${GITEE_CONFIG.owner}/${GITEE_CONFIG.repo}/releases/latest`;
 
-const CACHED_APK_KEY = "cached_apk";
-const UPDATE_CHECK_CACHE_KEY = "update_check_cache";
-
-/** TTL for update check: 30 min — prevent Gitee 403 rate limiting */
+const CACHED_APK_KEY = "cached_apk_v2";
+const CHECK_CACHE_KEY = "update_check_cache_v2";
 const CHECK_TTL_MS = 30 * 60 * 1000;
-
-// ============================================================
-// Types
-// ============================================================
 
 export interface CheckResult {
   hasUpdate: boolean;
   name?: string;
   body?: string;
-  zipUrl?: string;
+  downloadUrl?: string;
   remoteVersion?: string;
+  isCached?: boolean;
 }
 
 interface GiteeRelease {
@@ -42,28 +32,26 @@ interface GiteeRelease {
   assets: Array<{
     browser_download_url: string;
     name: string;
+    size?: number;
   }>;
 }
 
-interface CachedApk {
+interface CachedApkInfo {
   version: string;
   apkPath: string;
+  size: number;
 }
 
-interface UpdateCheckCache {
-  checkedAt: number; // Date.now()
+interface CheckCacheEntry {
+  checkedAt: number;
   result: CheckResult;
 }
-
-// ============================================================
-// Path helpers — use cache dir (Expo FileProvider serves from here)
-// ============================================================
 
 const updateDir = new FileSystem.Directory(
   FileSystem.Paths.cache,
   "app_updates",
 );
-const zipFile = new FileSystem.File(updateDir, "update.zip");
+const dlFile = new FileSystem.File(updateDir, "update.bin");
 const extractDir = new FileSystem.Directory(updateDir, "extracted");
 
 function ensureDir(dir: FileSystem.Directory): void {
@@ -72,16 +60,10 @@ function ensureDir(dir: FileSystem.Directory): void {
   }
 }
 
-// ============================================================
-// Version utils — single source: package.json
-// ============================================================
-
-/** Strip 'v' prefix and '-beta*' / '-alpha*' suffix, keep only X.Y.Z */
 function normalizeVersion(ver: string): string {
   return ver.replace(/^v/, "").replace(/-.*$/, "");
 }
 
-/** Parse "X.Y.Z" into comparable number: major*10000 + minor*100 + patch */
 function versionToCode(ver: string): number {
   const parts = ver.split(".");
   const major = parseInt(parts[0] ?? "0", 10);
@@ -90,20 +72,27 @@ function versionToCode(ver: string): number {
   return major * 10000 + minor * 100 + patch;
 }
 
-/** Local version — uses package.json as single source of truth */
 function getLocalVersion(): string {
-  return packageJson.version ?? "0.0.0";
+  try {
+    return Constants.expoConfig?.version ?? "0.0.0";
+  } catch {
+    return "0.0.0";
+  }
 }
 
-// ============================================================
-// TTL cache for update check
-// ============================================================
-
-async function getCachedCheck(): Promise<UpdateCheckCache | null> {
+function getPackageName(): string {
   try {
-    const raw = await AsyncStorage.getItem(UPDATE_CHECK_CACHE_KEY);
+    return Constants.expoConfig?.android?.package ?? "com.anonymous.Project";
+  } catch {
+    return "com.anonymous.Project";
+  }
+}
+
+async function getCachedCheck(): Promise<CheckCacheEntry | null> {
+  try {
+    const raw = await AsyncStorage.getItem(CHECK_CACHE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as UpdateCheckCache;
+    return JSON.parse(raw) as CheckCacheEntry;
   } catch {
     return null;
   }
@@ -111,28 +100,25 @@ async function getCachedCheck(): Promise<UpdateCheckCache | null> {
 
 async function setCachedCheck(result: CheckResult): Promise<void> {
   try {
-    const entry: UpdateCheckCache = { checkedAt: Date.now(), result };
-    await AsyncStorage.setItem(UPDATE_CHECK_CACHE_KEY, JSON.stringify(entry));
+    const entry: CheckCacheEntry = { checkedAt: Date.now(), result };
+    await AsyncStorage.setItem(CHECK_CACHE_KEY, JSON.stringify(entry));
   } catch {
-    // non-critical
+    // ignore
   }
 }
 
-// ============================================================
-// 1. 检查更新
-// ============================================================
+export async function checkUpdate(force = false): Promise<CheckResult> {
+  runtimeLogger.info("Update", "[checkUpdate] start, force=" + String(force));
 
-export async function checkUpdate(): Promise<CheckResult> {
-  runtimeLogger.info("Update", "开始检查更新...");
-
-  const cached = await getCachedApk();
   const localVersion = getLocalVersion();
+  runtimeLogger.info("Update", `[checkUpdate] local version=${localVersion}`);
 
-  // TTL check: return cached result if within 30 min
-  const cachedCheck = await getCachedCheck();
-  if (cachedCheck && Date.now() - cachedCheck.checkedAt < CHECK_TTL_MS) {
-    runtimeLogger.info("Update", "命中 TTL 缓存，跳过网络请求");
-    return cachedCheck.result;
+  if (!force) {
+    const cachedCheck = await getCachedCheck();
+    if (cachedCheck && Date.now() - cachedCheck.checkedAt < CHECK_TTL_MS) {
+      runtimeLogger.info("Update", "[checkUpdate] hit TTL cache");
+      return cachedCheck.result;
+    }
   }
 
   let release: GiteeRelease;
@@ -141,21 +127,23 @@ export async function checkUpdate(): Promise<CheckResult> {
     if (!resp.ok) {
       runtimeLogger.error(
         "Update",
-        `Gitee API 返回非 200: ${String(resp.status)}`,
+        `[checkUpdate] Gitee API status=${String(resp.status)}`,
       );
-      // If rate limited but have stale cache, use it
-      if (resp.status === 403 && cachedCheck) {
-        runtimeLogger.warn("Update", "被限流，使用过期缓存");
-        return cachedCheck.result;
+      if (resp.status === 403) {
+        const cachedCheck = await getCachedCheck();
+        if (cachedCheck) {
+          runtimeLogger.warn("Update", "[checkUpdate] rate limited, use stale cache");
+          return cachedCheck.result;
+        }
       }
       throw new Error(`服务器返回 ${String(resp.status)}`);
     }
     release = (await resp.json()) as GiteeRelease;
   } catch (err) {
-    runtimeLogger.error("Update", "获取 Release 信息失败", err);
-    // Network error with stale cache → use it
+    runtimeLogger.error("Update", "[checkUpdate] fetch failed", err);
+    const cachedCheck = await getCachedCheck();
     if (cachedCheck) {
-      runtimeLogger.warn("Update", "网络错误，使用过期缓存");
+      runtimeLogger.warn("Update", "[checkUpdate] network error, use stale cache");
       return cachedCheck.result;
     }
     throw err;
@@ -167,20 +155,21 @@ export async function checkUpdate(): Promise<CheckResult> {
 
   runtimeLogger.info(
     "Update",
-    `版本比较: 本地=${localVersion} (${localNorm}) vs 远程=${remoteRaw} (${remoteVersion})`,
+    `[checkUpdate] compare: local=${localNorm} remote=${remoteVersion}`,
   );
 
   if (versionToCode(remoteVersion) <= versionToCode(localNorm)) {
+    runtimeLogger.info("Update", "[checkUpdate] already latest");
+    const cached = await getCachedApk();
     if (cached) {
+      runtimeLogger.info("Update", "[checkUpdate] cleaning stale cached apk");
       await cleanupFiles();
     }
-    runtimeLogger.info("Update", "已是最新版本");
     const result: CheckResult = { hasUpdate: false };
     await setCachedCheck(result);
     return result;
   }
 
-  // Find download asset: prefer zip, fallback to apk
   const zipAsset = release.assets.find(
     (a) => a.name.endsWith(".zip") && !a.name.includes("archive"),
   );
@@ -188,72 +177,82 @@ export async function checkUpdate(): Promise<CheckResult> {
   const downloadAsset = zipAsset ?? apkAsset;
 
   if (!downloadAsset) {
-    runtimeLogger.error("Update", "Release 中未找到下载文件");
+    runtimeLogger.error("Update", "[checkUpdate] no download asset found");
     throw new Error("未找到下载文件");
   }
 
-  // Same version already cached → install directly
-  if (cached?.version === remoteVersion) {
+  const cached = await getCachedApk();
+  if (cached && cached.version === remoteVersion) {
     const cachedFile = new FileSystem.File(cached.apkPath);
-    if (cachedFile.exists) {
+    if (cachedFile.exists && (cachedFile.size ?? 0) > 0) {
       runtimeLogger.info(
         "Update",
-        `版本 ${remoteVersion} 已有缓存 APK，直接安装`,
+        `[checkUpdate] cache hit for version ${remoteVersion}`,
       );
       const result: CheckResult = {
         hasUpdate: true,
         name: release.name,
         body: release.body,
         remoteVersion,
+        isCached: true,
       };
       await setCachedCheck(result);
       return result;
     }
+    runtimeLogger.warn("Update", "[checkUpdate] cache file missing, cleaning");
+    await cleanupFiles();
   }
 
-  runtimeLogger.info("Update", `发现新版本: ${remoteVersion}`);
+  runtimeLogger.info("Update", `[checkUpdate] new version available: ${remoteVersion}`);
   const result: CheckResult = {
     hasUpdate: true,
     name: release.name,
     body: release.body,
-    zipUrl: downloadAsset.browser_download_url,
+    downloadUrl: downloadAsset.browser_download_url,
     remoteVersion,
+    isCached: false,
   };
   await setCachedCheck(result);
   return result;
 }
 
-// ============================================================
-// 2. 下载（支持进度回调 + 取消）
-// ============================================================
-
 let currentDownloadTask: FileSystem.DownloadTask | null = null;
 
 export function cancelDownload(): void {
   if (currentDownloadTask) {
-    currentDownloadTask.cancel();
+    try {
+      currentDownloadTask.cancel();
+    } catch {
+      // ignore
+    }
     currentDownloadTask = null;
   }
 }
 
-export async function downloadZip(
+export async function downloadUpdate(
   url: string,
-  onProgress: (pct: number, status: string) => void,
+  onProgress: (percent: number, statusText: string) => void,
 ): Promise<string> {
   ensureDir(updateDir);
 
-  // Clean up previous download
-  cleanupFilesSync();
+  if (updateDir.exists) {
+    try {
+      updateDir.delete();
+    } catch {
+      // ignore
+    }
+  }
+  ensureDir(updateDir);
 
-  runtimeLogger.info("Update", `开始下载: ${url}`);
+  runtimeLogger.info("Update", "[downloadUpdate] start");
   onProgress(0, "准备下载...");
 
-  const task = FileSystem.File.createDownloadTask(url, zipFile, {
+  const task = FileSystem.File.createDownloadTask(url, dlFile, {
     onProgress: ({ bytesWritten, totalBytes }) => {
-      const pct =
-        totalBytes > 0 ? Math.round((bytesWritten / totalBytes) * 100) : 0;
+      if (totalBytes <= 0) return;
+      const pct = Math.round((bytesWritten / totalBytes) * 100);
       if (pct >= 100) {
-        onProgress(100, "下载完成，准备安装...");
+        onProgress(100, "下载完成");
       } else if (pct > 0) {
         onProgress(pct, `下载中 ${String(pct)}%`);
       }
@@ -264,91 +263,209 @@ export async function downloadZip(
 
   try {
     const result = await task.downloadAsync();
-    if (!result) {
-      throw new Error("下载被暂停");
-    }
-    runtimeLogger.info("Update", `下载完成: ${result.uri}`);
-    onProgress(100, "下载完成，准备安装...");
     currentDownloadTask = null;
+    if (!result) {
+      throw new Error("下载被取消");
+    }
+    runtimeLogger.info("Update", `[downloadUpdate] done, size=${String(dlFile.size)}`);
     return result.uri;
   } catch (err) {
     currentDownloadTask = null;
-    runtimeLogger.error("Update", "下载失败", err);
+    runtimeLogger.error("Update", "[downloadUpdate] failed", err);
     throw err;
   }
 }
 
-// ============================================================
-// 3. 解压 ZIP → APK
-// ============================================================
+export async function extractApkIfNeeded(downloadedPath: string): Promise<string> {
+  if (downloadedPath.toLowerCase().endsWith(".apk")) {
+    runtimeLogger.info("Update", "[extractApkIfNeeded] already APK, skip extract");
+    return downloadedPath;
+  }
 
-export async function extractApk(zipPath: string): Promise<string> {
-  runtimeLogger.info("Update", `开始解压: ${zipPath}`);
+  runtimeLogger.info("Update", "[extractApkIfNeeded] extracting zip");
 
   const fflate = await import("fflate");
 
-  const zipFileObj = new FileSystem.File(zipPath);
-  const bytes = await zipFileObj.bytes();
+  const zipFileObj = new FileSystem.File(downloadedPath);
+  const bytes = zipFileObj.bytesSync();
 
   const unzipped = fflate.unzipSync(bytes);
 
   ensureDir(extractDir);
 
   let apkPath = "";
+  let apkSize = 0;
 
   for (const [filename, data] of Object.entries(unzipped)) {
-    const apkFile = new FileSystem.File(extractDir, filename);
+    const file = new FileSystem.File(extractDir, filename);
 
-    // Ensure parent directory exists for nested paths
-    const parentDir = apkFile.parentDirectory;
+    const parentDir = file.parentDirectory;
     if (parentDir.uri !== extractDir.uri) {
       ensureDir(parentDir);
     }
 
-    apkFile.write(data as Uint8Array);
+    file.write(data as Uint8Array);
 
     if (filename.toLowerCase().endsWith(".apk")) {
-      apkPath = apkFile.uri;
+      apkPath = file.uri;
+      apkSize = file.size ?? 0;
       runtimeLogger.info(
         "Update",
-        `找到 APK: ${filename} (${String(apkFile.size)} bytes)`,
+        `[extractApkIfNeeded] found APK: ${filename} (${String(apkSize)} bytes)`,
       );
     }
   }
 
   if (!apkPath) {
-    runtimeLogger.error("Update", "ZIP 中未找到 APK 文件");
-    const extracted = extractDir
-      .list()
-      .map((f) => (f instanceof FileSystem.File ? f.uri : f.uri));
-    runtimeLogger.error("Update", `解压内容: ${extracted.join(", ")}`);
+    runtimeLogger.error("Update", "[extractApkIfNeeded] no APK found in zip");
     throw new Error("安装包不存在");
   }
 
-  runtimeLogger.info("Update", `解压完成，APK: ${apkPath}`);
+  if (apkSize < 1024 * 1024) {
+    runtimeLogger.error(
+      "Update",
+      `[extractApkIfNeeded] APK too small: ${String(apkSize)} bytes`,
+    );
+    throw new Error("APK 文件损坏");
+  }
+
   return apkPath;
 }
 
-// ============================================================
-// 4. APK 缓存
-// ============================================================
+async function getContentUri(apkPath: string): Promise<string> {
+  try {
+    const apkFile = new FileSystem.File(apkPath);
+    const directUri = apkFile.contentUri;
+    if (directUri && directUri.startsWith("content://")) {
+      runtimeLogger.info("Update", `[getContentUri] new API success: ${directUri}`);
+      return directUri;
+    }
+  } catch (err) {
+    runtimeLogger.warn("Update", "[getContentUri] new API failed, try legacy", err);
+  }
+
+  try {
+    const legacy = await import("expo-file-system/legacy");
+    const legacyUri = await legacy.getContentUriAsync(apkPath);
+    if (legacyUri) {
+      runtimeLogger.info("Update", `[getContentUri] legacy API success: ${legacyUri}`);
+      return legacyUri;
+    }
+  } catch (err) {
+    runtimeLogger.error("Update", "[getContentUri] legacy API also failed", err);
+  }
+
+  throw new Error("无法获取文件访问 URI，请检查应用配置");
+}
+
+export async function installApk(apkPath: string): Promise<void> {
+  if (Platform.OS !== "android") {
+    throw new Error("仅支持 Android");
+  }
+
+  runtimeLogger.info("Update", "[installApk] start");
+
+  const apkFile = new FileSystem.File(apkPath);
+  if (!apkFile.exists) {
+    runtimeLogger.error("Update", "[installApk] APK file not found");
+    throw new Error("APK 文件不存在");
+  }
+
+  const fileSize = apkFile.size ?? 0;
+  if (fileSize < 1024 * 1024) {
+    runtimeLogger.error(
+      "Update",
+      `[installApk] APK too small: ${String(fileSize)} bytes`,
+    );
+    throw new Error("APK 文件损坏");
+  }
+
+  const contentUri = await getContentUri(apkPath);
+  runtimeLogger.info("Update", `[installApk] contentUri=${contentUri}`);
+
+  const FLAG_GRANT_READ_URI_PERMISSION = 1;
+  const FLAG_ACTIVITY_NEW_TASK = 268435456;
+
+  try {
+    await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+      data: contentUri,
+      type: "application/vnd.android.package-archive",
+      flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK,
+      extra: {
+        "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
+        "android.intent.extra.RETURN_RESULT": true,
+      },
+    });
+    runtimeLogger.info("Update", "[installApk] installer launched");
+  } catch (err) {
+    runtimeLogger.error("Update", "[installApk] failed to launch installer", err);
+    throw new Error("无法打开安装程序，请检查是否已授予安装未知应用权限");
+  }
+}
+
+export async function openInstallPermissionSettings(): Promise<void> {
+  if (Platform.OS !== "android") return;
+
+  const packageName = getPackageName();
+
+  try {
+    await IntentLauncher.startActivityAsync(
+      "android.settings.MANAGE_UNKNOWN_APP_SOURCES",
+      { data: `package:${packageName}` },
+    );
+    runtimeLogger.info("Update", "[openInstallPermissionSettings] opened");
+  } catch {
+    runtimeLogger.warn(
+      "Update",
+      "[openInstallPermissionSettings] MANAGE_UNKNOWN_APP_SOURCES failed, try app details",
+    );
+    try {
+      await IntentLauncher.startActivityAsync(
+        "android.settings.APPLICATION_DETAILS_SETTINGS",
+        { data: `package:${packageName}` },
+      );
+    } catch (err) {
+      runtimeLogger.error(
+        "Update",
+        "[openInstallPermissionSettings] both failed",
+        err,
+      );
+      throw new Error("请手动前往设置 → 应用 → 允许安装未知应用");
+    }
+  }
+}
 
 export async function cacheApk(
   apkPath: string,
   version: string,
 ): Promise<void> {
-  if (!version) return;
-  const data: CachedApk = { version, apkPath };
-  await AsyncStorage.setItem(CACHED_APK_KEY, JSON.stringify(data));
+  if (!version || !apkPath) return;
+
+  try {
+    const file = new FileSystem.File(apkPath);
+    const info: CachedApkInfo = {
+      version,
+      apkPath,
+      size: file.size ?? 0,
+    };
+    await AsyncStorage.setItem(CACHED_APK_KEY, JSON.stringify(info));
+    runtimeLogger.info(
+      "Update",
+      `[cacheApk] cached version=${version} path=${apkPath}`,
+    );
+  } catch (err) {
+    runtimeLogger.warn("Update", "[cacheApk] failed", err);
+  }
 }
 
-async function getCachedApk(): Promise<CachedApk | null> {
+async function getCachedApk(): Promise<CachedApkInfo | null> {
   try {
     const raw = await AsyncStorage.getItem(CACHED_APK_KEY);
     if (!raw) return null;
-    const data = JSON.parse(raw) as CachedApk;
-    const cachedFile = new FileSystem.File(data.apkPath);
-    if (!cachedFile.exists) {
+    const data = JSON.parse(raw) as CachedApkInfo;
+
+    const file = new FileSystem.File(data.apkPath);
+    if (!file.exists || (file.size ?? 0) === 0) {
       await AsyncStorage.removeItem(CACHED_APK_KEY);
       return null;
     }
@@ -363,109 +480,14 @@ export async function getCachedApkPath(): Promise<string | null> {
   return cached?.apkPath ?? null;
 }
 
-// ============================================================
-// 5. 权限引导
-// ============================================================
-
-/**
- * 跳转到系统「安装未知应用」权限设置页
- */
-export async function openInstallPermissionSettings(): Promise<void> {
-  if (Platform.OS !== "android") return;
-
-  const packageName =
-    Constants.expoConfig?.android?.package ?? "com.anonymous.Project";
-
-  try {
-    await IntentLauncher.startActivityAsync(
-      "android.settings.MANAGE_UNKNOWN_APP_SOURCES",
-      { data: `package:${packageName}` },
-    );
-    runtimeLogger.info("Update", "已跳转安装权限设置页");
-  } catch {
-    runtimeLogger.warn("Update", "MANAGE_UNKNOWN_APP_SOURCES 失败，尝试应用详情");
-    try {
-      await IntentLauncher.startActivityAsync(
-        "android.settings.APPLICATION_DETAILS_SETTINGS",
-        { data: `package:${packageName}` },
-      );
-    } catch (err) {
-      runtimeLogger.error("Update", "打开设置页失败", err);
-      throw new Error("请手动前往设置 → 应用 → 允许安装未知应用");
-    }
-  }
-}
-
-// ============================================================
-// 6. 调起系统安装器
-// ============================================================
-
-export async function installApk(apkPath: string): Promise<void> {
-  runtimeLogger.info("Update", `调起安装: ${apkPath}`);
-
-  if (Platform.OS !== "android") {
-    throw new Error("仅支持 Android 安装");
-  }
-
-  const apkFile = new FileSystem.File(apkPath);
-
-  if (!apkFile.exists) {
-    throw new Error("APK 文件不存在");
-  }
-
-  const fileSize = apkFile.size ?? 0;
-  runtimeLogger.info("Update", `APK 大小: ${String(fileSize)} bytes`);
-
-  if (fileSize < 1024 * 1024) {
-    throw new Error(`APK 文件异常，大小仅 ${String(fileSize)} bytes`);
-  }
-
-  const contentUri = apkFile.contentUri;
-
-  if (!contentUri) {
-    throw new Error("无法获取 contentUri，FileProvider 未正确配置");
-  }
-
-  runtimeLogger.info("Update", `Content URI: ${contentUri}`);
-
-  const FLAG_GRANT_READ_URI_PERMISSION = 1;
-  const FLAG_ACTIVITY_NEW_TASK = 268435456;
-
-  try {
-    await IntentLauncher.startActivityAsync(
-      "android.intent.action.VIEW",
-      {
-        data: contentUri,
-        type: "application/vnd.android.package-archive",
-        flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK,
-        extra: {
-          "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
-        },
-      },
-    );
-    runtimeLogger.info("Update", "安装器已调起");
-  } catch (err) {
-    runtimeLogger.error("Update", "调起安装器失败", err);
-    throw new Error("无法打开安装程序，请检查是否已授予安装未知应用权限");
-  }
-}
-
-// ============================================================
-// 7. 清理
-// ============================================================
-
-function cleanupFilesSync(): void {
-  if (updateDir.exists) {
-    updateDir.delete();
-  }
-}
-
 export async function cleanupFiles(): Promise<void> {
   try {
-    cleanupFilesSync();
+    if (updateDir.exists) {
+      updateDir.delete();
+    }
     await AsyncStorage.removeItem(CACHED_APK_KEY);
-    runtimeLogger.info("Update", "临时文件已清理");
+    runtimeLogger.info("Update", "[cleanupFiles] done");
   } catch (err) {
-    runtimeLogger.warn("Update", "清理临时文件失败", err);
+    runtimeLogger.warn("Update", "[cleanupFiles] failed", err);
   }
 }
