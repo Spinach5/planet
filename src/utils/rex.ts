@@ -6,20 +6,19 @@ export function extractXhidFromHtml(html: string): string | null {
 }
 
 export function parseCookiesToKeyValue(cookieStr: string): Record<string, string> {
-  const cookieItems = cookieStr.split(',');
   const result: Record<string, string> = {};
 
-  for (const item of cookieItems) {
-    if (!item.trim()) continue;
+  const trimmed = cookieStr.trim();
+  if (!trimmed) return result;
 
-    const parts = item.split(';');
-    const keyValue = parts[0].trim();
+  const cookiePairs = trimmed.split(/;\s*/);
 
-    const equalIndex = keyValue.indexOf('=');
+  for (const pair of cookiePairs) {
+    const equalIndex = pair.indexOf('=');
     if (equalIndex === -1) continue;
 
-    const key = keyValue.slice(0, equalIndex).trim();
-    const value = keyValue.slice(equalIndex + 1).trim();
+    const key = pair.slice(0, equalIndex).trim();
+    const value = pair.slice(equalIndex + 1).trim();
 
     if (key && !Object.prototype.hasOwnProperty.call(result, key)) {
       result[key] = value;

@@ -1,5 +1,5 @@
-import cacheManager from './cache';
-import { parseCookiesToKeyValue, stringifyCookieObj } from './rex';
+import cacheManager from "./cache";
+import { parseCookiesToKeyValue, stringifyCookieObj } from "./rex";
 
 class CookiesManager {
   private prefix: string;
@@ -7,7 +7,7 @@ class CookiesManager {
   private cookies: Record<string, string>;
   private loaded = false;
 
-  constructor(prefix = '') {
+  constructor(prefix = "") {
     this.prefix = prefix;
     this.cacheKey = `cookies_${prefix}`;
     this.cookies = {};
@@ -20,8 +20,10 @@ class CookiesManager {
   }
 
   private async loadFromCache(): Promise<void> {
-    const cached = await cacheManager.getAsync<Record<string, string>>(this.cacheKey);
-    if (cached && typeof cached === 'object') {
+    const cached = await cacheManager.getAsync<Record<string, string>>(
+      this.cacheKey,
+    );
+    if (cached && typeof cached === "object") {
       this.cookies = { ...cached };
     } else {
       this.cookies = {};
@@ -65,7 +67,6 @@ class CookiesManager {
 
   async clear(): Promise<this> {
     this.cookies = {};
-    this.loaded = false;
     await this.saveToCache();
     return this;
   }

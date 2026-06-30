@@ -1,5 +1,4 @@
 import { auth } from './auth';
-import { clearHbutCookies } from '../../utils/request';
 import { getXhid } from './GetXhid';
 import { getStuInfo } from './StuInfo';
 import userManager from '../../service/userInfo';
@@ -15,12 +14,8 @@ interface LoginResult {
  * Matches the original Taro auth flow.
  */
 export async function login(stuID: string, password: string): Promise<LoginResult> {
-  // Clear any residual session cookies before starting a new login attempt.
-  // This ensures a completely fresh session, preventing stale cookies from
-  // a previous failed attempt from interfering with the current attempt.
-  await clearHbutCookies();
-
   // Step 1: Authenticate with the HBUT academic system
+  // Note: auth() internally clears cookies before attempting login
   const authResult = await auth(stuID, password);
 
   if (!authResult.success) {
