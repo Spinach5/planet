@@ -386,21 +386,27 @@ export async function installApk(apkPath: string): Promise<void> {
   const FLAG_GRANT_READ_URI_PERMISSION = 1;
   const FLAG_ACTIVITY_NEW_TASK = 268435456;
 
-  try {
-    await IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+  // 注意：不能 await startActivityAsync，因为安装器会替换 App 进程，
+  // 导致 startActivityForResult 永远收不到结果，Promise 会永久挂起。
+  // 所以这里用 fire-and-forget 方式调起安装器。
+  IntentLauncher.startActivityAsync(
+    "android.intent.action.VIEW",
+    {
       data: contentUri,
       type: "application/vnd.android.package-archive",
       flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK,
       extra: {
         "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
-        "android.intent.extra.RETURN_RESULT": true,
       },
-    });
-    runtimeLogger.info("Update", "[installApk] installer launched");
-  } catch (err) {
-    runtimeLogger.error("Update", "[installApk] failed to launch installer", err);
-    throw new Error("无法打开安装程序，请检查是否已授予安装未知应用权限");
-  }
+    },
+  ).catch((err) => {
+    // 安装器启动失败（用户拒绝、安装器崩溃等）才进入这里
+    runtimeLogger.error("Update", "[installApk] installer error", err);
+  });
+
+  // 无论用户是否真正完成安装，我们都立即返回
+  //（用户可能在安装界面取消，或安装后 App 被重启）
+  runtimeLogger.info("Update", "[installApk] installer launched");
 }
 
 export async function openInstallPermissionSettings(): Promise<void> {
