@@ -36,7 +36,6 @@ export const getExtroInfo = withCache(
         Referer: "https://jwxt.hbut.edu.cn",
         Origin: "https://jwxt.hbut.edu.cn",
       },
-      withCredentials: true,
     };
 
     const xhid = await getXhid();

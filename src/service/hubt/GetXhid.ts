@@ -15,7 +15,6 @@ export async function getXhid(): Promise<string> {
       Referer: 'https://jwxt.hbut.edu.cn',
       Origin: 'https://jwxt.hbut.edu.cn',
     },
-    withCredentials: true,
   };
 
   const response = await hbutRequest.get('/admin/xsd/xyjc/getXsjbxx', loginConfig);

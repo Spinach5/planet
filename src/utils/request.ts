@@ -10,7 +10,7 @@ const createRequest = (baseURL: string, cookieManager: CookiesManager) => {
   const instance = axios.create({
     baseURL,
     timeout: 15000,
-    withCredentials: true,
+    withCredentials: false,
     responseType: 'text',
   });
 

@@ -19,7 +19,6 @@ async function _fetchHtml(): Promise<string> {
           Referer: "https://jwxt.hbut.edu.cn",
           Origin: "https://jwxt.hbut.edu.cn",
         },
-        withCredentials: true,
         responseType: "text",
       });
       return String(response.data ?? "");
@@ -133,7 +132,6 @@ export async function getEmptyClassRoom(
         Referer: "https://jwxt.hbut.edu.cn",
         Origin: "https://jwxt.hbut.edu.cn",
       },
-      withCredentials: true,
     },
   );
 

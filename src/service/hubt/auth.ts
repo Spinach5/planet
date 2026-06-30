@@ -59,7 +59,6 @@ export async function auth(
       Referer: "https://jwxt.hbut.edu.cn",
       Origin: "https://jwxt.hbut.edu.cn",
     },
-    withCredentials: true,
   };
 
   // Step 4: Submit login

@@ -15,7 +15,6 @@ export async function getTimeTable(semester?: string): Promise<ClassTime[]> {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
       },
-      withCredentials: true,
     };
     const resp = await hbutRequest.get('/admin/xsd/xsdcjcx/getCurrentXnxq', loginConfig);
     if (resp.status !== 200) throw new Error('获取时间表失败：无法获取学期');
@@ -30,7 +29,6 @@ export async function getTimeTable(semester?: string): Promise<ClassTime[]> {
       Referer: 'https://jwxt.hbut.edu.cn',
       Origin: 'https://jwxt.hbut.edu.cn',
     },
-    withCredentials: true,
   };
 
   const response = await hbutRequest.get(

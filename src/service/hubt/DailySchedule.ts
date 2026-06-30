@@ -16,7 +16,6 @@ export async function getDailySchedule(time: string): Promise<unknown[]> {
       Referer: 'https://jwxt.hbut.edu.cn',
       Origin: 'https://jwxt.hbut.edu.cn',
     },
-    withCredentials: true,
   };
 
   const response = await hbutRequest.get(`/admin/getDayBz?rq=${time}`, loginConfig);

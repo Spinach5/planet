@@ -16,7 +16,6 @@ export async function getAllWeek(semester?: string): Promise<any[]> {
         Referer: "https://jwxt.hbut.edu.cn",
         Origin: "https://jwxt.hbut.edu.cn",
       },
-      withCredentials: true,
     };
 
     const resp = await hbutRequest.get("/admin/getCurrentPkZc", loginConfig);
@@ -53,7 +52,6 @@ export async function getAllWeek(semester?: string): Promise<any[]> {
       Referer: "https://jwxt.hbut.edu.cn",
       Origin: "https://jwxt.hbut.edu.cn",
     },
-    withCredentials: true,
   };
 
   const response = await hbutRequest.get(
