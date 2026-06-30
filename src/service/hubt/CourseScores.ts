@@ -49,7 +49,6 @@ export async function getCourseScores(
       Referer: "https://jwxt.hbut.edu.cn",
       Origin: "https://jwxt.hbut.edu.cn",
     },
-    withCredentials: true,
   };
 
   const fetchPage = async (size: number) => {

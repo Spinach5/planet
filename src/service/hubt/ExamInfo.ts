@@ -62,7 +62,6 @@ export const getExamInfo = withCache(
         Referer: "https://jwxt.hbut.edu.cn",
         Origin: "https://jwxt.hbut.edu.cn",
       },
-      withCredentials: true,
     };
 
     const response = await hbutRequest.get(

@@ -16,7 +16,6 @@ export async function getCurrentWeek(): Promise<number> {
       Referer: 'https://jwxt.hbut.edu.cn',
       Origin: 'https://jwxt.hbut.edu.cn',
     },
-    withCredentials: true,
   };
 
   const response = await hbutRequest.post('/admin/api/getXlzc', {}, loginConfig);
