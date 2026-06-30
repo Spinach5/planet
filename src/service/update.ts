@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as IntentLauncher from "expo-intent-launcher";
+import * as Application from "expo-application";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { runtimeLogger } from "@/utils/runtimeLogger";
@@ -72,8 +73,24 @@ function versionToCode(ver: string): number {
   return major * 10000 + minor * 100 + patch;
 }
 
+/** 将 versionCode 转换为语义化版本号 (如 108 -> "1.0.8") */
+function versionCodeToString(versionCode: number): string {
+  const major = Math.floor(versionCode / 10000);
+  const minor = Math.floor((versionCode % 10000) / 100);
+  const patch = versionCode % 100;
+  return `${major}.${minor}.${patch}`;
+}
+
 function getLocalVersion(): string {
   try {
+    // 优先使用 nativeBuildVersion（Android versionCode）获取真实版本
+    if (Platform.OS === "android" && Application.nativeBuildVersion) {
+      const versionCode = parseInt(String(Application.nativeBuildVersion), 10);
+      if (!isNaN(versionCode) && versionCode > 0) {
+        return versionCodeToString(versionCode);
+      }
+    }
+    // fallback 到 expoConfig.version
     return Constants.expoConfig?.version ?? "0.0.0";
   } catch {
     return "0.0.0";
