@@ -2,13 +2,14 @@
   "expo": {
     "name": "Project",
     "slug": "Project",
-    "version": "1.0.5",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "project",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.anonymous.Project"
     },
     "android": {
       "adaptiveIcon": {
