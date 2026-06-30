@@ -385,21 +385,26 @@ export async function installApk(apkPath: string): Promise<void> {
 
   const FLAG_GRANT_READ_URI_PERMISSION = 1;
   const FLAG_ACTIVITY_NEW_TASK = 268435456;
+  const FLAG_GRANT_PERSISTABLE_URI_PERMISSION = 64;
 
   // 注意：不能 await startActivityAsync，因为安装器会替换 App 进程，
   // 导致 startActivityForResult 永远收不到结果，Promise 会永久挂起。
   // 所以这里用 fire-and-forget 方式调起安装器。
+  runtimeLogger.info("Update", `[installApk] launching installer with flags: ${FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_PERSISTABLE_URI_PERMISSION}`);
+
   IntentLauncher.startActivityAsync(
     "android.intent.action.VIEW",
     {
       data: contentUri,
       type: "application/vnd.android.package-archive",
-      flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK,
+      flags: FLAG_GRANT_READ_URI_PERMISSION | FLAG_ACTIVITY_NEW_TASK | FLAG_GRANT_PERSISTABLE_URI_PERMISSION,
       extra: {
         "android.intent.extra.NOT_UNKNOWN_SOURCE": true,
       },
     },
-  ).catch((err) => {
+  ).then((result) => {
+    runtimeLogger.info("Update", `[installApk] startActivityAsync completed: ${JSON.stringify(result)}`);
+  }).catch((err) => {
     // 安装器启动失败（用户拒绝、安装器崩溃等）才进入这里
     runtimeLogger.error("Update", "[installApk] installer error", err);
   });
