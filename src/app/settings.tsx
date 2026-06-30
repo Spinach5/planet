@@ -35,10 +35,10 @@ import * as Application from "expo-application";
 /** 获取本机应用版本号 */
 function getNativeVersion(): string {
   try {
-    if (Application.nativeAppVersion) {
-      return Application.nativeAppVersion;
+    if (Platform.OS === "android") {
+      return Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? "1.0.0";
     }
-    return Constants.expoConfig?.version ?? "1.0.0";
+    return Constants.expoConfig?.version ?? Application.nativeApplicationVersion ?? "1.0.0";
   } catch {
     return Constants.expoConfig?.version ?? "1.0.0";
   }

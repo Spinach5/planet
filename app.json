@@ -2,7 +2,7 @@
   "expo": {
     "name": "Project",
     "slug": "Project",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "project",
@@ -45,6 +45,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "618bbd10-689e-4110-a54d-9a2e03a5dd99"
+      }
     }
   }
 }
