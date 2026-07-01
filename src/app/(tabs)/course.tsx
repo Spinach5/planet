@@ -17,16 +17,16 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Modal,
-    PanResponder,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  PanResponder,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -87,14 +87,12 @@ function computeWeekDates(
 } {
   const weekStrMap = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"];
 
-  // Find the matching week entry by currentWeek to get rqfw
   const entry =
     currentWeek !== null
       ? weekDataList.find((w) => Number(w.zc) === currentWeek)
       : undefined;
 
   if (entry?.rqfw) {
-    // Parse rqfw like "03.02-03.08" → { month: 3, day: 2 }
     const [startStr] = entry.rqfw.split("-");
     const parts = startStr.split(".");
     const month = parseInt(parts[0], 10);
@@ -115,7 +113,6 @@ function computeWeekDates(
     return { currentMonth: month, weekDates: dates };
   }
 
-  // Fallback: use today's dates (when no rqfw available)
   const today = new Date();
   const dayOfWeek = today.getDay();
   const daysToMonday = (dayOfWeek + 6) % 7;
@@ -365,7 +362,6 @@ function WeekHeader({
   return (
     <View style={wh.container}>
       <View style={wh.row}>
-        {/* Left spacer matching TimeColumn width */}
         <View style={[wh.monthBox, { width: 40 }]}>
           <Text style={[wh.monthNum, { color: theme.text }]}>
             {currentMonth}
@@ -703,28 +699,37 @@ export default function CourseScreen() {
     ? ["rgb(26,29,46)", "rgb(35,39,64)", "rgb(26,29,46)"]
     : ["#47a5fd", "#cce5ff", "#f2f5f9"];
 
+  // ─── Step 1: 登录状态 ───
   const [isLoggedIn, setIsLoggedIn] = useState(userManager.checkLogin());
+
+  // ─── Data state ───
   const [semesterList, setSemesterList] = useState<string[]>([]);
   const [currentSemester, setCurrentSemester] = useState("");
-  const [currentWeek, setCurrentWeek] = useState<number | null>(null);
-  const [realCurrentWeek, setRealCurrentWeek] = useState<number | null>(null); // 当前真实的周数，用于"返回本周"
   const [isCurrentSemester, setIsCurrentSemester] = useState(false);
-  const [weekList, setWeekList] = useState<number[]>([]);
+  const [currentWeek, setCurrentWeek] = useState<number | null>(null);
+  const [realCurrentWeek, setRealCurrentWeek] = useState<number | null>(null);
   interface WeekDataItem {
     zc: string;
     rqfw?: string;
   }
+  const [weekList, setWeekList] = useState<number[]>([]);
   const [weekDataList, setWeekDataList] = useState<WeekDataItem[]>([]);
   const [courses, setCourses] = useState<CourseCleaned[]>([]);
   const [timeTable, setTimeTable] = useState<ClassTime[]>([]);
   const [practiceData, setPracticeData] = useState<PracticeItem[]>([]);
   const [gridCourses, setGridCourses] = useState<GridCourse[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedCourse, setSelectedCourse] = useState<GridCourse | null>(null);
   const [showDetail, setShowDetail] = useState(false);
   const [showWeekPicker, setShowWeekPicker] = useState(false);
   const [showSemesterPicker, setShowSemesterPicker] = useState(false);
-  const [scheduleNotPublished, setScheduleNotPublished] = useState(false);
+
+  // ─── 分步加载状态 ───
+  const [isLoading, setIsLoading] = useState(false);
+  const [semesterError, setSemesterError] = useState<string | null>(null);
+  const [frameworkError, setFrameworkError] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [frameworkReady, setFrameworkReady] = useState(false);
+
   const initialized = useRef(false);
 
   // Keep swipe-accessible refs in sync
@@ -767,142 +772,246 @@ export default function CourseScreen() {
     }),
   ).current;
 
-  // Refresh login status on focus
+  // ─── Step 1: 登录状态检查（页面焦点时刷新） ───
   useFocusEffect(
     useCallback(() => {
       const loggedIn = userManager.checkLogin();
       setIsLoggedIn(loggedIn);
+      runtimeLogger.info(
+        "Course",
+        `步骤1: 登录状态检查 → ${loggedIn ? "已登录" : "未登录"}`,
+      );
     }, []),
   );
 
-  // Initialize: load semester list
+  // ─── 步骤 3-5：载入指定学期的数据（初始化 + 学期切换复用） ───
+  const loadSemesterFramework = useCallback(
+    async (semester: string, isCurrentSem: boolean) => {
+      // 重置状态
+      setCourses([]);
+      setPracticeData([]);
+      setGridCourses([]);
+      setFrameworkReady(false);
+      setFrameworkError(null);
+      setScheduleError(null);
+      setIsLoading(true);
+
+      // ─── 步骤 3：获取周次与节次时间 ───
+      try {
+        runtimeLogger.info(
+          "Course",
+          `步骤3: 获取周次与节次时间, xnxq=${semester}`,
+        );
+        const [weekData, timeData] = await Promise.all([
+          getAllWeek(semester),
+          getTimeTable(semester),
+        ]);
+
+        const weeksNum = weekData.map((w: { zc: string }) =>
+          parseInt(w.zc, 10),
+        );
+        setWeekList(weeksNum);
+        setWeekDataList(weekData as WeekDataItem[]);
+        setTimeTable(timeData);
+        setFrameworkReady(true);
+
+        // 默认选中第 1 周
+        const defaultWeek = weeksNum[0] ?? 1;
+        setCurrentWeek(defaultWeek);
+        runtimeLogger.info(
+          "Course",
+          `步骤3 完成: ${weeksNum.length}周, ${timeData.length}节课`,
+        );
+
+        // ─── 步骤 4a：获取课表数据（可能失败，不影响备注） ───
+        try {
+          runtimeLogger.info(
+            "Course",
+            `步骤4a: 获取课表数据, xnxq=${semester}`,
+          );
+          const scheduleData = await getAllSchedule(false, semester);
+          setCourses(scheduleData);
+          setScheduleError(null);
+          runtimeLogger.info(
+            "Course",
+            `步骤4a 完成: ${scheduleData.length}门课程`,
+          );
+        } catch (err) {
+          runtimeLogger.error("Course", "步骤4a 失败: 课表未公布", err);
+          setScheduleError("该学年学期课表还未公布");
+          setCourses([]);
+        }
+
+        // ─── 步骤 4b：获取备注信息（独立于课表） ───
+        try {
+          runtimeLogger.info(
+            "Course",
+            `步骤4b: 获取备注信息, xnxq=${semester}`,
+          );
+          const extroData = await getExtroInfo(semester);
+          setPracticeData(extroData);
+          runtimeLogger.info(
+            "Course",
+            `步骤4b 完成: ${extroData.length}条备注`,
+          );
+        } catch (err) {
+          runtimeLogger.warn("Course", "步骤4b 失败: 获取备注信息失败", err);
+        }
+
+        // ─── 步骤 5：定位到当前周 ───
+        try {
+          runtimeLogger.info("Course", "步骤5: 定位当前周");
+          if (isCurrentSem) {
+            const serverWeek = await getCurrentWeek();
+            setRealCurrentWeek(serverWeek);
+            const validWeek = weeksNum.includes(serverWeek)
+              ? serverWeek
+              : defaultWeek;
+            setCurrentWeek(validWeek);
+            runtimeLogger.info(
+              "Course",
+              `步骤5 完成: 当前学期, 定位到第${validWeek}周`,
+            );
+          } else {
+            setRealCurrentWeek(null);
+            runtimeLogger.info("Course", "步骤5: 非当前学期, 保持第1周");
+          }
+        } catch (err) {
+          runtimeLogger.warn(
+            "Course",
+            "步骤5: 获取当前周失败, 使用默认第1周",
+            err,
+          );
+        }
+      } catch (err) {
+        // 步骤 3 失败：不渲染课表框架
+        runtimeLogger.error(
+          "Course",
+          "步骤3 失败: 获取排课周数或节次失败",
+          err,
+        );
+        setFrameworkError("获取排课周数或节次失败");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
+  // ─── 初始化：已登录后执行步骤 2-5 ───
   useEffect(() => {
     if (!isLoggedIn) return;
     if (initialized.current) return;
     initialized.current = true;
 
     void (async () => {
+      setIsLoading(true);
+
+      // ─── 步骤 2：获取当前学年学期 ───
       try {
+        runtimeLogger.info("Course", "步骤2: 获取当前学年学期");
         const list = await getSemesterList();
         setSemesterList(list);
         if (list.length > 0) {
           const latest = list[list.length - 1];
           setCurrentSemester(latest);
           setIsCurrentSemester(true);
+          runtimeLogger.info("Course", `步骤2 完成: xnxq=${latest}`);
+
+          // 继续执行步骤 3-5
+          await loadSemesterFramework(latest, true);
         }
       } catch (err) {
-        runtimeLogger.error("Course", "获取学期列表失败", err);
+        runtimeLogger.error("Course", "步骤2 失败: 获取学年学期失败", err);
+        setSemesterError("获取学期失败");
+        setIsLoading(false);
       }
     })();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, loadSemesterFramework]);
 
-  // Load week list when semester changes
-  useEffect(() => {
-    if (!isLoggedIn || !currentSemester) return;
-    void (async () => {
-      try {
-        const [week, weeksRaw] = await Promise.all([
-          getCurrentWeek(),
-          getAllWeek(currentSemester),
-        ]);
-        const weeksNum = weeksRaw.map((w) => parseInt(w.zc, 10));
-        setWeekList(weeksNum);
-        setWeekDataList(weeksRaw as WeekDataItem[]);
-        const weekNum = Number(week); // defensive: getCurrentWeek may return string from old cache
-        // 只有当前学期才用实际周数，非当前学期默认第一周
-        if (isCurrentSemester) {
-          setRealCurrentWeek(weekNum);
-          const validWeek = weeksNum.includes(weekNum)
-            ? weekNum
-            : (weeksNum[0] ?? 1);
-          setCurrentWeek(validWeek);
-        } else {
-          setRealCurrentWeek(null);
-          setCurrentWeek(weeksNum[0] ?? 1);
-        }
-        setScheduleNotPublished(false);
-      } catch (err) {
-        runtimeLogger.error("Course", "获取当前周数/周次列表失败", err);
-        setScheduleNotPublished(true);
-        setLoading(false);
-      }
-    })();
-  }, [isLoggedIn, currentSemester]);
+  // ─── 学期切换：从步骤 3 重新开始 ───
+  const handleSemesterChange = useCallback(
+    (sem: string) => {
+      setShowSemesterPicker(false);
+      const isCurrentSem = sem === semesterList[semesterList.length - 1];
+      setIsCurrentSemester(isCurrentSem);
+      setCurrentSemester(sem);
+      setCurrentWeek(null); // 重置当前周，步骤3会设置
+      setRealCurrentWeek(null);
+      runtimeLogger.info(
+        "Course",
+        `学期切换: ${sem}, isCurrentSem=${String(isCurrentSem)}`,
+      );
 
-  // Load schedule, timetable, practice data when semester changes
-  useEffect(() => {
-    if (!isLoggedIn || !currentSemester) return;
-    setLoading(true);
-    void (async () => {
-      try {
-        const [scheduleData, timeData, extroData] = await Promise.all([
-          getAllSchedule(false, currentSemester),
-          getTimeTable(currentSemester),
-          getExtroInfo(currentSemester),
-        ]);
-        setCourses(scheduleData);
-        setTimeTable(timeData);
-        setPracticeData(extroData);
-        setScheduleNotPublished(false);
-      } catch (err) {
-        runtimeLogger.error("Course", "加载课表/时间表/备注失败", err);
-        setScheduleNotPublished(true);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [isLoggedIn, currentSemester]);
+      void loadSemesterFramework(sem, isCurrentSem);
+    },
+    [semesterList, loadSemesterFramework],
+  );
 
-  // Compute grid courses
+  // ─── 计算课表网格（周次切换时重新计算，无需请求接口） ───
   useEffect(() => {
-    if (loading || currentWeek === null || !timeTable.length || !courses.length)
+    if (
+      isLoading ||
+      currentWeek === null ||
+      !timeTable.length ||
+      !courses.length
+    )
       return;
     const items = computeGridCourses(currentWeek, courses, timeTable);
     setGridCourses(items);
-  }, [currentWeek, courses, timeTable, loading]);
+    runtimeLogger.info(
+      "Course",
+      `网格计算完成: 第${currentWeek}周, ${items.length}门课`,
+    );
+  }, [currentWeek, courses, timeTable, isLoading]);
 
+  // ─── 刷新（重新获取课表与备注，二者独立） ───
   const handleRefresh = useCallback(() => {
     if (!isLoggedIn || !currentSemester) return;
-    setLoading(true);
+    setIsLoading(true);
+    runtimeLogger.info("Course", "手动刷新: 重新获取课表与备注");
+
+    const refreshData = async () => {
+      // 刷新课表
+      try {
+        const scheduleData = await getAllSchedule(true, currentSemester);
+        setCourses(scheduleData);
+        setScheduleError(null);
+        runtimeLogger.info("Course", "刷新: 课表获取成功");
+      } catch (err) {
+        runtimeLogger.error("Course", "刷新: 课表获取失败", err);
+        setScheduleError("该学年学期课表还未公布");
+        setCourses([]);
+      }
+
+      // 刷新备注（独立于课表）
+      try {
+        const extroData = await getExtroInfo(currentSemester);
+        setPracticeData(extroData);
+        runtimeLogger.info("Course", "刷新: 备注获取成功");
+      } catch (err) {
+        runtimeLogger.warn("Course", "刷新: 备注获取失败", err);
+      }
+    };
+
     void (async () => {
       try {
-        const [scheduleData, timeData, extroData] = await Promise.all([
-          getAllSchedule(true, currentSemester),
-          getTimeTable(currentSemester),
-          getExtroInfo(currentSemester, true),
-        ]);
-        setCourses(scheduleData);
-        setTimeTable(timeData);
-        setPracticeData(extroData);
+        await refreshData();
         showToast({ message: "刷新成功", type: "success" });
       } catch (err) {
-        runtimeLogger.error("Course", "刷新课表失败", err);
+        runtimeLogger.error("Course", "刷新失败", err);
 
-        // Try auto re-login — session cookies may have expired
+        // Try auto re-login
         const { stuId, password } = userManager.getAccount();
         if (stuId && password) {
-          runtimeLogger.info(
-            "Course",
-            "检测到请求失败，尝试自动重新登录恢复会话...",
-          );
+          runtimeLogger.info("Course", "尝试自动重新登录恢复会话...");
           try {
             const loginResult = await login(stuId, password);
             if (loginResult.success) {
-              runtimeLogger.info("Course", "自动重新登录成功，重试刷新课表");
-              try {
-                const [scheduleData, timeData, extroData] = await Promise.all([
-                  getAllSchedule(true, currentSemester),
-                  getTimeTable(currentSemester),
-                  getExtroInfo(currentSemester, true),
-                ]);
-                setCourses(scheduleData);
-                setTimeTable(timeData);
-                setPracticeData(extroData);
-                showToast({ message: "刷新成功", type: "success" });
-                return;
-              } catch (retryErr) {
-                runtimeLogger.error("Course", "重新登录后刷新仍失败", retryErr);
-              }
+              runtimeLogger.info("Course", "自动重新登录成功，重试刷新");
+              await refreshData();
+              showToast({ message: "刷新成功", type: "success" });
+              return;
             } else {
               runtimeLogger.warn(
                 "Course",
@@ -913,19 +1022,21 @@ export default function CourseScreen() {
             runtimeLogger.error("Course", "自动重新登录异常", reloginErr);
           }
         } else {
-          runtimeLogger.warn(
-            "Course",
-            "无可用登录凭据（App 重启后需手动登录），无法自动恢复会话",
-          );
+          runtimeLogger.warn("Course", "无可用登录凭据，无法自动恢复会话");
         }
 
         showToast({ message: "刷新失败，请尝试重新登录", type: "error" });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     })();
   }, [isLoggedIn, currentSemester, showToast]);
 
+  // ═══════════════════════════════════════════════════════════════
+  // 渲染逻辑
+  // ═══════════════════════════════════════════════════════════════
+
+  // 步骤 1 失败：未登录
   if (!isLoggedIn) {
     return (
       <View style={st.container}>
@@ -946,7 +1057,50 @@ export default function CourseScreen() {
     );
   }
 
-  if (loading && !courses.length) {
+  // 步骤 2 失败：获取学期失败
+  if (semesterError) {
+    return (
+      <View style={st.container}>
+        <LinearGradient
+          colors={gradientColors}
+          locations={[0, 0.28, 1]}
+          style={st.gradient}
+        >
+          <SafeAreaView style={st.safeArea} edges={["top"]}>
+            <View style={st.center}>
+              <ThemedText style={st.loadText} themeColor="textSecondary">
+                {semesterError}
+              </ThemedText>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  // 步骤 3 失败：获取排课周数或节次失败（不渲染表格）
+  if (frameworkError) {
+    return (
+      <View style={st.container}>
+        <LinearGradient
+          colors={gradientColors}
+          locations={[0, 0.28, 1]}
+          style={st.gradient}
+        >
+          <SafeAreaView style={st.safeArea} edges={["top"]}>
+            <View style={st.center}>
+              <ThemedText style={st.loadText} themeColor="textSecondary">
+                {frameworkError}
+              </ThemedText>
+            </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  // 步骤 2/3 加载中（框架尚未就绪）
+  if (!frameworkReady && isLoading) {
     return (
       <View style={st.container}>
         <LinearGradient
@@ -966,89 +1120,7 @@ export default function CourseScreen() {
     );
   }
 
-  if (scheduleNotPublished) {
-    return (
-      <View style={st.container}>
-        <LinearGradient
-          colors={gradientColors}
-          locations={[0, 0.28, 1]}
-          style={st.gradient}
-        >
-          <SafeAreaView style={st.safeArea} edges={["top"]}>
-            <View style={st.header}>
-              <TouchableOpacity
-                style={[st.btn, { backgroundColor: theme.surface }]}
-                onPress={handleRefresh}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator size="small" color="#47a5fd" />
-                ) : (
-                  <MaterialIcon name="refresh" size={20} color="#47a5fd" />
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  st.btn,
-                  st.semesterBtn,
-                  { backgroundColor: theme.surface },
-                ]}
-                onPress={() => setShowSemesterPicker(true)}
-              >
-                <ThemedText style={st.btnText} numberOfLines={1}>
-                  {currentSemester || "学期"}
-                </ThemedText>
-                <MaterialIcon
-                  name="chevron-down"
-                  size={14}
-                  color={theme.textSecondary}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={st.center}>
-              <ThemedText style={st.loadText} themeColor="textSecondary">
-                该学年学期课表还未发布
-              </ThemedText>
-            </View>
-            <SemesterPickerModal
-              visible={showSemesterPicker}
-              semesterList={semesterList}
-              currentSemester={currentSemester}
-              onSelect={(sem) => {
-                setShowSemesterPicker(false);
-                setIsCurrentSemester(
-                  sem === semesterList[semesterList.length - 1],
-                );
-                setCurrentSemester(sem);
-              }}
-              onClose={() => setShowSemesterPicker(false)}
-            />
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
-    );
-  }
-
-  if (loading && gridCourses.length === 0) {
-    return (
-      <View style={st.container}>
-        <LinearGradient
-          colors={gradientColors}
-          locations={[0, 0.28, 1]}
-          style={st.gradient}
-        >
-          <SafeAreaView style={st.safeArea} edges={["top"]}>
-            <View style={st.center}>
-              <ThemedText style={st.loadText} themeColor="textSecondary">
-                加载中...
-              </ThemedText>
-            </View>
-          </SafeAreaView>
-        </LinearGradient>
-      </View>
-    );
-  }
-
+  // 计算渲染参数
   const dayWidth = (SCREEN_WIDTH - 40) / 7;
   const { currentMonth, weekDates } = computeWeekDates(
     currentWeek,
@@ -1057,6 +1129,9 @@ export default function CourseScreen() {
   const CELL_H = 62;
   const gridHeight = timeTable.length * CELL_H;
 
+  // ═══════════════════════════════════════════════════════════════
+  // 主布局（框架就绪后始终渲染 header + weekHeader + 时间轴）
+  // ═══════════════════════════════════════════════════════════════
   return (
     <View style={st.container}>
       <LinearGradient
@@ -1065,14 +1140,14 @@ export default function CourseScreen() {
         style={st.gradient}
       >
         <SafeAreaView style={st.safeArea} edges={["top"]}>
-          {/* Header: semester, week, refresh in one row */}
+          {/* Header: semester, week, refresh */}
           <View style={st.header}>
             <TouchableOpacity
               style={[st.btn, { backgroundColor: theme.surface }]}
               onPress={handleRefresh}
-              disabled={loading}
+              disabled={isLoading}
             >
-              {loading ? (
+              {isLoading ? (
                 <ActivityIndicator size="small" color="#47a5fd" />
               ) : (
                 <MaterialIcon name="refresh" size={20} color="#47a5fd" />
@@ -1114,77 +1189,97 @@ export default function CourseScreen() {
             dayWidth={dayWidth}
           />
 
-          {/* Outer vertical scroll containing both grid and notes */}
+          {/* Outer vertical scroll: grid + notes */}
           <ScrollView
             style={st.outerScroll}
             contentContainerStyle={st.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Horizontal scroll for the grid (7 cols) — swipe left/right to change week */}
+            {/* Grid area */}
             <View style={st.tableH}>
               <View style={{ flexDirection: "row" }}>
                 <TimeColumn timeTable={timeTable} />
-                {/* Swipe detector — PanResponder handles horizontal swipes, taps pass through */}
+
+                {/* Swipe detector + grid content */}
                 <View
                   style={{
                     width: dayWidth * 7,
-                    height: gridHeight,
+                    height: gridHeight || 200,
                     position: "relative",
                   }}
                   {...weekSwipeResponder.panHandlers}
                 >
-                  {/* Course cards */}
-                  {gridCourses.map((course) => (
-                    <TouchableOpacity
-                      key={course.id}
-                      style={[
-                        st.courseCard,
-                        {
-                          left: course.col * dayWidth + 2,
-                          top: course.row * CELL_H + 2,
-                          width: dayWidth - 4,
-                          height: course.rowSpan * CELL_H - 4,
-                          backgroundColor: getBgFromColor(course.color),
-                        },
-                      ]}
-                      onPress={() => {
-                        setSelectedCourse(course);
-                        setShowDetail(true);
-                      }}
-                      activeOpacity={0.7}
-                    >
-                      <Text
-                        style={[st.courseName, { color: course.color }]}
-                        numberOfLines={3}
+                  {/* 步骤 4 失败：网格区域显示错误信息，保留时间轴 */}
+                  {scheduleError ? (
+                    <View style={st.gridError}>
+                      <ThemedText
+                        style={st.gridErrorText}
+                        themeColor="textSecondary"
                       >
-                        {course.name}
-                      </Text>
-                      <Text
-                        style={[st.courseRoom, { color: course.color }]}
-                        numberOfLines={2}
+                        {scheduleError}
+                      </ThemedText>
+                    </View>
+                  ) : isLoading && !courses.length ? (
+                    <View style={st.gridError}>
+                      <ActivityIndicator size="small" color="#47a5fd" />
+                    </View>
+                  ) : (
+                    /* Course cards */
+                    gridCourses.map((course) => (
+                      <TouchableOpacity
+                        key={course.id}
+                        style={[
+                          st.courseCard,
+                          {
+                            left: course.col * dayWidth + 2,
+                            top: course.row * CELL_H + 2,
+                            width: dayWidth - 4,
+                            height: course.rowSpan * CELL_H - 4,
+                            backgroundColor: getBgFromColor(course.color),
+                          },
+                        ]}
+                        onPress={() => {
+                          setSelectedCourse(course);
+                          setShowDetail(true);
+                        }}
+                        activeOpacity={0.7}
                       >
-                        {course.room}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                        <Text
+                          style={[st.courseName, { color: course.color }]}
+                          numberOfLines={3}
+                        >
+                          {course.name}
+                        </Text>
+                        <Text
+                          style={[st.courseRoom, { color: course.color }]}
+                          numberOfLines={2}
+                        >
+                          {course.room}
+                        </Text>
+                      </TouchableOpacity>
+                    ))
+                  )}
                 </View>
               </View>
             </View>
 
-            {/* Practice notes / 备注 */}
-            <View style={st.remarkSection}>
-              <ThemedText style={st.remarkTitle}>备注</ThemedText>
-              <PracticeCard data={practiceData} />
-            </View>
+            {/* Practice notes */}
+            {!isLoading && (
+              <View style={st.remarkSection}>
+                <ThemedText style={st.remarkTitle}>备注</ThemedText>
+                <PracticeCard data={practiceData} />
+              </View>
+            )}
           </ScrollView>
 
           <WeekPickerModal
             visible={showWeekPicker}
             weekList={weekList}
-            currentWeek={currentWeek}
+            currentWeek={currentWeek ?? 1}
             onSelect={(week) => {
               setShowWeekPicker(false);
               setCurrentWeek(week);
+              runtimeLogger.info("Course", `周次切换: 第${week}周`);
             }}
             onClose={() => setShowWeekPicker(false)}
           />
@@ -1192,13 +1287,7 @@ export default function CourseScreen() {
             visible={showSemesterPicker}
             semesterList={semesterList}
             currentSemester={currentSemester}
-            onSelect={(sem) => {
-              setShowSemesterPicker(false);
-              setIsCurrentSemester(
-                sem === semesterList[semesterList.length - 1],
-              );
-              setCurrentSemester(sem);
-            }}
+            onSelect={handleSemesterChange}
             onClose={() => setShowSemesterPicker(false)}
           />
           <CourseDetailModal
@@ -1254,6 +1343,16 @@ const st = StyleSheet.create({
   outerScroll: { flex: 1 },
   scrollContent: { paddingBottom: 100 },
   tableH: { flexGrow: 0 },
+  gridError: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  gridErrorText: {
+    fontSize: 14,
+    textAlign: "center",
+    paddingHorizontal: 16,
+  },
   courseCard: {
     position: "absolute",
     borderRadius: 2,
