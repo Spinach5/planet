@@ -9,24 +9,24 @@ import { getAllWeek } from "@/service/hubt/GetAllWeek";
 import { getTimeTable } from "@/service/hubt/GetTimeTable";
 import { login } from "@/service/hubt/login";
 import userManager from "@/service/userInfo";
-import { runtimeLogger } from "@/utils/runtimeLogger";
 import type { CourseCleaned } from "@/utils/hbut/courseHelper";
 import type { ClassTime } from "@/utils/hbut/timeHelper";
+import { runtimeLogger } from "@/utils/runtimeLogger";
 import { useToast } from "@/utils/toast";
 import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  Modal,
-  PanResponder,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    Modal,
+    PanResponder,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -273,7 +273,10 @@ function SemesterPickerModal({
                 return (
                   <TouchableOpacity
                     key={sem}
-                    style={[sp.item, selected && { backgroundColor: "#e8f4fd" }]}
+                    style={[
+                      sp.item,
+                      selected && { backgroundColor: "#e8f4fd" },
+                    ]}
                     onPress={() => {
                       onSelect(sem);
                     }}
@@ -721,6 +724,7 @@ export default function CourseScreen() {
   const [showDetail, setShowDetail] = useState(false);
   const [showWeekPicker, setShowWeekPicker] = useState(false);
   const [showSemesterPicker, setShowSemesterPicker] = useState(false);
+  const [scheduleNotPublished, setScheduleNotPublished] = useState(false);
   const initialized = useRef(false);
 
   // Keep swipe-accessible refs in sync
@@ -747,13 +751,16 @@ export default function CourseScreen() {
           if (curIdx < list.length - 1) {
             setCurrentWeek(list[curIdx + 1]);
           } else {
-            showToastRef.current({ message: '已到达最后一周', type: 'warning' });
+            showToastRef.current({
+              message: "已到达最后一周",
+              type: "warning",
+            });
           }
         } else if (gs.dx > 40) {
           if (curIdx > 0) {
             setCurrentWeek(list[curIdx - 1]);
           } else {
-            showToastRef.current({ message: '已到达第一周', type: 'warning' });
+            showToastRef.current({ message: "已到达第一周", type: "warning" });
           }
         }
       },
@@ -784,7 +791,7 @@ export default function CourseScreen() {
           setIsCurrentSemester(true);
         }
       } catch (err) {
-        runtimeLogger.error('Course', '获取学期列表失败', err);
+        runtimeLogger.error("Course", "获取学期列表失败", err);
       }
     })();
   }, [isLoggedIn]);
@@ -813,8 +820,11 @@ export default function CourseScreen() {
           setRealCurrentWeek(null);
           setCurrentWeek(weeksNum[0] ?? 1);
         }
+        setScheduleNotPublished(false);
       } catch (err) {
-        runtimeLogger.error('Course', '获取当前周数/周次列表失败', err);
+        runtimeLogger.error("Course", "获取当前周数/周次列表失败", err);
+        setScheduleNotPublished(true);
+        setLoading(false);
       }
     })();
   }, [isLoggedIn, currentSemester]);
@@ -833,8 +843,10 @@ export default function CourseScreen() {
         setCourses(scheduleData);
         setTimeTable(timeData);
         setPracticeData(extroData);
+        setScheduleNotPublished(false);
       } catch (err) {
-        runtimeLogger.error('Course', '加载课表/时间表/备注失败', err);
+        runtimeLogger.error("Course", "加载课表/时间表/备注失败", err);
+        setScheduleNotPublished(true);
       } finally {
         setLoading(false);
       }
@@ -864,16 +876,19 @@ export default function CourseScreen() {
         setPracticeData(extroData);
         showToast({ message: "刷新成功", type: "success" });
       } catch (err) {
-        runtimeLogger.error('Course', '刷新课表失败', err);
+        runtimeLogger.error("Course", "刷新课表失败", err);
 
         // Try auto re-login — session cookies may have expired
         const { stuId, password } = userManager.getAccount();
         if (stuId && password) {
-          runtimeLogger.info('Course', '检测到请求失败，尝试自动重新登录恢复会话...');
+          runtimeLogger.info(
+            "Course",
+            "检测到请求失败，尝试自动重新登录恢复会话...",
+          );
           try {
             const loginResult = await login(stuId, password);
             if (loginResult.success) {
-              runtimeLogger.info('Course', '自动重新登录成功，重试刷新课表');
+              runtimeLogger.info("Course", "自动重新登录成功，重试刷新课表");
               try {
                 const [scheduleData, timeData, extroData] = await Promise.all([
                   getAllSchedule(true, currentSemester),
@@ -886,16 +901,22 @@ export default function CourseScreen() {
                 showToast({ message: "刷新成功", type: "success" });
                 return;
               } catch (retryErr) {
-                runtimeLogger.error('Course', '重新登录后刷新仍失败', retryErr);
+                runtimeLogger.error("Course", "重新登录后刷新仍失败", retryErr);
               }
             } else {
-              runtimeLogger.warn('Course', `自动重新登录失败: ${loginResult.message}`);
+              runtimeLogger.warn(
+                "Course",
+                `自动重新登录失败: ${loginResult.message}`,
+              );
             }
           } catch (reloginErr) {
-            runtimeLogger.error('Course', '自动重新登录异常', reloginErr);
+            runtimeLogger.error("Course", "自动重新登录异常", reloginErr);
           }
         } else {
-          runtimeLogger.warn('Course', '无可用登录凭据（App 重启后需手动登录），无法自动恢复会话');
+          runtimeLogger.warn(
+            "Course",
+            "无可用登录凭据（App 重启后需手动登录），无法自动恢复会话",
+          );
         }
 
         showToast({ message: "刷新失败，请尝试重新登录", type: "error" });
@@ -939,6 +960,69 @@ export default function CourseScreen() {
                 加载课表中...
               </ThemedText>
             </View>
+          </SafeAreaView>
+        </LinearGradient>
+      </View>
+    );
+  }
+
+  if (scheduleNotPublished) {
+    return (
+      <View style={st.container}>
+        <LinearGradient
+          colors={gradientColors}
+          locations={[0, 0.28, 1]}
+          style={st.gradient}
+        >
+          <SafeAreaView style={st.safeArea} edges={["top"]}>
+            <View style={st.header}>
+              <TouchableOpacity
+                style={[st.btn, { backgroundColor: theme.surface }]}
+                onPress={handleRefresh}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#47a5fd" />
+                ) : (
+                  <MaterialIcon name="refresh" size={20} color="#47a5fd" />
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  st.btn,
+                  st.semesterBtn,
+                  { backgroundColor: theme.surface },
+                ]}
+                onPress={() => setShowSemesterPicker(true)}
+              >
+                <ThemedText style={st.btnText} numberOfLines={1}>
+                  {currentSemester || "学期"}
+                </ThemedText>
+                <MaterialIcon
+                  name="chevron-down"
+                  size={14}
+                  color={theme.textSecondary}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={st.center}>
+              <ThemedText style={st.loadText} themeColor="textSecondary">
+                该学年学期课表还未发布
+              </ThemedText>
+            </View>
+            <SemesterPickerModal
+              visible={showSemesterPicker}
+              semesterList={semesterList}
+              currentSemester={currentSemester}
+              onSelect={(sem) => {
+                setShowSemesterPicker(false);
+                setIsCurrentSemester(
+                  sem === semesterList[semesterList.length - 1],
+                );
+                setCurrentSemester(sem);
+              }}
+              onClose={() => setShowSemesterPicker(false)}
+            />
           </SafeAreaView>
         </LinearGradient>
       </View>

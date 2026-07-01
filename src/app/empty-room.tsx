@@ -1,14 +1,14 @@
-import { HeadStatus } from "@/components/layout/HeadStatus";
 import { MaterialIcon } from "@/components/base/MaterialIcon";
+import { HeadStatus } from "@/components/layout/HeadStatus";
 import { ThemedText } from "@/components/themed/ThemedText";
 import { ThemedView } from "@/components/themed/ThemedView";
 import { useTheme } from "@/hooks/use-theme";
 import { getSemesterList } from "@/service/hubt/CurrentSemester";
 import { getCurrentWeek } from "@/service/hubt/CurrentWeek";
 import {
-  getEmptyClassRoom,
-  getTeachBuilding,
-  getTeachBuildingCategory,
+    getEmptyClassRoom,
+    getTeachBuilding,
+    getTeachBuildingCategory,
 } from "@/service/hubt/emptyClassRoom";
 import { getAllWeek } from "@/service/hubt/GetAllWeek";
 import { getTimeTable } from "@/service/hubt/GetTimeTable";
@@ -18,13 +18,13 @@ import { LinearGradient } from "expo-linear-gradient";
 import { router, Stack } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
-  Modal,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    Modal,
+    RefreshControl,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -155,6 +155,7 @@ export default function EmptyRoomPage() {
   const [results, setResults] = useState<RoomItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [notPublished, setNotPublished] = useState(false);
   const [picker, setPicker] = useState<{
     title: string;
     options: string[];
@@ -211,8 +212,9 @@ export default function EmptyRoomPage() {
         setSectionStart(0);
         setSectionEnd(1);
       }
+      setNotPublished(false);
     } catch {
-      showToast({ message: "加载失败", type: "error" });
+      setNotPublished(true);
     } finally {
       initDone.current = true;
       initLoading.current = false;
@@ -325,6 +327,17 @@ export default function EmptyRoomPage() {
               color={theme.primary}
               style={{ marginTop: 40 }}
             />
+          ) : notPublished ? (
+            <View style={st.empty}>
+              <MaterialIcon
+                name="door-open"
+                size={48}
+                color={theme.textSecondary}
+              />
+              <ThemedText style={st.emptyText} themeColor="textSecondary">
+                该学年学期空教室还未发布
+              </ThemedText>
+            </View>
           ) : (
             <>
               <View style={st.filterRow}>
